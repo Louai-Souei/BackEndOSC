@@ -1,0 +1,84 @@
+.navbar {
+  height: 60px;
+  background-color: #007bff;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  color: white;
+  position: relative;
+  padding: 0 20px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.logo {
+  font-weight: bold;
+  font-size: 24px;
+  text-transform: uppercase;
+}
+
+.icons {
+  display: flex;
+  align-items: center;
+}
+
+.icon {
+  position: relative;
+}
+
+.iconImg {
+  width: 24px;
+  height: 24px;
+}
+
+.counter {
+  width: 16px;
+  height: 16px;
+  background-color: #ff5252;
+  border-radius: 50%;
+  font-size: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: absolute;
+  top: -6px;
+  right: -6px;
+  color: white;
+  font-weight: bold;
+}
+
+.notifications {
+  position: absolute;
+  top: 60px;
+  right: 0;
+  background-color: #fff;
+  color: #333;
+  font-weight: 400;
+  display: flex;
+  flex-direction: column;
+  padding: 10px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  border-radius: 4px;
+  width: 200px;
+  z-index: 1;
+}
+
+.notification {
+  padding: 8px;
+  font-size: 14px;
+}
+
+.nButton {
+  width: 100%;
+  padding: 8px;
+  margin-top: 10px;
+  background-color: #007bff;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.nButton:hover {
+  background-color: #0056b3;
+}
