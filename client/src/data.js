@@ -1,0 +1,65 @@
+export const data = [
+  {
+    "_id": "65777432b5eff61f66319bde",
+    "nom": "Doe",
+    "prenom": "John",
+    "tel": "0123456789",
+    "login": "john_doe",
+    "password": "1234" ,
+    "sexe": "Male",
+    "email": "louai.souei01@gmail.com",
+    "__v": 0
+},
+{
+    "_id": "65777875ff670a0f404e9557",
+    "nom": "souei",
+    "prenom": "louai",
+    "tel": "0123456789",
+    "login": "s_louai",
+    "password": "1234" ,
+    "sexe": "Male",
+    "email": "tt",
+    "__v": 0
+},
+{
+    "_id": "657ccf7f4f2d9afd379944da",
+    "nom": "souei",
+    "prenom": "louai",
+    "tel": "0123456789",
+    "login": "s_louai10",
+    "password": "1234" ,
+    "sexe": "Male",
+    "email": "testemail",
+    "__v": 0
+},
+{
+    "_id": "657ce8968d9a3f5ab3b55c0f",
+    "nom": "Doe",
+    "prenom": "John",
+    "age": 30,
+    "taille": 180,
+    "tel": "0123456789",
+    "date_naissance": "1992-05-15T00:00:00.000Z",
+    "login": "johndoe",
+    "password": "1234" ,
+    "sexe": "Male",
+    "email": "john@example.com",
+    "type": "657ce7b38d9a3f5ab3b55c03",
+    "__v": 0
+},
+{
+    "_id": "657ce8968d9a3f5ab3b55c10",
+    "nom": "Smith",
+    "prenom": "Jane",
+    "age": 25,
+    "taille": 165,
+    "tel": "9876543210",
+    "date_naissance": "1997-08-20T00:00:00.000Z",
+    "login": "janesmith",
+    "password": "1234" ,
+    "sexe": "Female",
+    "email": "jane@example.com",
+    "type": "657ce7cd8d9a3f5ab3b55c07",
+    "__v": 0
+},
+  ];
