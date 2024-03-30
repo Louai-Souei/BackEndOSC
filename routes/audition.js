@@ -313,28 +313,21 @@ router.get(
   "/Check/EvenementAudition",
   auditionController.CheckEvenementAudition
 );
-router.get(
-  "/Check/NextEvenementAudition",
-  auditionController.checkNextEvent
-);
+router.get("/Check/NextEvenementAudition", auditionController.checkNextEvent);
 
 router.patch(
   "/update/EvenementAudition/:eventId",
   auditionController.updateEvenementAudition
 );
 
-router.get(
-  "/get/EvenementAudition",
-  auditionController.getEvenementAudition
-);
-
+router.get("/get/EvenementAudition", auditionController.getEvenementAudition);
 
 router.post(
-  "/generer-planning",
-  auth.authMiddleware,
-  auth.isAdmin,
+  "/generer-planning/:evenementAuditionId",
+
   auditionController.genererPlanification
 );
+
 /**
  * @swagger
  * /auditions/generer-planning:
@@ -371,8 +364,7 @@ router.post(
 
 router.post(
   "/genererplanabsence",
-  auth.authMiddleware,
-  auth.isAdmin,
+
   auditionController.genererPlanificationabsence
 );
 /**
