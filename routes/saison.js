@@ -98,7 +98,7 @@ const auth = require('../middlewares/auth');
  *       '500':
  *         $ref: '#/components/responses/ErrorResponse'
  */
-router.post('/', auth.authMiddleware, auth.isAdmin, saisonController.createSaison);
+router.post('/', saisonController.createSaison);
 
 /**
  * @swagger

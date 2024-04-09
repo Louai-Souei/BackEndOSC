@@ -310,7 +310,7 @@ router.post(
 );
 
 router.get(
-  "/Check/EvenementAudition",
+  "/:saison/Check/EvenementAudition",
   auditionController.CheckEvenementAudition
 );
 router.get(
