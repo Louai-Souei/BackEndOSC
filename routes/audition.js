@@ -314,7 +314,7 @@ router.get(
   auditionController.CheckEvenementAudition
 );
 router.get(
-  "/Check/NextEvenementAudition",
+  "/:saisonId/Check/NextEvenementAudition",
   auditionController.checkNextEvent
 );
 
@@ -331,8 +331,7 @@ router.get(
 
 router.post(
   "/generer-planning",
-  auth.authMiddleware,
-  auth.isAdmin,
+
   auditionController.genererPlanification
 );
 /**

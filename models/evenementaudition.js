@@ -9,6 +9,8 @@ const EvenementAuditionSchema = new Schema({
   Date_fin_Audition: { type: Date, required: true },
   date: { type: Date, required: true, default: Date.now() },
   lienFormulaire: { type: String },
+  isPlaned: { type: Boolean, default: false },
+  isClosed: { type: Boolean, default: false },
   saison: { type: mongoose.Schema.Types.ObjectId, ref: "Saison" },
 });
 EvenementAuditionSchema.pre("save", async function (next) {

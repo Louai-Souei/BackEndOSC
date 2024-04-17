@@ -223,23 +223,37 @@ const CheckEvenementAudition = async (req, res) => {
 const checkNextEvent = async (req, res) => {
   try {
     const now = new Date();
+    const saisonId = req.params.saisonId;
+
+    // Recherche des événements dont la date de début est postérieure à la date actuelle
+    // et qui appartiennent à la saison spécifiée
     const nextEvent = await EvenementAudition.findOne({
       Date_debut_Audition: { $gt: now },
+      saison: saisonId,
     }).sort({ Date_debut_Audition: 1 });
+
     res.json(nextEvent);
   } catch (error) {
     console.error(
       "Erreur lors de la vérification de l'événement suivant :",
       error
     );
-    throw error;
+    res
+      .status(500)
+      .json({ error: "Erreur lors de la vérification de l'événement suivant" });
   }
 };
 
+
 const updateEvenementAudition = async (req, res) => {
   const evenementId = req.params.eventId;
+  console.log('req: ', req.body);
+  console.log('evenementId: ', evenementId);
+
 
   try {
+    console.log("ok")
+
     // Vérifier si l'événement existe
     const evenement = await EvenementAudition.findById(evenementId);
     if (!evenement) {
@@ -263,6 +277,12 @@ const updateEvenementAudition = async (req, res) => {
     }
     if (req.body.lienFormulaire) {
       evenement.lienFormulaire = req.body.lienFormulaire;
+    }
+    if (req.body.isClosed) {
+      evenement.isClosed = req.body.isClosed;
+    }
+    if (req.body.isPlaned) {
+      evenement.isPlaned = req.body.isPlaned;
     }
 
     await evenement.save();
@@ -295,7 +315,9 @@ async function genererPlanification(req, res) {
     );
 
     const nombreSeancesParJour = auditionPlanning.nombre_séance;
+    console.log('nombreSeancesParJour: ', nombreSeancesParJour);
     const dureeAuditionMinutes = auditionPlanning.dureeAudition;
+    console.log('dureeAuditionMinutes: ', dureeAuditionMinutes);
 
     const nombreTotalSeances = Math.ceil(
       candidatsNonPresentes.length / nombreSeancesParJour
@@ -374,6 +396,7 @@ async function genererPlanification(req, res) {
 
     console.log("Planification des candidats générée avec succès");
     res.status(200).json({ success: true, data: planning });
+    console.log('planning: ', planning);
   } catch (error) {
     console.error(
       "Erreur lors de la génération de la planification des candidats:",
