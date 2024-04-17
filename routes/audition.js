@@ -330,7 +330,7 @@ router.get(
 
 
 router.post(
-  "/generer-planning",
+  "/generer-planning/:evenementAuditionId",
 
   auditionController.genererPlanification
 );
