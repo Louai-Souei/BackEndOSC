@@ -19,7 +19,6 @@ const AuditionSchema = new Schema({
   evaluation: {
     type: String,
     enum: ["A", "B", "C"],
-    default : ""
   },
   decisioneventuelle: {
     type: String,
