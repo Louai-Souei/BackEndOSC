@@ -295,9 +295,7 @@ async function genererPlanification(req, res) {
 
     const planning = [];
 
-    let dateDebutAudition = moment(
-      auditionPlanning.Date_debut_Audition
-    ).startOf("day");
+    let dateDebutAudition = moment(auditionPlanning.Date_debut_Audition);
 
     for (let jour = 0; jour < auditionPlanning.nombre_séance; jour++) {
       for (let seance = 0; seance < nombreSeancesParJour; seance++) {
@@ -306,10 +304,13 @@ async function genererPlanification(req, res) {
         if (candidatIndex < candidats.length) {
           const candidat = candidats[candidatIndex];
 
-          const dateDebutSeance = dateDebutAudition
-            .clone()
-            .add(seance * dureeAuditionMinutes, "minutes");
-          const dateFinSeance = dateDebutSeance
+          // Calculer l'heure de début de la séance en ajoutant la durée de chaque séance
+          const heureDebutSeance = moment(auditionPlanning.Date_debut_Audition)
+            .add(jour, "days") // Ajouter le nombre de jours pour chaque jour
+            .add(seance * dureeAuditionMinutes - 60, "minutes");
+
+          const dateDebutSeance = heureDebutSeance.clone();
+          const dateFinSeance = heureDebutSeance
             .clone()
             .add(dureeAuditionMinutes, "minutes");
 
@@ -323,21 +324,22 @@ async function genererPlanification(req, res) {
             });
           }
 
-          const nouvellePlanification = new PlanificationAudition({
-            nom: candidat.nom,
-            prenom: candidat.prenom,
-            email: candidat.email,
-            date_audition: dateDebutSeance.format("DD/MM/YYYY"),
-            heure_debut_audition: dateDebutSeance.format("HH:mm"),
-            heure_fin_audition: dateFinSeance.format("HH:mm"),
+          const nouvelleAudition = new Audition({
+            date_audition: dateDebutSeance.toDate(),
+            heure_debut: dateDebutSeance.toDate(),
+            heure_fin: dateFinSeance.toDate(),
+            evenementAudition: evenementAuditionId,
+            candidat: candidat._id,
           });
 
-          await nouvellePlanification.save();
-          planning.push(nouvellePlanification);
+          await nouvelleAudition.save();
+          planning.push(nouvelleAudition);
+          await sendAuditionEmails(candidat, {
+            date_audition: dateDebutSeance.toDate(),
+            heure_debut: dateDebutSeance.toDate(),
+          });
         }
       }
-
-      dateDebutAudition.add(1, "day");
     }
 
     console.log(
@@ -352,6 +354,47 @@ async function genererPlanification(req, res) {
     res.status(500).json({ success: false, error: error.message });
   }
 }
+
+const sendAuditionEmails = async (candidat, audition) => {
+  try {
+    const transporter = nodemailer.createTransport({
+      service: "gmail",
+      auth: {
+        user: "namouchicyrine@gmail.com",
+        pass: "tqdmvzynhcwsjsvy",
+      },
+      tls: {
+        rejectUnauthorized: false,
+      },
+    });
+
+    let contenuEmail;
+
+    contenuEmail = `
+        Cher(e) ${candidat.nom} ${candidat.prenom},
+        Nous souhaitons vous informer de votre prochaine audition.
+        Date: ${audition.date_audition.toDateString()}
+        Heure: ${audition.heure_debut.toTimeString()}
+        Cordialement,
+        Votre organisation
+      `;
+
+    await transporter.sendMail({
+      from: "namouchicyrine@gmail.com",
+      to: candidat.email,
+      subject: "Information Audition",
+      text: contenuEmail,
+    });
+
+    console.log(`E-mail envoyé avec succès à ${candidat.email}.`);
+  } catch (error) {
+    console.error(
+      `Erreur lors de l'envoi de l'e-mail à ${candidat.email}:`,
+      error.message
+    );
+  }
+};
+
 async function genererPlanificationabsence(req, res) {
   try {
     const { evenementAuditionId } = req.body;
@@ -458,45 +501,6 @@ async function genererPlanificationabsence(req, res) {
   }
 }
 
-const sendAuditionEmails = async (candidat, audition) => {
-  try {
-    const transporter = nodemailer.createTransport({
-      service: "gmail",
-      auth: {
-        user: "namouchicyrine@gmail.com",
-        pass: "tqdmvzynhcwsjsvy",
-      },
-      tls: {
-        rejectUnauthorized: false,
-      },
-    });
-
-    let contenuEmail;
-
-    contenuEmail = `
-        Cher(e) ${candidat.nom} ${candidat.prenom},
-        Nous souhaitons vous informer de votre prochaine audition.
-        Date: ${audition.date_audition.toDateString()}
-        Heure: ${audition.heure_debut.toTimeString()}
-        Cordialement,
-        Votre organisation
-      `;
-
-    await transporter.sendMail({
-      from: "namouchicyrine@gmail.com",
-      to: candidat.email,
-      subject: "Information Audition",
-      text: contenuEmail,
-    });
-
-    console.log(`E-mail envoyé avec succès à ${candidat.email}.`);
-  } catch (error) {
-    console.error(
-      `Erreur lors de l'envoi de l'e-mail à ${candidat.email}:`,
-      error.message
-    );
-  }
-};
 const sendAuditionEmailsAbsents = async (candidat, audition) => {
   try {
     const transporter = nodemailer.createTransport({
