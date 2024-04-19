@@ -64,6 +64,10 @@ router.get(
   gerercontroller.confirmAcceptanceByEmail
 );
 
+router.get(
+  "/besoinpup", gerercontroller.filtrerAuditions
+);
+
 /**
  * @swagger
  * paths:

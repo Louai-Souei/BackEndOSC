@@ -3,6 +3,7 @@ const nodemailer = require("nodemailer");
 require("dotenv").config();
 const Candidat = require("../models/candidat");
 const Audition = require("../models/audition");
+const listeFinale = require("../models/listeFinale");
 const User = require("../models/utilisateurs");
 const bcrypt = require("bcrypt");
 const uuid = require("uuid");
@@ -414,5 +415,100 @@ exports.getCandidatsRetenusParPupitre = async (req, res) => {
     return res.status(500).json({
       error: "Erreur lors de la récupération des candidats retenus par pupitre",
     });
+  }
+};
+
+
+
+exports.filtrerAuditions = async (req, res) => {
+  try {
+    const { saisonId } = req.params;
+    let { autre, tenor, soprano, alto, basse } = req.body;
+
+    // Récupérer toutes les auditions de la saison avec la décision "retenu"
+    const auditions = await Audition.find({
+      // saison: saisonId,
+      decisioneventuelle: "retenu",
+    });
+
+    let auditionsFiltrees = [];
+
+    // Boucle pour chaque tessiture
+
+    let i = 0;
+
+    // Boucle pour soprano
+    while (soprano > 0 && i < auditions.length) {
+      const audition = auditions[i];
+      if (audition.tessiture.toLowerCase() === "soprano") {
+        auditionsFiltrees.push(audition);
+        soprano--;
+      }
+      i++;
+    }
+
+    i = 0; // Réinitialiser l'index pour la boucle suivante
+
+    // Boucle pour alto
+    while (alto > 0 && i < auditions.length) {
+      const audition = auditions[i];
+
+      if (audition.tessiture.toLowerCase() === "alto") {
+        console.log(
+          "audition.tessiture.toLowerCase(): ",
+          audition.tessiture.toLowerCase()
+        );
+        auditionsFiltrees.push(audition);
+        alto--;
+      }
+      i++;
+    }
+    i = 0; // Réinitialiser l'index pour la boucle suivante
+
+    // Boucle pour tenor
+    while (tenor > 0 && i < auditions.length) {
+      const audition = auditions[i];
+      if (audition.tessiture.toLowerCase() === "tenor") {
+        auditionsFiltrees.push(audition);
+        tenor--;
+      }
+      i++;
+    }
+
+    i = 0; // Réinitialiser l'index pour la boucle suivante
+
+    // Boucle pour autre
+    while (autre > 0 && i < auditions.length) {
+      const audition = auditions[i];
+      if (audition.tessiture.toLowerCase() === "autre") {
+        auditionsFiltrees.push(audition);
+        autre--;
+      }
+      i++;
+    }
+
+    i = 0; // Réinitialiser l'index pour la boucle suivante
+
+    // Boucle pour basse
+    while (basse > 0 && i < auditions.length) {
+      const audition = auditions[i];
+      if (audition.tessiture.toLowerCase() === "basse") {
+        auditionsFiltrees.push(audition);
+        basse--;
+      }
+      i++;
+    }
+
+    // Enregistrer les candidats dans listeFinaleSchema
+    const candidats = auditionsFiltrees.map((audition) => ({
+      candidat: audition.candidat,
+      // saison: saisonId,
+    }));
+
+    await listeFinale.insertMany(candidats);
+    res.status(200).json(auditionsFiltrees);
+  } catch (error) {
+    console.error("Erreur lors du filtrage des auditions:", error);
+    res.status(500).json({ message: "Erreur lors du filtrage des auditions" });
   }
 };

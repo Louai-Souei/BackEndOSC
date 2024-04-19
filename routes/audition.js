@@ -124,7 +124,10 @@ router.get(
   "/Check/EvenementAudition",
   auditionController.CheckEvenementAudition
 );
-router.get("/Check/NextEvenementAudition", auditionController.checkNextEvent);
+router.get(
+  "/:saisonId/Check/NextEvenementAudition",
+  auditionController.checkNextEvent
+);
 
 router.patch(
   "/update/EvenementAudition/:eventId",
@@ -134,6 +137,8 @@ router.patch(
 router.get("/get/EvenementAudition", auditionController.getEvenementAudition);
 
 router.post(
+  "/generer-planning/:evenementAuditionId",
+
   "/generer-planning/:evenementAuditionId",
 
   auditionController.genererPlanification

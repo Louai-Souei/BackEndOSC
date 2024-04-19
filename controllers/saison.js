@@ -1,20 +1,46 @@
 const Saison = require('../models/saison'); 
 
 exports.createSaison = async (req, res) => {
-    try {
-      const nouvelleSaison = new Saison(req.body);
+  try {
+    // Chercher la saison active et la rendre inactive
+    const activeSaison = await Saison.findOneAndUpdate(
+      { isActive: true },
+      { $set: { isActive: false } },
+      { new: true }
+    );
+
+    if (activeSaison) {
+      // Extraire le numéro de la saison active
+      const numero = activeSaison.numero;
+
+      // Créer une nouvelle saison en incrémentant le numéro de la saison active
+      const newNumero = parseInt(numero) + 1;
+      const nouvelleSaison = new Saison({
+        name: req.body.nom,
+        numero: newNumero.toString(),
+      });
+
+      // Sauvegarder la nouvelle saison
       await nouvelleSaison.save();
+
       res.status(201).json({
         model: nouvelleSaison,
-        message: 'Saison créée avec succès',
+        message: "Nouvelle saison créée avec succès",
       });
-    } catch (error) {
-      res.status(500).json({
-        error: error.message,
-        message: 'Erreur lors de la création de la saison',
+    } else {
+      res.status(404).json({
+        message: "Aucune saison active trouvée",
       });
     }
-  };
+  } catch (error) {
+    res.status(500).json({
+      error: error.message,
+      message: "Erreur lors de la création de la saison",
+    });
+  }
+};
+
+
   exports.getAllSaisons = async (req, res) => {
     try {
       const saisons = await Saison.find();
@@ -60,6 +86,8 @@ exports.createSaison = async (req, res) => {
     }
   };
 
+
+
   exports.deleteSaison = async (req, res) => {
     try {
       const saison = await Saison.findByIdAndDelete(req.params.id);
@@ -78,5 +106,15 @@ exports.createSaison = async (req, res) => {
     }
   };
   
-
+  exports.getCurrentSaison = async (req, res) => {
+    try {
+      const currentSaison = await Saison.findOne({ isActive: true });
+      if (!currentSaison) {
+        return res.status(404).json({ message: "Saison non trouvée" });
+      }
+      res.status(200).json(currentSaison);
+    } catch (error) {
+      res.status(500).json({ error: error.message });
+    }
+  }
   

@@ -116,6 +116,11 @@ router.post('/', saisonController.createSaison);
  */
 router.get('/', auth.authMiddleware, auth.isAdmin, saisonController.getAllSaisons);
 
+router.get(
+  "/current-saison",
+  saisonController.getCurrentSaison
+);
+
 /**
  * @swagger
  * /saisons/{id}:

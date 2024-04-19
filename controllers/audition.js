@@ -223,24 +223,37 @@ const CheckEvenementAudition = async (req, res) => {
 
 const checkNextEvent = async (req, res) => {
   try {
-    const now = new Date();
+    const now = new Date()
+    const saisonId = req.params.saisonId;
+
+    // Recherche des événements dont la date de début est postérieure à la date actuelle
+    // et qui appartiennent à la saison spécifiée
     const nextEvent = await EvenementAudition.findOne({
       Date_debut_Audition: { $gt: now },
-    }).sort({ Date_debut_Audition: 1 });
-    res.json(nextEvent);
+      saison: saisonId,
+    }).sort({ Date_debut_Audition: 1 })
+
+    res.json(nextEvent)
   } catch (error) {
     console.error(
       "Erreur lors de la vérification de l'événement suivant :",
-      error
-    );
-    throw error;
+      error,
+    )
+    res
+      .status(500)
+      .json({ error: "Erreur lors de la vérification de l'événement suivant" })
   }
 };
 
 const updateEvenementAudition = async (req, res) => {
-  const evenementId = req.params.eventId;
+  const evenementId = req.params.eventId
+  console.log('req: ', req.body);
+  console.log('evenementId: ', evenementId);
+
 
   try {
+    console.log("ok")
+
     // Vérifier si l'événement existe
     const evenement = await EvenementAudition.findById(evenementId);
     if (!evenement) {
@@ -265,6 +278,12 @@ const updateEvenementAudition = async (req, res) => {
     if (req.body.lienFormulaire) {
       evenement.lienFormulaire = req.body.lienFormulaire;
     }
+    if (req.body.isClosed) {
+      evenement.isClosed = req.body.isClosed;
+    }
+    if (req.body.isPlaned) {
+      evenement.isPlaned = req.body.isPlaned;
+    }
 
     await evenement.save();
 
@@ -285,10 +304,12 @@ const updateEvenementAudition = async (req, res) => {
 async function genererPlanification(req, res) {
   try {
     const { evenementAuditionId } = req.params;
+    const { evenementAuditionId } = req.params
     const auditionPlanning = await EvenementAudition.findOne({
+      
       _id: evenementAuditionId,
     });
-
+    console.log('auditionPlanning: ', auditionPlanning);
     const candidats = await Candidat.find();
     const nombreSeancesParJour = auditionPlanning.nombre_séance;
     const dureeAuditionMinutes = parseInt(auditionPlanning.dureeAudition);
@@ -296,7 +317,11 @@ async function genererPlanification(req, res) {
     const planning = [];
 
     let dateDebutAudition = moment(auditionPlanning.Date_debut_Audition);
+    let dateDebutAudition = moment(auditionPlanning.Date_debut_Audition);
 
+    for (let jour = 0; jour < auditionPlanning.nombre_séance; jour++) {
+      for (let seance = 0; seance < nombreSeancesParJour; seance++) {
+        const candidatIndex = jour * nombreSeancesParJour + seance;
     for (let jour = 0; jour < auditionPlanning.nombre_séance; jour++) {
       for (let seance = 0; seance < nombreSeancesParJour; seance++) {
         const candidatIndex = jour * nombreSeancesParJour + seance;
@@ -311,16 +336,31 @@ async function genererPlanification(req, res) {
 
           const dateDebutSeance = heureDebutSeance.clone();
           const dateFinSeance = heureDebutSeance
+        if (candidatIndex < candidats.length) {
+          const candidat = candidats[candidatIndex];
+
+          // Calculer l'heure de début de la séance en ajoutant la durée de chaque séance
+          const heureDebutSeance = moment(auditionPlanning.Date_debut_Audition)
+            .add(jour, "days") // Ajouter le nombre de jours pour chaque jour
+            .add(seance * dureeAuditionMinutes - 60, "minutes");
+
+          const dateDebutSeance = heureDebutSeance.clone();
+          const dateFinSeance = heureDebutSeance
             .clone()
             .add(dureeAuditionMinutes, "minutes");
 
+          if (dateFinSeance.isAfter(auditionPlanning.Date_fin_Audition)) {
           if (dateFinSeance.isAfter(auditionPlanning.Date_fin_Audition)) {
             console.warn(
               "La date de fin de l'audition dépasse la date spécifiée."
             );
             return res.status(400).json({
+              "La date de fin de l'audition dépasse la date spécifiée."
+            );
+            return res.status(400).json({
               success: false,
               error: "La date de fin de l'audition dépasse la date spécifiée.",
+            });
             });
           }
 
@@ -348,6 +388,10 @@ async function genererPlanification(req, res) {
     res.status(200).json({ success: true, data: planning });
   } catch (error) {
     console.error(
+      "Erreur lors de la génération et de l'enregistrement de la planification des candidats:",
+      error.message
+    );
+    res.status(500).json({ success: false, error: error.message });
       "Erreur lors de la génération et de l'enregistrement de la planification des candidats:",
       error.message
     );
@@ -521,6 +565,9 @@ const sendAuditionEmails = async (candidat, audition) => {
     );
   }
 };
+};
+
+
 const sendAuditionEmailsAbsents = async (candidat, audition) => {
   try {
     const transporter = nodemailer.createTransport({

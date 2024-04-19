@@ -17,6 +17,7 @@ const congeRoutes = require("./routes/conge");
 const saisonRoutes = require("./routes/saison.js");
 const concertsRoutes = require("./routes/concert.js");
 const qrcodeRoutes = require("./routes/qrcode");
+const listeFinaleRoutes = require("./routes/listeFinale.js");
 const filtragecandidatRoutes = require("./routes/filtragecandidats.js");
 const authRoutes = require("./routes/auth");
 const AbsenceRoutes = require("./routes/absenceRequest.js");
@@ -250,6 +251,7 @@ app.use("/api/pupitres", pupitreRoutes);
 app.use("/api/reset", dbresetController);
 app.use("/api/intervenant", intervenantRoutes);
 app.use("/api/notification", notificationRoutes);
+app.use("/api/liste-finale", listeFinaleRoutes);
 
 module.exports = app;
 //module.exports.io = io;
