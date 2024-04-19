@@ -301,36 +301,41 @@ const updateEvenementAudition = async (req, res) => {
 
 async function genererPlanification(req, res) {
   try {
-    const { evenementAuditionId } = req.params
+    const { evenementAuditionId, saison } = req.params;
+    console.log('evenementAuditionId: ', evenementAuditionId);
+    console.log('saison: ', saison);
+    const { startTime } = req.body;
     const auditionPlanning = await EvenementAudition.findOne({
-      
       _id: evenementAuditionId,
     });
-    console.log('auditionPlanning: ', auditionPlanning);
-    const candidats = await Candidat.find();
+
+    const candidats = await Candidat.find({saison: saison});
+    console.log('candidats: ', candidats);
     const nombreSeancesParJour = auditionPlanning.nombre_séance;
     const dureeAuditionMinutes = parseInt(auditionPlanning.dureeAudition);
 
-    const planning = []
+    const planning = [];
 
     let dateDebutAudition = moment(auditionPlanning.Date_debut_Audition);
 
     for (let jour = 0; jour < auditionPlanning.nombre_séance; jour++) {
+      let heureDebutSeance = moment(auditionPlanning.Date_debut_Audition)
+        .add(jour, "days")
+        .set({
+          hour: startTime.split(":")[0],
+          minute: startTime.split(":")[1],
+        });
+
       for (let seance = 0; seance < nombreSeancesParJour; seance++) {
         const candidatIndex = jour * nombreSeancesParJour + seance;
 
         if (candidatIndex < candidats.length) {
           const candidat = candidats[candidatIndex];
 
-          // Calculer l'heure de début de la séance en ajoutant la durée de chaque séance
-          const heureDebutSeance = moment(auditionPlanning.Date_debut_Audition)
-            .add(jour, "days") // Ajouter le nombre de jours pour chaque jour
-            .add(seance * dureeAuditionMinutes - 60, "minutes");
-
           const dateDebutSeance = heureDebutSeance.clone();
-          const dateFinSeance = heureDebutSeance
+          const dateFinSeance = dateDebutSeance
             .clone()
-            .add(dureeAuditionMinutes, 'minutes')
+            .add(dureeAuditionMinutes, "minutes");
 
           if (dateFinSeance.isAfter(auditionPlanning.Date_fin_Audition)) {
             console.warn(
@@ -342,21 +347,19 @@ async function genererPlanification(req, res) {
             });
           }
 
-          const nouvellePlanification = new PlanificationAudition({
-            nom: candidat.nom,
-            prenom: candidat.prenom,
-            email: candidat.email,
-            date_audition: dateDebutSeance.format("DD/MM/YYYY"),
-            heure_debut_audition: dateDebutSeance.format("HH:mm"),
-            heure_fin_audition: dateFinSeance.format("HH:mm"),
+          const nouvellePlanification = new Audition({
+            candidat: candidat._id,
+            evenementAudition: evenementAuditionId,
+            date_audition: dateDebutSeance,
+            heure_debut: dateDebutSeance,
+            heure_fin: dateFinSeance,
           });
 
           await nouvellePlanification.save();
           planning.push(nouvellePlanification);
-          await sendAuditionEmails(candidat, {
-            date_audition: dateDebutSeance.toDate(),
-            heure_debut: dateDebutSeance.toDate(),
-          });
+
+          // Ajustez l'heure de début de la prochaine séance en ajoutant la durée de la séance précédente
+          heureDebutSeance = dateFinSeance;
         }
       }
     }
@@ -373,6 +376,8 @@ async function genererPlanification(req, res) {
     res.status(500).json({ success: false, error: error.message });
   }
 }
+
+
 
 async function genererPlanificationabsence(req, res) {
   try {

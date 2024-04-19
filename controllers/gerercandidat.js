@@ -8,6 +8,7 @@ const User = require("../models/utilisateurs");
 const bcrypt = require("bcrypt");
 const uuid = require("uuid");
 const Pupitre = require("../models/pupitre");
+const variablesController = require("./variablesController");
 function generateUniqueToken() {
   return uuid.v4();
 }
@@ -89,7 +90,7 @@ exports.getListeCandidatsParPupitre = async (req, res) => {
 
 exports.envoyerEmailAcceptation = async (req, res) => {
   try {
-    const auditions = await Audition.find({ decisioneventuelle: "retenu" });
+    const auditions = await listeFinale.find();
     const candidatsRetenusIds = auditions.map((audition) => audition.candidat);
     let countEmailsSent = 0;
 
@@ -427,7 +428,7 @@ exports.filtrerAuditions = async (req, res) => {
 
     // Récupérer toutes les auditions de la saison avec la décision "retenu"
     const auditions = await Audition.find({
-      // saison: saisonId,
+      // saison: saisonId, 
       decisioneventuelle: "retenu",
     });
 
@@ -501,11 +502,15 @@ exports.filtrerAuditions = async (req, res) => {
 
     // Enregistrer les candidats dans listeFinaleSchema
     const candidats = auditionsFiltrees.map((audition) => ({
+
       candidat: audition.candidat,
       // saison: saisonId,
-    }));
-
+    }));      console.log('candidats: ', candidats);
+    const toUpdate = {
+      "listeGenerated" : true
+    }
     await listeFinale.insertMany(candidats);
+    await variablesController.updateVariables(toUpdate)
     res.status(200).json(auditionsFiltrees);
   } catch (error) {
     console.error("Erreur lors du filtrage des auditions:", error);
