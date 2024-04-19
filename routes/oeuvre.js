@@ -135,7 +135,7 @@ router.get('/statistics',auth.authMiddleware,auth.isAdmin , oeuvreController.Oeu
  *       '500':
  *         description: Server error
  */
-router.get('/', auth.authMiddleware, auth.isAdmin, oeuvreController.getAllOeuvres);
+router.get('/', oeuvreController.getAllOeuvres);
 
 /**
  * @swagger

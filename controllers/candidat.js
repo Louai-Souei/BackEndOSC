@@ -66,7 +66,7 @@ const create = async (req, res) => {
         res.status(201).json(savedCandidat);
     } catch (error) {
         console.log('error: ', error.message);
-        res.status(400).json({ error: error.message });
+        res.status(400).json({ message: "un utilisateur déjà inscrit avec cette adresse e-mail" });
     }
 }
 

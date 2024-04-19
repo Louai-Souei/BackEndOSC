@@ -1,15 +1,14 @@
 const mongoose = require('mongoose');
 
 const saisonSchema = new mongoose.Schema({
-  titre: { type: String, required: true, },
-  Datedebut: { type: Date, required: true,},
-  Datefin: {   type: Date,  required: true,},
-  concerts: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Concert' }],
-  repetitions: [{ type: mongoose.Schema.Types.ObjectId,  ref: 'Repetition' }],
-  oeuvres: [{  type: mongoose.Schema.Types.ObjectId,ref: 'oeuvres' }],
-  auditions: [{type: mongoose.Schema.Types.ObjectId,ref: 'Audition'  }],
-  utilisateur: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
-  
+  name: { type: String, required: false },
+  numero: { type: String, required: false, unique: true },
+  Datedebut: {
+    type: Date,
+    default: Date.now,
+  },
+  Datefin: { type: Date, required: false },
+  isActive: { type: Boolean, default: true },
 });
 
 const Saison = mongoose.model('Saison', saisonSchema);
