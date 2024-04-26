@@ -27,7 +27,7 @@ const candidatSchema = new Schema(
     estPresent: { type: Boolean, default: false },
     decisioneventuelle: {
       type: String,
-      enum: ["retenu", "en attente", "refuse"],
+      enum: ["retenu", "en attente", "refuse","finale"],
       default: "en attente",
     },
     token: { type: String },

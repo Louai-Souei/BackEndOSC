@@ -64,9 +64,6 @@ router.get(
   gerercontroller.confirmAcceptanceByEmail
 );
 
-router.get(
-  "/besoinpup", gerercontroller.filtrerAuditions
-);
 
 /**
  * @swagger
@@ -201,8 +198,7 @@ router.post(
 
 router.get(
   "/listeretenu",
-  Auth.authMiddleware,
-  Auth.isAdminOrManager,
+
   gerercontroller.getCandidatsRetenusParPupitre
 );
 
@@ -274,8 +270,13 @@ router.get(
 
 router.post(
   "/besoin",
-  Auth.authMiddleware,
-  Auth.isAdminOrManager,
+ 
+  gerercontroller.getListeCandidatsParPupitre
+);
+
+router.post("/besoin-pupitre", gerercontroller.defineBesoinPupitre);
+router.post(
+  "/liste-candidats-par-pupitre",
   gerercontroller.getListeCandidatsParPupitre
 );
 

@@ -8,6 +8,8 @@ require("dotenv").config();
 const mongoose = require("mongoose");
 const userRoutes = require("./routes/utilisateur");
 const auditionRoutes = require("./routes/audition");
+const besoinRoutes = require("./routes/besoinpupitre");
+
 const repetitionRoutes = require("./routes/repetition");
 const gererRoutes = require("./routes/gerercandidat");
 const oeuvreRoutes = require("./routes/oeuvre");
@@ -131,7 +133,7 @@ mongoose
 const app = express();
 app.use(
   cors({
-    origin: ["http://localhost:3000"],
+    origin: "*",
     methods: ["POST", "GET", "DELETE", "PUT", "PATCH"],
     credentials: true,
   })
@@ -142,14 +144,14 @@ app.get("/", (req, res) => {
 });
 app.use((req, res, next) => {
   res.setHeader("Access-Control-Allow-Origin", "*");
-  res.setHeader(
-    "Access-Control-Allow-Headers",
-    "Origin, X-Requested-With, Content-Type, Accept, Authorization"
-  );
-  res.setHeader(
-    "Access-Control-Allow-Methods",
-    "GET, POST, PUT, DELETE, PATCH, OPTIONS"
-  );
+  // res.setHeader(
+  // "Access-Control-Allow-Headers",
+  //"Origin, X-Requested-With, Content-Type, Accept, Authorization"
+  //);
+  //res.setHeader(
+  // "Access-Control-Allow-Methods",
+  //"GET, POST, PUT, DELETE, PATCH, OPTIONS"
+  // );
   next();
 });
 
@@ -244,6 +246,8 @@ app.use("/api/saisons", saisonRoutes);
 app.use("/api/programme", programmeRoutes);
 app.use("/api/users", userRoutes);
 app.use("/api/pupitre", pupitreRoutes);
+app.use("/api/besoinpupitre", besoinRoutes);
+
 app.use("/api/elimination", eliminationRoutes);
 app.use("/api/intervenant", intervenantRoutes);
 app.use("/api/placement", placementController);

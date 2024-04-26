@@ -342,10 +342,57 @@ exports.getListeCandidats = async (req, res) => {
 };
 
 exports.getCandidatsRetenusParPupitre = async (req, res) => {
+  
   try {
-    const auditionsRetenues = await Audition.find({
-      decisioneventuelle: "retenu",
-    });
+    const candidatsRetenus = await Audition.aggregate([
+      { $match: { decisioneventuelle: "retenu" } }, // Filtrer les auditions retenues
+      {
+        $lookup: {
+          // Rechercher les détails du candidat associé à chaque audition
+          from: "candidats",
+          localField: "candidat",
+          foreignField: "_id",
+          as: "candidatDetails",
+        },
+      },
+      { $unwind: "$candidatDetails" }, // Déplier le tableau de candidats
+      {
+        $group: {
+          // Grouper les candidats par la tessiture de l'audition
+          _id: "$tessiture",
+          candidats: {
+            $push: {
+              _id: "$candidatDetails._id",
+              nom: "$candidatDetails.nom",
+              prenom: "$candidatDetails.prenom",
+              email: "$candidatDetails.email",
+            },
+          },
+        },
+      },
+    ]);
+
+    res.status(200).json(candidatsRetenus);
+  } catch (error) {
+    console.error(
+      "Erreur lors de la récupération des candidats retenus groupés par tessiture :",
+      error
+    );
+    res
+      .status(500)
+      .json({
+        error:
+          "Erreur lors de la récupération des candidats retenus groupés par tessiture",
+      });
+  }
+};
+
+
+
+
+exports.defineBesoinPupitre = async (req, res) => {
+  try {
+    const besoinPupitres = req.body || {};
 
     const candidatsParPupitre = {
       Soprano: [],
@@ -354,57 +401,71 @@ exports.getCandidatsRetenusParPupitre = async (req, res) => {
       Basse: [],
     };
 
-    await Promise.all(
-      auditionsRetenues.map(async (audition) => {
-        const candidat = await Candidat.findById(audition.candidat);
-        let numPupitre = null;
+    if (Object.keys(besoinPupitres).length === 0) {
+      return res
+        .status(400)
+        .json({ error: "Besoin des pupitres non spécifié dans la requête" });
+    }
 
-        switch (audition.tessiture) {
-          case "Soprano":
-            numPupitre = 1;
-            break;
-          case "Alto":
-            numPupitre = 2;
-            break;
-          case "Ténor":
-            numPupitre = 3;
-            break;
-          case "Basse":
-            numPupitre = 4;
-            break;
-          default:
-            break;
-        }
+    // Parcourir les besoins de pupitres et les stocker par tessiture
+    for (const tessiture in besoinPupitres) {
+      const besoin = besoinPupitres[tessiture];
+      if (candidatsParPupitre.hasOwnProperty(tessiture)) {
+        candidatsParPupitre[tessiture] = { besoin };
+      }
+    }
 
-        let existingPupitre = await Pupitre.findOne({
-          num_pupitre: numPupitre,
-          tessiture: audition.tessiture,
-        });
-
-        if (existingPupitre) {
-          if (!existingPupitre.choristes.includes(candidat._id)) {
-            existingPupitre.choristes.push(candidat._id);
-            await existingPupitre.save();
-          }
-        } else {
-          const newPupitreInstance = new Pupitre({
-            num_pupitre: numPupitre,
-            tessiture: audition.tessiture,
-            besoin: 1,
-            choristes: [candidat._id],
-          });
-
-          await newPupitreInstance.save();
-        }
-
-        candidatsParPupitre[audition.tessiture].push({
-          id: candidat._id,
-          nom: candidat.nom,
-          prenom: candidat.prenom,
-          email: candidat.email,
-        });
-      })
+    return res.status(200).json(candidatsParPupitre);
+  } catch (error) {
+    console.error(
+      "Erreur lors de la définition des besoins de pupitre par tessiture :",
+      error
     );
+    return res.status(500).json({
+      error:
+        "Erreur lors de la définition des besoins de pupitre par tessiture",
+    });
+  }
+};
+
+
+
+exports.getListeCandidatsParPupitre = async (req, res) => {
+  try {
+    const besoinsPupitres = req.body || {};
+
+    const candidatsParPupitre = {
+      Soprano: [],
+      Alto: [],
+      Ténor: [],
+      Basse: [],
+    };
+
+    // Vérifier si les besoins des pupitres sont spécifiés dans la requête
+    if (Object.keys(besoinsPupitres).length === 0) {
+      return res
+        .status(400)
+        .json({ error: "Besoin des pupitres non spécifié dans la requête" });
+    }
+
+    // Parcourir les candidats et les ajouter aux pupitres en fonction des besoins spécifiés
+    const candidats = await Candidat.find();
+    for (const candidat of candidats) {
+      const tessiture = candidat.tessiture;
+
+      // Vérifier si la tessiture du candidat est spécifiée dans les besoins des pupitres
+      if (besoinsPupitres.hasOwnProperty(tessiture)) {
+        const besoinPupitre = besoinsPupitres[tessiture];
+        if (candidatsParPupitre[tessiture].length < besoinPupitre) {
+          candidatsParPupitre[tessiture].push({
+            id: candidat._id,
+            nom: candidat.nom,
+            prenom: candidat.prenom,
+            email: candidat.email,
+          });
+        }
+      }
+    }
 
     return res.status(200).json(candidatsParPupitre);
   } catch (error) {
@@ -412,103 +473,12 @@ exports.getCandidatsRetenusParPupitre = async (req, res) => {
       "Erreur lors de la récupération des candidats retenus par pupitre :",
       error
     );
-    return res.status(500).json({
-      error: "Erreur lors de la récupération des candidats retenus par pupitre",
-    });
+    return res
+      .status(500)
+      .json({
+        error:
+          "Erreur lors de la récupération des candidats retenus par pupitre",
+      });
   }
 };
 
-
-
-exports.filtrerAuditions = async (req, res) => {
-  try {
-    const { saisonId } = req.params;
-    let { autre, tenor, soprano, alto, basse } = req.body;
-
-    // Récupérer toutes les auditions de la saison avec la décision "retenu"
-    const auditions = await Audition.find({
-      // saison: saisonId,
-      decisioneventuelle: "retenu",
-    });
-
-    let auditionsFiltrees = [];
-
-    // Boucle pour chaque tessiture
-
-    let i = 0;
-
-    // Boucle pour soprano
-    while (soprano > 0 && i < auditions.length) {
-      const audition = auditions[i];
-      if (audition.tessiture.toLowerCase() === "soprano") {
-        auditionsFiltrees.push(audition);
-        soprano--;
-      }
-      i++;
-    }
-
-    i = 0; // Réinitialiser l'index pour la boucle suivante
-
-    // Boucle pour alto
-    while (alto > 0 && i < auditions.length) {
-      const audition = auditions[i];
-
-      if (audition.tessiture.toLowerCase() === "alto") {
-        console.log(
-          "audition.tessiture.toLowerCase(): ",
-          audition.tessiture.toLowerCase()
-        );
-        auditionsFiltrees.push(audition);
-        alto--;
-      }
-      i++;
-    }
-    i = 0; // Réinitialiser l'index pour la boucle suivante
-
-    // Boucle pour tenor
-    while (tenor > 0 && i < auditions.length) {
-      const audition = auditions[i];
-      if (audition.tessiture.toLowerCase() === "tenor") {
-        auditionsFiltrees.push(audition);
-        tenor--;
-      }
-      i++;
-    }
-
-    i = 0; // Réinitialiser l'index pour la boucle suivante
-
-    // Boucle pour autre
-    while (autre > 0 && i < auditions.length) {
-      const audition = auditions[i];
-      if (audition.tessiture.toLowerCase() === "autre") {
-        auditionsFiltrees.push(audition);
-        autre--;
-      }
-      i++;
-    }
-
-    i = 0; // Réinitialiser l'index pour la boucle suivante
-
-    // Boucle pour basse
-    while (basse > 0 && i < auditions.length) {
-      const audition = auditions[i];
-      if (audition.tessiture.toLowerCase() === "basse") {
-        auditionsFiltrees.push(audition);
-        basse--;
-      }
-      i++;
-    }
-
-    // Enregistrer les candidats dans listeFinaleSchema
-    const candidats = auditionsFiltrees.map((audition) => ({
-      candidat: audition.candidat,
-      // saison: saisonId,
-    }));
-
-    await listeFinale.insertMany(candidats);
-    res.status(200).json(auditionsFiltrees);
-  } catch (error) {
-    console.error("Erreur lors du filtrage des auditions:", error);
-    res.status(500).json({ message: "Erreur lors du filtrage des auditions" });
-  }
-};
