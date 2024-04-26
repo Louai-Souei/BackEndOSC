@@ -1,12 +1,8 @@
-const express = require('express');
+const express = require("express");
 const router = express.Router();
-const absenceController = require('../controllers/absencerequest');
-const  absenceElemination = require('../controllers/absenceElemination')
-const auth = require('../middlewares/auth')
-
-
-
-
+const absenceController = require("../controllers/absencerequest");
+const absenceElemination = require("../controllers/absenceElemination");
+const auth = require("../middlewares/auth");
 
 /**
  * @swagger
@@ -30,7 +26,7 @@ const auth = require('../middlewares/auth')
  *               eventDate:
  *                 type: string
  *                 format: date
- *              
+ *
  *               reason:
  *                 type: string
  *                 description: Raison de l'absence
@@ -61,8 +57,12 @@ const auth = require('../middlewares/auth')
  *               success: false
  *               message: "Erreur interne du serveur"
  */
-router.post('/createrequest', auth.authMiddleware, auth.isChoriste, absenceController.informerAbsence);
-
+router.post(
+  "/createrequest",
+  auth.authMiddleware,
+  auth.isChoriste,
+  absenceController.informerAbsence
+);
 
 /**
  * @swagger
@@ -88,10 +88,14 @@ router.post('/createrequest', auth.authMiddleware, auth.isChoriste, absenceContr
  *         description: Erreur interne du serveur
  */
 
-router.get('/getabsence/:id',auth.authMiddleware,auth.isAdmin, absenceController.getAbsenceRequestsByUser);
+router.get(
+  "/getabsence/:id",
+  auth.authMiddleware,
+  auth.isAdmin,
+  absenceController.getAbsenceRequestsByUser
+);
 
-
-router.post('/', absenceController.createAbsence);
+router.post("/", absenceController.createAbsence);
 
 /**
  * @swagger
@@ -238,8 +242,12 @@ router.post('/', absenceController.createAbsence);
  *         description: Server error while fetching choristes' attendance details
  */
 
-
-router.get("/getparticipants/:repetitionId/:tessiture", auth.authMiddleware, auth.ischefpupitre, absenceController.getChoristesByRepetitionAndPupitre);
+router.get(
+  "/getparticipants/:repetitionId/:tessiture",
+  auth.authMiddleware,
+  auth.ischefpupitre,
+  absenceController.getChoristesByRepetitionAndPupitre
+);
 
 /**
  * @swagger
@@ -306,11 +314,21 @@ router.get("/getparticipants/:repetitionId/:tessiture", auth.authMiddleware, aut
  *         description: Server error while fetching choristes' attendance details
  */
 
-router.get("/getparticipants/:concertId", auth.authMiddleware, auth.ischefpupitre, absenceController.getChoristesByConcertAndPupitre);
+//router.get("/getparticipants/:concertId", auth.authMiddleware, auth.ischefpupitre, absenceController.getChoristesByConcertAndPupitre);
+router.get(
+  "/getparticipants/:concertId",
+  absenceController.getChoristesByConcertAndPupitre
+);
 
 
 
-  
+
+router.delete(
+  "/getparticipants/:participantId",
+  absenceController.deleteParticipant
+);
+
+
 /**
  * @swagger
  * /absence/getChoristedepasseseuil/{seuil}:
@@ -333,8 +351,19 @@ router.get("/getparticipants/:concertId", auth.authMiddleware, auth.ischefpupitr
  *       500:
  *         description: Internal server error
  */
-router.get('/getChoristedepasseseuil/:seuil',auth.authMiddleware,auth.isAdmin, absenceElemination.getChoristedepasseseuil)
-router.get('/gestionAbsencesExcessives/:seuil',auth.authMiddleware,auth.isAdmin, absenceElemination.gestionAbsencesExcessives,absenceElemination.envoyermailnominé)
+router.get(
+  "/getChoristedepasseseuil/:seuil",
+  auth.authMiddleware,
+  auth.isAdmin,
+  absenceElemination.getChoristedepasseseuil
+);
+router.get(
+  "/gestionAbsencesExcessives/:seuil",
+  auth.authMiddleware,
+  auth.isAdmin,
+  absenceElemination.gestionAbsencesExcessives,
+  absenceElemination.envoyermailnominé
+);
 /**
  * @swagger
  * /absence/elimine:
@@ -354,7 +383,12 @@ router.get('/gestionAbsencesExcessives/:seuil',auth.authMiddleware,auth.isAdmin,
  *       500:
  *         description: Internal server error
  */
-router.get('/elimine',auth.authMiddleware,auth.isAdmin, absenceElemination.getChoristesÉliminés);
+router.get(
+  "/elimine",
+  auth.authMiddleware,
+  auth.isAdmin,
+  absenceElemination.getChoristesÉliminés
+);
 /**
  * @swagger
  * /absence/:
@@ -374,7 +408,12 @@ router.get('/elimine',auth.authMiddleware,auth.isAdmin, absenceElemination.getCh
  *       500:
  *         description: Internal server error
  */
-router.get('/',auth.authMiddleware,auth.isAdmin, absenceElemination.notifieradminChoristeseliminés)
+router.get(
+  "/",
+  auth.authMiddleware,
+  auth.isAdmin,
+  absenceElemination.notifieradminChoristeseliminés
+);
 /**
  * @swagger
  * /absence/nomines:
@@ -394,6 +433,11 @@ router.get('/',auth.authMiddleware,auth.isAdmin, absenceElemination.notifieradmi
  *       500:
  *         description: Internal server error
  */
-router.get('/nomines',auth.authMiddleware,auth.isAdmin, absenceElemination.getChoristesNominés)
+router.get(
+  "/nomines",
+  auth.authMiddleware,
+  auth.isAdmin,
+  absenceElemination.getChoristesNominés
+);
 
 module.exports = router;

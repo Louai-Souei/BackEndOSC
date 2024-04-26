@@ -287,6 +287,15 @@ async function genererPlanification(req, res) {
     const auditionPlanning = await EvenementAudition.findOne({
       _id: evenementAuditionId,
     });
+
+    // Vérifier si aucun événement d'audition correspondant n'a été trouvé
+    // if (!auditionPlanning) {
+    //   return res.status(404).json({
+    //     success: false,
+    //     error: "Aucun événement d'audition trouvé avec cet identifiant.",
+    //   });
+    // }
+
     const candidats = await Candidat.find();
 
     // Filtrer les candidats qui ne se sont pas encore présentés
@@ -296,6 +305,7 @@ async function genererPlanification(req, res) {
 
     const nombreSeancesParJour = auditionPlanning.nombre_séance;
     const dureeAuditionMinutes = auditionPlanning.dureeAudition;
+    const intervalleEntreAuditions = 30; // Intervalle de 30 minutes entre chaque audition
 
     const nombreTotalSeances = Math.ceil(
       candidatsNonPresentes.length / nombreSeancesParJour
@@ -303,10 +313,11 @@ async function genererPlanification(req, res) {
 
     const planning = [];
 
-    let dateDebutAudition = moment(auditionPlanning.Date_debut_Audition)
-      .hours(8)
-      .minutes(0)
-      .milliseconds(0);
+    let heureDebutAudition = moment(auditionPlanning.Date_debut_Audition)
+      .hour(9) // Commencer à partir de 9h du matin
+      .minute(0)
+      .second(0)
+      .millisecond(0);
 
     for (let seance = 0; seance < nombreTotalSeances; seance++) {
       for (
@@ -319,27 +330,24 @@ async function genererPlanification(req, res) {
         if (auditionIndex < candidatsNonPresentes.length) {
           const candidat = candidatsNonPresentes[auditionIndex];
 
-          const dateFinAudition = dateDebutAudition
-            .clone()
-            .add(dureeAuditionMinutes, "minutes");
+          const heureFinAudition = heureDebutAudition.clone().add(dureeAuditionMinutes, "minutes");
 
-          if (dateFinAudition.isAfter(auditionPlanning.Date_fin_Audition)) {
+          if (heureFinAudition.isAfter(auditionPlanning.Date_fin_Audition)) {
             console.warn(
               "La date de fin de l'audition dépasse la date spécifiée."
             );
-            res.status(400).json({
+            return res.status(400).json({
               success: false,
               error: "La date de fin de l'audition dépasse la date spécifiée.",
             });
-            return;
           }
 
           const audition = new Audition({
-            heure_debut: dateDebutAudition.toDate(),
-            heure_fin: dateFinAudition.toDate(),
+            heure_debut: heureDebutAudition.toDate(),
+            heure_fin: heureFinAudition.toDate(),
             candidat: candidat._id,
             evenementAudition: evenementAuditionId,
-            date_audition: dateDebutAudition.toDate(),
+            date_audition: heureDebutAudition.toDate(),
           });
 
           await audition.save();
@@ -350,26 +358,26 @@ async function genererPlanification(req, res) {
           planning.push({
             nom: candidat.nom,
             prenom: candidat.prenom,
-            email: candidat.email, // Ajouter l'e-mail du candidat
-            date_audition: dateDebutAudition.format("DD/MM/YYYY"),
-            heure_debut_audition: dateDebutAudition.format("HH:mm"),
-            heure_fin_audition: dateFinAudition.format("HH:mm"),
+            email: candidat.email,
+            date_audition: heureDebutAudition.format("DD/MM/YYYY"),
+            heure_debut_audition: heureDebutAudition.format("HH:mm"),
+            heure_fin_audition: heureFinAudition.format("HH:mm"),
           });
 
           // Mettre à jour la propriété estEngage du candidat
           candidat.estEngage = true;
           await candidat.save();
 
-          dateDebutAudition.add(dureeAuditionMinutes, "minutes");
+          heureDebutAudition.add(intervalleEntreAuditions, "minutes");
         }
       }
 
-      dateDebutAudition = moment(auditionPlanning.Date_debut_Audition)
+      heureDebutAudition = moment(auditionPlanning.Date_debut_Audition)
         .add(seance + 1, "days")
-        .hours(8)
-        .minutes(0)
-        .seconds(0)
-        .milliseconds(0);
+        .hour(9) // Commencer à partir de 9h du matin
+        .minute(0)
+        .second(0)
+        .millisecond(0);
     }
 
     console.log("Planification des candidats générée avec succès");
@@ -382,6 +390,7 @@ async function genererPlanification(req, res) {
     res.status(500).json({ success: false, error: error.message });
   }
 }
+
 
 async function genererPlanificationabsence(req, res) {
   try {

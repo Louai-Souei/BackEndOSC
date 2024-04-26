@@ -204,7 +204,10 @@ router.patch("/:id", auditionController.updateAudition);
 router.delete("/:id", auditionController.deleteAudition);
 
 // Route pour générer le planning d'auditions
-router.post("/generer-planning", auditionController.genererPlanification);
+router.post(
+  "/generer-planning/:evenementAuditionId",
+  auditionController.genererPlanification
+);
 
 /**
  * @swagger
@@ -313,21 +316,14 @@ router.get(
   "/Check/EvenementAudition",
   auditionController.CheckEvenementAudition
 );
-router.get(
-  "/Check/NextEvenementAudition",
-  auditionController.checkNextEvent
-);
+router.get("/Check/NextEvenementAudition", auditionController.checkNextEvent);
 
 router.patch(
   "/update/EvenementAudition/:eventId",
   auditionController.updateEvenementAudition
 );
 
-router.get(
-  "/get/EvenementAudition",
-  auditionController.getEvenementAudition
-);
-
+router.get("/get/EvenementAudition", auditionController.getEvenementAudition);
 
 router.post(
   "/generer-planning",
