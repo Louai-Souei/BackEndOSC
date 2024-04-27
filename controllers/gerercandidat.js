@@ -202,16 +202,14 @@ async function genererMotDePasse(candidatId) {
 const ajouterChoriste = async (candidat, tessiture) => {
   try {
     if (candidat.estConfirme === true) {
-      // Générer le mot de passe
       const password = await genererMotDePasse(candidat._id);
 
       const nouveauChoriste = new User({
         nom: candidat.nom,
         prenom: candidat.prenom,
         email: candidat.email,
-        password: password, // Utiliser le mot de passe généré
+        password: password,
         role: "choriste",
-        tessiture: tessiture,
         taille_en_m: candidat.taille_en_m,
       });
 
@@ -271,7 +269,7 @@ exports.confirmerEngagement = async (req, res) => {
     if (!candidat) {
       throw new Error("Candidat introuvable");
     }
-    candidat.signature = true;
+    candidat.signature = false;
     await candidat.save();
     const tessitureAudition = (
       await Audition.findOne({ candidat: candidat.id })

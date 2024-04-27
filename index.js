@@ -2,7 +2,7 @@ const express = require("express");
 const cron = require("node-cron");
 const swaggerJsdoc = require("swagger-jsdoc");
 const swaggerUi = require("swagger-ui-express");
-const cors = require("cors");
+//const cors = require("cors");
 // const socketIO = require("socket.io");
 require("dotenv").config();
 const mongoose = require("mongoose");
@@ -128,13 +128,13 @@ mongoose
   .catch((e) => console.log("connexion a mongoDB echouée", e));
 
 const app = express();
-app.use(
-  cors({
-    origin: ["http://localhost:3000"],
-    methods: ["POST", "GET", "DELETE", "PUT", "PATCH"],
-    credentials: true,
-  })
-);
+// app.use(
+//   cors({
+//     origin: ["http://localhost:3000"],
+//     methods: ["POST", "GET", "DELETE", "PUT", "PATCH"],
+//     credentials: true,
+//   })
+// );
 app.use(express.json());
 app.get("/", (req, res) => {
   res.json("hello to our project ");

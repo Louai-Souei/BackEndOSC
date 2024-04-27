@@ -1,7 +1,7 @@
-const express = require('express');
+const express = require("express");
 const router = express.Router();
-const repetitionController = require('../controllers/repetition');
-const auth = require('../middlewares/auth');
+const repetitionController = require("../controllers/repetition");
+const auth = require("../middlewares/auth");
 
 /**
  * @swagger
@@ -33,7 +33,10 @@ const auth = require('../middlewares/auth');
  *       '500':
  *         description: Erreur interne du serveur
  */
-router.get('/consulterEtatAbsencesRepetitions', auth.authMiddleware, auth.isAdmin,repetitionController.consulterEtatAbsencesRepetitions);
+router.get(
+  "/consulterEtatAbsencesRepetitions",
+  repetitionController.consulterEtatAbsencesRepetitions
+);
 /**
  * @swagger
  * components:
@@ -197,7 +200,7 @@ router.get('/consulterEtatAbsencesRepetitions', auth.authMiddleware, auth.isAdmi
  *                 nom: "Smith"
  *                 prenom: "Alice"
  *         programme: "lmnop"
- * 
+ *
  *   responses:
  *     RepetitionResponse:
  *       200:
@@ -211,8 +214,6 @@ router.get('/consulterEtatAbsencesRepetitions', auth.authMiddleware, auth.isAdmi
  *       500:
  *         description: Erreur interne du serveur
  */
-
-
 
 /**
  * @swagger
@@ -228,7 +229,7 @@ router.get('/consulterEtatAbsencesRepetitions', auth.authMiddleware, auth.isAdmi
  *         content:
  *           application/json:
  *             example:
- *               repetitions: 
+ *               repetitions:
  *                 - _id: "60cf7123b8c5e851b00cd6a1"
  *                   nom: "Répétition 1"
  *                   date: ["2024-01-01"]
@@ -241,8 +242,16 @@ router.get('/consulterEtatAbsencesRepetitions', auth.authMiddleware, auth.isAdmi
  *                   programme: "60cf7123b8c5e851b00cd5a1"
  *               message: "Réussi - Récupération des répétitions."
  */
-router.get("/", auth.authMiddleware, auth.isAdmin, repetitionController.fetchRepetitions);
-router.post("/", auth.authMiddleware, auth.isAdmin, repetitionController.addRepetition);
+router.get(
+  "/",
+
+  repetitionController.fetchRepetitions
+);
+router.post(
+  "/",
+
+  repetitionController.addRepetition
+);
 /**
  * @swagger
  * /repetitions/add:
@@ -299,7 +308,11 @@ router.post("/", auth.authMiddleware, auth.isAdmin, repetitionController.addRepe
  *               error: "Description de l'erreur interne"
  *               message: "Échec d'ajout de la répétition"
  */
-router.post("/add", auth.authMiddleware, auth.isAdmin, repetitionController.addRepetitionn);
+router.post(
+  "/add/:id",
+
+  repetitionController.addRepetitionn
+);
 /**
  * @swagger
  * /repetitions/{id}:
@@ -328,7 +341,11 @@ router.post("/add", auth.authMiddleware, auth.isAdmin, repetitionController.addR
  *         description: Erreur interne du serveur
  */
 
-router.get("/:id", auth.authMiddleware, auth.isAdmin, repetitionController.getRepetitionById);
+router.get(
+  "/:id",
+
+  repetitionController.getRepetitionById
+);
 /**
  * @swagger
  * /repetitions/updaterepetition/{id}:
@@ -359,7 +376,11 @@ router.get("/:id", auth.authMiddleware, auth.isAdmin, repetitionController.getRe
  *         description: Erreur interne du serveur
  */
 
-router.put("/updaterepetition/:id", auth.authMiddleware, auth.isAdmin, repetitionController.updateRepetition);
+router.put(
+  "/updaterepetition/:id",
+
+  repetitionController.updateRepetition
+);
 /**
  * @swagger
  * /repetitions/deleterepetition/{id}:
@@ -384,7 +405,11 @@ router.put("/updaterepetition/:id", auth.authMiddleware, auth.isAdmin, repetitio
  *         description: Erreur interne du serveur
  */
 
-router.delete("/deleterepetition/:id", auth.authMiddleware, auth.isAdmin, repetitionController.deleteRepetition);
+router.delete(
+  "/deleterepetition/:concertId/:repetitionId",
+  repetitionController.deleteRepetition
+);
+
 /**
  * @swagger
  * /repetitions/generatePupitreList:
@@ -414,13 +439,19 @@ router.delete("/deleterepetition/:id", auth.authMiddleware, auth.isAdmin, repeti
  *       '500':
  *         description: Erreur interne du serveur
  */
-router.post('/generatePupitreList', auth.authMiddleware, auth.isAdmin, repetitionController.generatePupitreList);
 router.post(
-  "/sendnotif",
-  repetitionController.testnotif
-);
+  "/generatePupitreList",
 
-router.post('/:id/confirmerpresence', auth.authMiddleware, auth.isChoriste,repetitionController.confirmerpresenceRepetition);
+  repetitionController.generatePupitreList
+);
+router.post("/sendnotif", repetitionController.testnotif);
+
+router.post(
+  "/:id/confirmerpresence",
+  auth.authMiddleware,
+  auth.isChoriste,
+  repetitionController.confirmerpresenceRepetition
+);
 /**
  * @swagger
  * /repetitions/{id}/confirmerpresence:
@@ -457,6 +488,5 @@ router.post('/:id/confirmerpresence', auth.authMiddleware, auth.isChoriste,repet
  *         description: Erreur interne du serveur
  */
 //router.post('/sendnotif', repetitionController.testnotif);
-
 
 module.exports = router;
