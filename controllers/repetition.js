@@ -246,49 +246,39 @@ const getRRepetitionById = async (req, res) => {
 
 const updateRepetition = async (req, res) => {
   try {
-    const repetition = await Repetition.findOneAndUpdate(
-      { _id: req.params.id },
+    const concertId = req.params.concertId;
+    const repetitionId = req.params.repetitionId;
+
+    const concert = await Concert.findById(concertId);
+    if (!concert) {
+      return res.status(404).json({ message: "Concert not found" });
+    }
+    const repetition = await Repetition.findByIdAndUpdate(
+      repetitionId,
       req.body,
       { new: true }
     );
-
     if (!repetition) {
-      return res.status(404).json({ message: "Répétition non trouvée" });
-    } else {
-      res.status(200).json({
-        message: "Répétition modifiée avec succès",
-        model: repetition,
-      });
-
-      try {
-        const memberIds = repetition.participant;
-
-        const members = await User.find({ _id: { $in: memberIds } });
-        console.log(members);
-
-        if (members) {
-          members.forEach((member) => {
-            io.emit("member", {
-              userId: member._id,
-              message: "Votre répétition a été mise à jour.",
-              updatedRepetition: repetition,
-            });
-          });
-        }
-      } catch (error) {
-        console.error(
-          "Erreur lors de l'envoi des notifications aux membres :",
-          error
-        );
-      }
+      return res.status(404).json({ message: "Repetition not found" });
     }
-  } catch (error) {
-    res.status(400).json({ error: error.message });
+
+    const index = concert.repetition.findIndex((c) => c._id == repetitionId);
+    if (index !== -1) {
+      concert.repetition[index] = repetition;
+    }
+
+    await concert.save();
+
+    res
+      .status(200)
+      .json({ message: "Repetition updated successfully", repetition });
+  } catch (e) {
+    res.status(500).json({
+      message: "Server Error",
+      error: e.message,
+    });
   }
 };
-io.on("updateRepetition", (data) => {
-  console.log("Notification received:", data.message);
-});
 
 const deleteRepetition = async (req, res) => {
   try {

@@ -382,7 +382,7 @@ router.get(
  */
 
 router.put(
-  "/updaterepetition/:id",
+  "/updaterepetition/:concertId/:repetitionId",
 
   repetitionController.updateRepetition
 );
