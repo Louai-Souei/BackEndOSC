@@ -313,6 +313,11 @@ router.post(
 
   repetitionController.addRepetitionn
 );
+router.get(
+  "/get/:id/:repetitionId",
+
+  repetitionController.getRRepetitionById
+);
 /**
  * @swagger
  * /repetitions/{id}:

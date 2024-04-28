@@ -8,16 +8,23 @@ const RepetitionSchema = new Schema({
   heureFin: { type: String, required: true },
   lieu: { type: String, required: true },
   nbr_repetition: { type: Number },
-  pourcentagesPupitres: [
+  // pourcentagesPupitres: [
+  //   {
+  //     pupitre: { type: Schema.Types.ObjectId, ref: "Pupitre" },
+  //     selectedChoristes: [
+  //       {
+  //         _id: { type: Schema.Types.ObjectId, ref: "User" },
+  //         nom: { type: String },
+  //         prenom: { type: String },
+  //       },
+  //     ],
+  //   },
+  // ],
+  pupitreInstances: [
     {
+      tessiture: { type: String, required: true },
       pupitre: { type: Schema.Types.ObjectId, ref: "Pupitre" },
-      selectedChoristes: [
-        {
-          _id: { type: Schema.Types.ObjectId, ref: "User" },
-          nom: { type: String },
-          prenom: { type: String },
-        },
-      ],
+      choristes: [{ type: Schema.Types.ObjectId, ref: "User" }],
     },
   ],
   programme: { type: Schema.Types.ObjectId, ref: "Programme" },

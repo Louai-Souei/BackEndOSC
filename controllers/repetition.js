@@ -71,50 +71,60 @@ const fetchRepetitions = (req, res) => {
 };
 
 const addRepetitionn = async (req, res) => {
-  const {
-    pourcentageAlto,
-    pourcentageSoprano,
-    pourcentageTenor,
-    pourcentageBasse,
-  } = req.body;
-
   const id = req.params.id;
 
   try {
     const newRepetition = new Repetition(req.body);
-    await newRepetition.save();
-
     const pupitreInstances = [];
 
+    const {
+      pourcentageAlto,
+      pourcentageSoprano,
+      pourcentageTenor,
+      pourcentageBasse,
+    } = req.body;
+
+    const tessitures = ["Alto", "Soprano", "Tenor", "Basse"];
+
     const pourcentages = {
-      Alto: pourcentageAlto || 25,
-      Soprano: pourcentageSoprano || 25,
-      Tenor: pourcentageTenor || 25,
-      Basse: pourcentageBasse || 25,
+      Alto: pourcentageAlto || 0,
+      Soprano: pourcentageSoprano || 0,
+      Tenor: pourcentageTenor || 0,
+      Basse: pourcentageBasse || 0,
     };
 
-    for (const [tessiture, pourcentage] of Object.entries(pourcentages)) {
-      const choristes = await User.find({ role: "choriste", tessiture });
-      const nombreChoristes = Math.ceil((pourcentage / 100) * choristes.length);
-      const selectedChoristes = choristes
-        .slice(0, nombreChoristes)
-        .map((choriste) => ({
-          _id: choriste._id,
-          nom: choriste.nom,
-          prenom: choriste.prenom,
-        }));
+    for (const tessiture of tessitures) {
+      const pourcentage = pourcentages[tessiture];
 
-      const newPupitreInstance = {
-        tessiture,
-        selectedChoristes,
-      };
+      if (pourcentage > 0) {
+        const choristes = await User.find({ role: "choriste", tessiture });
 
-      pupitreInstances.push(newPupitreInstance);
+        const nombreChoristes = Math.ceil(
+          (pourcentage / 100) * choristes.length
+        );
+        const selectedChoristes = choristes
+          .slice(0, nombreChoristes)
+          .map((choriste) => choriste._id);
+
+        const newPupitreInstance = {
+          tessiture,
+          pupitre: id,
+          choristes: selectedChoristes,
+        };
+
+        pupitreInstances.push(newPupitreInstance);
+      }
     }
+
+    newRepetition.pupitreInstances = pupitreInstances;
+
+    await newRepetition.save();
+
     const concert = await Concert.findOne({ _id: id });
     if (!concert) {
-      res.status(404).json({ message: "not found" });
+      return res.status(404).json({ message: "Concert not found" });
     }
+
     concert.repetition.push(newRepetition);
     await Concert.findByIdAndUpdate(
       id,
@@ -124,13 +134,14 @@ const addRepetitionn = async (req, res) => {
       { new: true }
     );
 
-    res.status(200).json({
+    return res.status(200).json({
       repetition: newRepetition,
       pupitreInstances,
-      message: "Répétition ajoutée avec succès et enregistrée dans le concert",
+      message:
+        "Répétition ajoutée avec succès et les choristes sélectionnés enregistrés",
     });
   } catch (error) {
-    res.status(400).json({
+    return res.status(400).json({
       error: error.message,
       message: "Échec d'ajout de la répétition",
     });
@@ -141,7 +152,6 @@ const addRepetition = async (req, res) => {
   try {
     const newRepetition = new Repetition(req.body);
     await newRepetition.save();
-
     await QRCode.toFile(
       `C:\\Users\\tinne\\OneDrive\\Desktop\\ProjetBackend\\image QR\\qrcode-${newRepetition._id}.png`,
       `http://localhost:5000/api/repetitions/${newRepetition._id}/confirmerpresence`,
@@ -169,6 +179,11 @@ const getRepetitionById = (req, res) => {
   Concert.findById(req.params.id)
     .populate({
       path: "repetition",
+      populate: {
+        path: "pupitreInstances.choristes",
+        model: "User",
+        select: "nom prenom",
+      },
     })
     .then((concert) => {
       if (!concert) {
@@ -188,6 +203,45 @@ const getRepetitionById = (req, res) => {
         message: "Échec de récupération du concert par ID",
       });
     });
+};
+const getRRepetitionById = async (req, res) => {
+  try {
+    const id = req.params.id;
+    const repetitionId = req.params.repetitionId;
+
+    console.log("id:", id);
+    console.log("repetitionId:", repetitionId);
+    const concert = await Concert.findById(id);
+    if (!concert) {
+      return res.status(404).json({ message: "Concert non trouvé" });
+    }
+    const repetition = await Repetition.findById(repetitionId);
+    if (!repetition) {
+      return res.status(404).json({ message: "Répétition non trouvée" });
+    }
+    concert.repetition = concert.repetition.filter(
+      (c) => c._id != repetitionId
+    );
+    const retrievedRepetition = await Repetition.findById(
+      repetitionId
+    ).populate({
+      path: "pupitreInstances.choristes",
+      model: "User",
+      select: "nom prenom",
+    });
+    if (!retrievedRepetition) {
+      return res.status(404).json({ message: "Répétition non trouvée" });
+    }
+    res.status(200).json({
+      repetition: retrievedRepetition,
+      message: "Répétition récupérée avec succès",
+    });
+  } catch (error) {
+    res.status(400).json({
+      error: error.message,
+      message: "Échec de récupération de la répétition par ID",
+    });
+  }
 };
 
 const updateRepetition = async (req, res) => {
@@ -533,4 +587,5 @@ module.exports = {
   addRepetitionn,
   consulterEtatAbsencesRepetitions,
   testnotif,
+  getRRepetitionById,
 };
