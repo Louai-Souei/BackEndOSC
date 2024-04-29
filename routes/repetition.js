@@ -33,7 +33,7 @@ const auth = require('../middlewares/auth');
  *       '500':
  *         description: Erreur interne du serveur
  */
-router.get('/consulterEtatAbsencesRepetitions', auth.authMiddleware, auth.isAdmin,repetitionController.consulterEtatAbsencesRepetitions);
+router.get('/consulterEtatAbsencesRepetitions', repetitionController.consulterEtatAbsencesRepetitions);
 /**
  * @swagger
  * components:
