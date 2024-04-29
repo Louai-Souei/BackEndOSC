@@ -223,7 +223,7 @@ const CheckEvenementAudition = async (req, res) => {
 
 const checkNextEvent = async (req, res) => {
   try {
-    const now = new Date()
+    const now = new Date();
     const saisonId = req.params.saisonId;
 
     // Recherche des événements dont la date de début est postérieure à la date actuelle
@@ -231,28 +231,27 @@ const checkNextEvent = async (req, res) => {
     const nextEvent = await EvenementAudition.findOne({
       Date_debut_Audition: { $gt: now },
       saison: saisonId,
-    }).sort({ Date_debut_Audition: 1 })
+    }).sort({ Date_debut_Audition: 1 });
 
-    res.json(nextEvent)
+    res.json(nextEvent);
   } catch (error) {
     console.error(
       "Erreur lors de la vérification de l'événement suivant :",
-      error,
-    )
+      error
+    );
     res
       .status(500)
-      .json({ error: "Erreur lors de la vérification de l'événement suivant" })
+      .json({ error: "Erreur lors de la vérification de l'événement suivant" });
   }
 };
 
 const updateEvenementAudition = async (req, res) => {
-  const evenementId = req.params.eventId
-  console.log('req: ', req.body);
-  console.log('evenementId: ', evenementId);
-
+  const evenementId = req.params.eventId;
+  console.log("req: ", req.body);
+  console.log("evenementId: ", evenementId);
 
   try {
-    console.log("ok")
+    console.log("ok");
 
     // Vérifier si l'événement existe
     const evenement = await EvenementAudition.findById(evenementId);
@@ -304,24 +303,20 @@ const updateEvenementAudition = async (req, res) => {
 async function genererPlanification(req, res) {
   try {
     const { evenementAuditionId } = req.params;
-    const { evenementAuditionId } = req.params
     const auditionPlanning = await EvenementAudition.findOne({
-      
       _id: evenementAuditionId,
     });
-    console.log('auditionPlanning: ', auditionPlanning);
+
     const candidats = await Candidat.find();
     const nombreSeancesParJour = auditionPlanning.nombre_séance;
     const dureeAuditionMinutes = parseInt(auditionPlanning.dureeAudition);
 
     const planning = [];
 
-    let dateDebutAudition = moment(auditionPlanning.Date_debut_Audition);
-    let dateDebutAudition = moment(auditionPlanning.Date_debut_Audition);
+    let dateDebutAudition = moment(
+      auditionPlanning.Date_debut_Audition
+    ).startOf("day");
 
-    for (let jour = 0; jour < auditionPlanning.nombre_séance; jour++) {
-      for (let seance = 0; seance < nombreSeancesParJour; seance++) {
-        const candidatIndex = jour * nombreSeancesParJour + seance;
     for (let jour = 0; jour < auditionPlanning.nombre_séance; jour++) {
       for (let seance = 0; seance < nombreSeancesParJour; seance++) {
         const candidatIndex = jour * nombreSeancesParJour + seance;
@@ -329,57 +324,44 @@ async function genererPlanification(req, res) {
         if (candidatIndex < candidats.length) {
           const candidat = candidats[candidatIndex];
 
-          // Calculer l'heure de début de la séance en ajoutant la durée de chaque séance
-          const heureDebutSeance = moment(auditionPlanning.Date_debut_Audition)
-            .add(jour, "days") // Ajouter le nombre de jours pour chaque jour
-            .add(seance * dureeAuditionMinutes - 60, "minutes");
-
-          const dateDebutSeance = heureDebutSeance.clone();
-          const dateFinSeance = heureDebutSeance
-        if (candidatIndex < candidats.length) {
-          const candidat = candidats[candidatIndex];
-
-          // Calculer l'heure de début de la séance en ajoutant la durée de chaque séance
-          const heureDebutSeance = moment(auditionPlanning.Date_debut_Audition)
-            .add(jour, "days") // Ajouter le nombre de jours pour chaque jour
-            .add(seance * dureeAuditionMinutes - 60, "minutes");
-
-          const dateDebutSeance = heureDebutSeance.clone();
-          const dateFinSeance = heureDebutSeance
+          const dateDebutSeance = dateDebutAudition
+            .clone()
+            .add(seance * dureeAuditionMinutes, "minutes");
+          const dateFinSeance = dateDebutSeance
             .clone()
             .add(dureeAuditionMinutes, "minutes");
 
           if (dateFinSeance.isAfter(auditionPlanning.Date_fin_Audition)) {
-          if (dateFinSeance.isAfter(auditionPlanning.Date_fin_Audition)) {
             console.warn(
-              "La date de fin de l'audition dépasse la date spécifiée."
-            );
-            return res.status(400).json({
               "La date de fin de l'audition dépasse la date spécifiée."
             );
             return res.status(400).json({
               success: false,
               error: "La date de fin de l'audition dépasse la date spécifiée.",
             });
-            });
           }
 
-          const nouvelleAudition = new Audition({
-            date_audition: dateDebutSeance.toDate(),
-            heure_debut: dateDebutSeance.toDate(),
-            heure_fin: dateFinSeance.toDate(),
-            evenementAudition: evenementAuditionId,
-            candidat: candidat._id,
+          const nouvellePlanification = new PlanificationAudition({
+            nom: candidat.nom,
+            prenom: candidat.prenom,
+            email: candidat.email,
+            date_audition: dateDebutSeance.format("DD/MM/YYYY"),
+            heure_debut_audition: dateDebutSeance.format("HH:mm"),
+            heure_fin_audition: dateFinSeance.format("HH:mm"),
           });
 
-          await nouvelleAudition.save();
-          planning.push(nouvelleAudition);
+          await nouvellePlanification.save();
+          planning.push(nouvellePlanification);
+
+          // Call sendAuditionEmails function here
           await sendAuditionEmails(candidat, {
             date_audition: dateDebutSeance.toDate(),
             heure_debut: dateDebutSeance.toDate(),
           });
         }
       }
+
+      dateDebutAudition.add(1, "day");
     }
 
     console.log(
@@ -392,15 +374,12 @@ async function genererPlanification(req, res) {
       error.message
     );
     res.status(500).json({ success: false, error: error.message });
-      "Erreur lors de la génération et de l'enregistrement de la planification des candidats:",
-      error.message
-    );
-    res.status(500).json({ success: false, error: error.message });
   }
 }
 
 const sendAuditionEmails = async (candidat, audition) => {
   try {
+    // Configuration de Nodemailer pour utiliser Gmail
     const transporter = nodemailer.createTransport({
       service: "gmail",
       auth: {
@@ -412,17 +391,19 @@ const sendAuditionEmails = async (candidat, audition) => {
       },
     });
 
-    let contenuEmail;
+    // Contenu de l'e-mail à envoyer
+    const contenuEmail = `
+Cher(e) ${candidat.nom} ${candidat.prenom},
 
-    contenuEmail = `
-        Cher(e) ${candidat.nom} ${candidat.prenom},
-        Nous souhaitons vous informer de votre prochaine audition.
-        Date: ${audition.date_audition.toDateString()}
-        Heure: ${audition.heure_debut.toTimeString()}
-        Cordialement,
-        Votre organisation
-      `;
+Nous souhaitons vous informer de votre prochaine audition.
+Date: ${audition.date_audition.toDateString()}
+Heure: ${audition.heure_debut.toTimeString()}
 
+Cordialement,
+Votre organisation
+`;
+
+    // Envoi de l'e-mail
     await transporter.sendMail({
       from: "namouchicyrine@gmail.com",
       to: candidat.email,
@@ -433,8 +414,7 @@ const sendAuditionEmails = async (candidat, audition) => {
     console.log(`E-mail envoyé avec succès à ${candidat.email}.`);
   } catch (error) {
     console.error(
-      `Erreur lors de l'envoi de l'e-mail à ${candidat.email}:`,
-      error.message
+      `Erreur lors de l'envoi de l'e-mail à ${candidat.email}: ${error.message}`
     );
   }
 };
@@ -455,12 +435,10 @@ async function genererPlanificationabsence(req, res) {
     // Vérifier si le nombre récupéré est valide
     if (isNaN(dureeAuditionMinutes)) {
       console.error("La durée de l'audition n'est pas valide.");
-      res
-        .status(400)
-        .json({
-          success: false,
-          error: "La durée de l'audition n'est pas valide.",
-        });
+      res.status(400).json({
+        success: false,
+        error: "La durée de l'audition n'est pas valide.",
+      });
       return;
     }
 
@@ -512,12 +490,10 @@ async function genererPlanificationabsence(req, res) {
     }
 
     console.log("Planification des auditions générée avec succès");
-    res
-      .status(200)
-      .json({
-        success: true,
-        message: "Planification des auditions générée avec succès",
-      });
+    res.status(200).json({
+      success: true,
+      message: "Planification des auditions générée avec succès",
+    });
   } catch (error) {
     console.error(
       "Erreur lors de la génération de la planification des auditions :",
@@ -526,47 +502,6 @@ async function genererPlanificationabsence(req, res) {
     res.status(500).json({ success: false, error: error.message });
   }
 }
-const sendAuditionEmails = async (candidat, audition) => {
-  try {
-    const transporter = nodemailer.createTransport({
-      service: "gmail",
-      auth: {
-        user: "namouchicyrine@gmail.com",
-        pass: "tqdmvzynhcwsjsvy",
-      },
-      tls: {
-        rejectUnauthorized: false,
-      },
-    });
-
-    let contenuEmail;
-    candidat = await Candidat.findById(candidat._id);
-    contenuEmail = `
-        Cher(e) ${candidat.nom} ${candidat.prenom},
-        Nous souhaitons vous informer de votre prochaine audition.
-        Date: ${audition.date_audition.toDateString()}
-        Heure: ${audition.heure_debut.toTimeString()}
-        Cordialement,
-        Votre organisation
-      `;
-
-    await transporter.sendMail({
-      from: "namouchicyrine@gmail.com",
-      to: candidat.email,
-      subject: "Information Audition",
-      text: contenuEmail,
-    });
-
-    console.log(`E-mail envoyé avec succès à ${candidat.email}.`);
-  } catch (error) {
-    console.error(
-      `Erreur lors de l'envoi de l'e-mail à ${candidat.email}:`,
-      error.message
-    );
-  }
-};
-};
-
 
 const sendAuditionEmailsAbsents = async (candidat, audition) => {
   try {
