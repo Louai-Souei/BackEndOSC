@@ -33,7 +33,7 @@ const candidatSchema = new Schema(
     token: { type: String },
     saison: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "Saison"
+      ref: "Saison",
     },
   },
   {
@@ -59,7 +59,6 @@ candidatSchema.pre("save", async function (next) {
     next(error);
   }
 });
-
 
 const Candidat = mongoose.model("Candidat", candidatSchema);
 

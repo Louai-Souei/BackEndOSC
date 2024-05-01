@@ -1,4 +1,4 @@
-const mongoose = require('mongoose');
+const mongoose = require("mongoose");
 const Saison = require("./saison");
 const Schema = mongoose.Schema;
 
@@ -34,5 +34,5 @@ pupitreSchema.pre("save", async function (next) {
   }
 });
 
-const Pupitre = mongoose.model('Pupitre', pupitreSchema);
+const Pupitre = mongoose.model("Pupitre", pupitreSchema);
 module.exports = Pupitre;

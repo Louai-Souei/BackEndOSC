@@ -1,6 +1,6 @@
-const mongoose = require('mongoose');
+const mongoose = require("mongoose");
 const Schema = mongoose.Schema;
-const AbsenceRequest = require('../models/absence');
+const AbsenceRequest = require("../models/absence");
 const Saison = require("./saison");
 
 const UserSchema = new Schema({
@@ -80,58 +80,66 @@ UserSchema.pre("save", async function (next) {
   }
 });
 
-UserSchema.virtual('name').get(function () {
-    return `${this.prenom} ${this.nom}`;
+UserSchema.virtual("name").get(function () {
+  return `${this.prenom} ${this.nom}`;
 });
 
 UserSchema.methods.toPublic = function () {
-    const publicUserData = this.toObject();
-    delete publicUserData.password;
-    publicUserData.name = this.name;
+  const publicUserData = this.toObject();
+  delete publicUserData.password;
+  publicUserData.name = this.name;
 
-    return publicUserData;
+  return publicUserData;
 };
 UserSchema.statics.getChefDePupitreEmail = async function () {
-    try {
-        const utilisateur = await this.findOne({ role: 'chef de pupitre' });
-        return utilisateur ? utilisateur.email : null;
-    } catch (error) {
-        console.error('Erreur lors de la récupération de l\'adresse e-mail du chef de pupitre:', error.message);
-        return null;
-    }
+  try {
+    const utilisateur = await this.findOne({ role: "chef de pupitre" });
+    return utilisateur ? utilisateur.email : null;
+  } catch (error) {
+    console.error(
+      "Erreur lors de la récupération de l'adresse e-mail du chef de pupitre:",
+      error.message
+    );
+    return null;
+  }
 };
 UserSchema.statics.getChoristeEmail = async function () {
-    try {
-        const utilisateur = await this.findOne({ role: 'choriste' });
-        return utilisateur ? utilisateur.email : null;
-    } catch (error) {
-        console.error('Erreur lors de la récupération de l\'adresse e-mail du choriste:', error.message);
-        return null;
-    }
+  try {
+    const utilisateur = await this.findOne({ role: "choriste" });
+    return utilisateur ? utilisateur.email : null;
+  } catch (error) {
+    console.error(
+      "Erreur lors de la récupération de l'adresse e-mail du choriste:",
+      error.message
+    );
+    return null;
+  }
 };
 
+//sauvgarde des absences
+UserSchema.pre("save", async function (next) {
+  if (
+    this.isModified("estEnConge") &&
+    this.estEnConge === true &&
+    this.role === "choriste"
+  ) {
+    this.AbsencestatusChanged = true;
 
-//sauvgarde des absences 
-UserSchema.pre('save', async function(next) {
-   
-    if (this.isModified('estEnConge') && this.estEnConge === true && this.role === 'choriste') {
-      
-        this.AbsencestatusChanged = true;
+    const newAbsence = new AbsenceRequest({
+      user: this._id,
+      status: "absent",
+      absence: new Date(),
+    });
 
-        
-        const newAbsence = new AbsenceRequest({ user: this._id, status: 'absent', absence: new Date() });
-
-        try {
-            
-            await newAbsence.save();
-        } catch (error) {
-           
-            console.error(error);
-        }
+    try {
+      await newAbsence.save();
+    } catch (error) {
+      console.error(error);
     }
-    next();
+  }
+  next();
 });
 
-const User = mongoose.model('User', UserSchema);
+const User = mongoose.model("User", UserSchema);
 
 module.exports = User;

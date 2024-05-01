@@ -1,9 +1,13 @@
-const express = require('express');
+const express = require("express");
 const router = express.Router();
-const oeuvreController = require('../controllers/oeuvre');
-const auth = require('../middlewares/auth');
-router.get('/statistics',auth.authMiddleware,auth.isAdmin , oeuvreController.OeuvreStatistics);
-
+const oeuvreController = require("../controllers/oeuvre");
+const auth = require("../middlewares/auth");
+router.get(
+  "/statistics",
+  auth.authMiddleware,
+  auth.isAdmin,
+  oeuvreController.OeuvreStatistics
+);
 
 /**
  * @swagger
@@ -135,7 +139,7 @@ router.get('/statistics',auth.authMiddleware,auth.isAdmin , oeuvreController.Oeu
  *       '500':
  *         description: Server error
  */
-router.get('/', oeuvreController.getAllOeuvres);
+router.get("/", oeuvreController.getAllOeuvres);
 
 /**
  * @swagger
@@ -161,7 +165,12 @@ router.get('/', oeuvreController.getAllOeuvres);
  *       '500':
  *         description: Server error
  */
-router.post('/', auth.authMiddleware, auth.isAdmin, oeuvreController.createOeuvre);
+router.post(
+  "/",
+  auth.authMiddleware,
+  auth.isAdmin,
+  oeuvreController.createOeuvre
+);
 
 /**
  * @swagger
@@ -188,7 +197,12 @@ router.post('/', auth.authMiddleware, auth.isAdmin, oeuvreController.createOeuvr
  *       '500':
  *         description: Server error
  */
-router.get('/:id', auth.authMiddleware, auth.isAdmin, oeuvreController.getOeuvreById);
+router.get(
+  "/:id",
+  auth.authMiddleware,
+  auth.isAdmin,
+  oeuvreController.getOeuvreById
+);
 
 /**
  * @swagger
@@ -223,7 +237,12 @@ router.get('/:id', auth.authMiddleware, auth.isAdmin, oeuvreController.getOeuvre
  *       '500':
  *         description: Server error
  */
-router.put('/:id', auth.authMiddleware, auth.isAdmin, oeuvreController.updateOeuvre);
+router.put(
+  "/:id",
+  auth.authMiddleware,
+  auth.isAdmin,
+  oeuvreController.updateOeuvre
+);
 
 /**
  * @swagger
@@ -252,7 +271,12 @@ router.put('/:id', auth.authMiddleware, auth.isAdmin, oeuvreController.updateOeu
  *       '500':
  *         description: Server error
  */
-router.delete('/:id', auth.authMiddleware, auth.isAdmin, oeuvreController.deleteOeuvre);
+router.delete(
+  "/:id",
+  auth.authMiddleware,
+  auth.isAdmin,
+  oeuvreController.deleteOeuvre
+);
 
 /**
  * @swagger
@@ -280,7 +304,5 @@ router.delete('/:id', auth.authMiddleware, auth.isAdmin, oeuvreController.delete
  *       500:
  *         description: Internal server error
  */
-
-
 
 module.exports = router;

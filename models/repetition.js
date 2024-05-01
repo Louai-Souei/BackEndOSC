@@ -1,4 +1,4 @@
-const mongoose = require('mongoose');
+const mongoose = require("mongoose");
 const Saison = require("./saison");
 const Schema = mongoose.Schema;
 
@@ -46,6 +46,6 @@ RepetitionSchema.pre("save", async function (next) {
   }
 });
 
-const Repetition = mongoose.model('Repetition', RepetitionSchema);
+const Repetition = mongoose.model("Repetition", RepetitionSchema);
 
 module.exports = Repetition;

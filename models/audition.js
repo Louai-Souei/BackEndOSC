@@ -1,4 +1,4 @@
-const mongoose = require('mongoose');
+const mongoose = require("mongoose");
 const Saison = require("./saison");
 const Schema = mongoose.Schema;
 
@@ -47,6 +47,6 @@ AuditionSchema.pre("save", async function (next) {
     next(error);
   }
 });
-   
-const Audition= mongoose.model('Audition', AuditionSchema);
+
+const Audition = mongoose.model("Audition", AuditionSchema);
 module.exports = Audition;

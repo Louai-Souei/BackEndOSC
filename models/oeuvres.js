@@ -1,6 +1,6 @@
 const mongoose = require("mongoose");
 const Schema = mongoose.Schema;
-const Saison = require("./saison")
+const Saison = require("./saison");
 const OeuvresSchema = new Schema({
   titre: { type: String, required: true },
   compositeurs: { type: String, required: true },
@@ -12,7 +12,7 @@ const OeuvresSchema = new Schema({
   requiresChoir: { type: Boolean, default: true },
   saison: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: "Saison"
+    ref: "Saison",
   },
 });
 

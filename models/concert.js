@@ -1,4 +1,4 @@
-const mongoose = require('mongoose');
+const mongoose = require("mongoose");
 const Saison = require("./saison");
 const Schema = mongoose.Schema;
 
@@ -47,7 +47,6 @@ concertSchema.pre("save", async function (next) {
   }
 });
 
-
-const Concert= mongoose.model('Concert', concertSchema);
+const Concert = mongoose.model("Concert", concertSchema);
 
 module.exports = Concert;
