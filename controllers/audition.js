@@ -21,12 +21,12 @@ const createAudition = async (req, res) => {
       remarque,
     } = req.body
 
-    // Vérification des données requises
-    if (!DateAudition) {
-      return res.status(400).json({
-        message: 'Certains champs sont manquants pour créer une audition.',
-      })
-    }
+    // // Vérification des données requises
+    // if (!DateAudition) {
+    //   return res.status(400).json({
+    //     message: 'Certains champs sont manquants pour créer une audition.',
+    //   })
+    //}
 
     const nouvelleAudition = new Audition({
       DateAudition,
@@ -77,21 +77,32 @@ const getAudition = async (req, res) => {
 
 const updateAudition = async (req, res) => {
   try {
-    const { id } = req.params
-    const audition = await Audition.findById(id)
+    const { id } = req.params;
+    const audition = await Audition.findById(id);
 
     if (!audition) {
-      return res.status(404).json({ message: 'Audition non trouvée.' })
+      return res.status(404).json({ message: "Audition non trouvée." });
     }
 
-    const updatedAudition = await Audition.findByIdAndUpdate(id, req.body, {
-      new: true,
-    })
-    res.json(updatedAudition)
+    // Créer un objet contenant uniquement les champs modifiés
+    const updatedFields = {};
+    for (const key in req.body) {
+      if (audition[key] !== req.body[key]) {
+        updatedFields[key] = req.body[key];
+      }
+    }
+
+    const updatedAudition = await Audition.findByIdAndUpdate(
+      id,
+      updatedFields,
+      { new: true }
+    );
+    res.json(updatedAudition);
   } catch (err) {
-    res.status(400).json({ message: err.message })
+    res.status(400).json({ message: err.message });
   }
-}
+};
+
 
 const deleteAudition = async (req, res) => {
   try {
