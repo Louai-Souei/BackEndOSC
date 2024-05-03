@@ -2,14 +2,14 @@ const mongoose = require("mongoose");
 const Schema = mongoose.Schema;
 const Saison = require("./saison")
 const OeuvresSchema = new Schema({
-  titre: { type: String, required: true },
-  compositeurs: { type: String, required: true },
-  arrangeurs: { type: String, required: true },
-  annee: { type: String, required: true },
-  genre: { type: String, required: true },
+  titre: { type: String},
+  compositeurs: { type: String },
+  arrangeurs: { type: String },
+  annee: { type: String },
+  genre: { type: String },
   paroles: { type: String },
-  partition: { type: String, required: true },
-  requiresChoir: { type: Boolean, default: true },
+  partition: { type: String },
+  presence_choeur: { type: Boolean, default: true },
   saison: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "Saison"

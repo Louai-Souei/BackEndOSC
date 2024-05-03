@@ -121,7 +121,8 @@ io.listen(8000);
 
 mongoose
   .connect(
-    "mongodb+srv://hendlegleg:hend12345@cluster0.fswjx.mongodb.net/database",
+   // "mongodb+srv://hendlegleg:hend12345@cluster0.fswjx.mongodb.net/database",
+   "mongodb://127.0.0.1:27017/OSC",
     {
       /*useNewUrlParser: true, useUnifiedTopology: true*/
     }
@@ -130,15 +131,15 @@ mongoose
   .catch((e) => console.log("connexion a mongoDB echouée", e));
 
 const app = express();
-app.use(
-  cors({
-    origin: ["http://localhost:3000"],
-    methods: ["POST", "GET", "DELETE", "PUT", "PATCH"],
-    credentials: true,
-  })
-);
+//app.use(
+ // cors({
+   // origin: "*",
+   // methods: ["POST", "GET", "DELETE", "PUT", "PATCH"],
+   // credentials: true,
+ // })
+//);
 app.use(express.json());
-app.get("/", (req, res) => {
+app.get("/hello", (req, res) => {
   res.json("hello to our project ");
 });
 app.use((req, res, next) => {
@@ -240,7 +241,7 @@ app.use("/api/absence", AbsenceRoutes);
 app.use("/api/tessiture", tessitureRoutes);
 app.use("/api/auth", authRoutes);
 // app.use('/api/concert', concertsRoutes);
-app.use("/api/concert", concertsRoutes);
+//app.use("/api/concert", concertsRoutes);
 app.use("/api/saisons", saisonRoutes);
 app.use("/api/programme", programmeRoutes);
 app.use("/api/users", userRoutes);
