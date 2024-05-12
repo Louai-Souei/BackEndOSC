@@ -5,6 +5,7 @@ const Excel = require("exceljs");
 const Utilisateur = require("../models/utilisateurs");
 const nodemailer = require("nodemailer");
 const Repetition = require("../models/repetition");
+const concert_oeuvre_dto = require("../models/dtos/concert_oeuvre_dto");
 
 const sendEmailToPupitre = async (subject, content) => {
   try {
@@ -91,8 +92,8 @@ const concertController = {
 
   getAllConcerts: async (req, res) => {
     try {
-      const concerts = await Concert.find();
-      res.status(200).json({ model: concerts });
+      const concerts = await Concert.find().populate("programme");
+      res.status(200).json(concerts);
     } catch (error) {
       res.status(500).json({ success: false, error: error.message });
     }
@@ -180,12 +181,10 @@ const concertController = {
 
       await sendEmailToPupitre(emailSubject, emailContent);
 
-      res
-        .status(200)
-        .json({
-          message:
-            "Présence confirmée avec succès. Un e-mail a été envoyé au chef de pupitre.",
-        });
+      res.status(200).json({
+        message:
+          "Présence confirmée avec succès. Un e-mail a été envoyé au chef de pupitre.",
+      });
     } catch (error) {
       res.status(500).json({ success: false, error: error });
       console.log(error);
@@ -360,6 +359,34 @@ const concertController = {
     } catch (error) {
       console.error(error);
       res.status(500).json({ success: false, error: error.message });
+    }
+  },
+
+  createConcertAndProg: async (req, res) => {
+    try {
+      console.log(req.body);
+      const dto = new concert_oeuvre_dto(req.body);
+      let listIds = [];
+      await Promise.all(
+        dto.programme.map(async (element) => {
+          // const nouvelleOeuvre = new Oeuvre(element);
+          // const savedOeuvre = await nouvelleOeuvre.save().then(savedDoc => {
+          // listIds.push(savedDoc.id);
+          // });
+          listIds.push(element._id);
+        })
+      );
+
+      if (listIds.length > 0) {
+        dto.concert.programme = listIds;
+        const concert = new Concert(dto.concert);
+        const savedConcert = await concert.save();
+        res.status(201).json(savedConcert);
+      } else {
+        return res.status(404).json({ message: "Programme est obligatoire" });
+      }
+    } catch (error) {
+      res.status(500).json({ message: error.message });
     }
   },
 };
