@@ -24,6 +24,7 @@ const tessitureRoutes = require("./routes/tessiture");
 const pupitreRoutes = require("./routes/pupitre");
 const repetitioncontroller = require("./controllers/repetition");
 const notificationRoutes = require("./routes/notification");
+const besoinRoutes = require("./routes/besoinpupitre");
 cron.schedule("22 20 * * *", repetitioncontroller.envoyerNotificationChoristes);
 const programmeRoutes = require("./routes/programme");
 
@@ -247,6 +248,7 @@ app.use("/api/elimination", eliminationRoutes);
 app.use("/api/intervenant", intervenantRoutes);
 app.use("/api/placement", placementController);
 app.use("/api/pupitres", pupitreRoutes);
+app.use("/api/besoinpupitre", besoinRoutes);
 app.use("/api/reset", dbresetController);
 app.use("/api/intervenant", intervenantRoutes);
 app.use("/api/notification", notificationRoutes);

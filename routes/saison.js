@@ -1,7 +1,7 @@
-const express = require('express');
+const express = require("express");
 const router = express.Router();
-const saisonController = require('../controllers/saison');
-const auth = require('../middlewares/auth');
+const saisonController = require("../controllers/saison");
+const auth = require("../middlewares/auth");
 
 /**
  * @swagger
@@ -48,11 +48,11 @@ const auth = require('../middlewares/auth');
  *           type: string
  *           description: User ID associated with the season
  *       example:
- *         
+ *
  *         titre: "Saison d'été 2023"
  *         Datedebut: "2023-06-01"
  *         Datefin: "2023-08-31"
- *         
+ *
  *
  *   responses:
  *     SaisonResponse:
@@ -98,7 +98,7 @@ const auth = require('../middlewares/auth');
  *       '500':
  *         $ref: '#/components/responses/ErrorResponse'
  */
-router.post('/', auth.authMiddleware, auth.isAdmin, saisonController.createSaison);
+router.post("/", saisonController.createSaison);
 
 /**
  * @swagger
@@ -114,7 +114,14 @@ router.post('/', auth.authMiddleware, auth.isAdmin, saisonController.createSaiso
  *       '500':
  *         $ref: '#/components/responses/ErrorResponse'
  */
-router.get('/', auth.authMiddleware, auth.isAdmin, saisonController.getAllSaisons);
+router.get(
+  "/",
+  auth.authMiddleware,
+  auth.isAdmin,
+  saisonController.getAllSaisons
+);
+
+router.get("/current-saison", saisonController.getCurrentSaison);
 
 /**
  * @swagger
@@ -139,7 +146,12 @@ router.get('/', auth.authMiddleware, auth.isAdmin, saisonController.getAllSaison
  *       '500':
  *         $ref: '#/components/responses/ErrorResponse'
  */
-router.get('/:id', auth.authMiddleware, auth.isAdmin, saisonController.getSaisonById);
+router.get(
+  "/:id",
+  auth.authMiddleware,
+  auth.isAdmin,
+  saisonController.getSaisonById
+);
 
 /**
  * @swagger
@@ -170,7 +182,12 @@ router.get('/:id', auth.authMiddleware, auth.isAdmin, saisonController.getSaison
  *       '500':
  *         $ref: '#/components/responses/ErrorResponse'
  */
-router.put('/:id', auth.authMiddleware, auth.isAdmin, saisonController.updateSaison);
+router.put(
+  "/:id",
+  auth.authMiddleware,
+  auth.isAdmin,
+  saisonController.updateSaison
+);
 
 /**
  * @swagger
@@ -195,6 +212,11 @@ router.put('/:id', auth.authMiddleware, auth.isAdmin, saisonController.updateSai
  *       '500':
  *         $ref: '#/components/responses/ErrorResponse'
  */
-router.delete('/:id', auth.authMiddleware, auth.isAdmin, saisonController.deleteSaison);
+router.delete(
+  "/:id",
+  auth.authMiddleware,
+  auth.isAdmin,
+  saisonController.deleteSaison
+);
 
 module.exports = router;

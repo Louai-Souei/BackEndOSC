@@ -2,18 +2,12 @@ const mongoose = require("mongoose");
 const Saison = require("./saison");
 const Schema = mongoose.Schema;
 
-const EvenementAuditionSchema = new Schema({
-  Date_debut_Audition: { type: Date, required: true },
-  nombre_séance: { type: Number, required: true },
-  dureeAudition: { type: String, required: true },
-  Date_fin_Audition: { type: Date, required: true },
-  date: { type: Date, default: Date.now() },
-  lienFormulaire: { type: String },
-  isPlaned: { type: Boolean, default: false },
-  isClosed: { type: Boolean, default: false },
+const listeFinaleSchema = new Schema({
+    
+  candidat: { type: mongoose.Schema.Types.ObjectId, ref: "Candidat" },
   saison: { type: mongoose.Schema.Types.ObjectId, ref: "Saison" },
 });
-EvenementAuditionSchema.pre("save", async function (next) {
+listeFinaleSchema.pre("save", async function (next) {
   try {
     // Recherche de la saison active
     const saisonActive = await Saison.findOne({ isActive: true });
@@ -32,8 +26,5 @@ EvenementAuditionSchema.pre("save", async function (next) {
   }
 });
 
-const EvenementAudition = mongoose.model(
-  "EvenementAudition",
-  EvenementAuditionSchema
-);
-module.exports = EvenementAudition;
+const listeFinale = mongoose.model("listeFinale", listeFinaleSchema);
+module.exports = listeFinale;
