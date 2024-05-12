@@ -138,9 +138,6 @@ router.get("/get/EvenementAudition", auditionController.getEvenementAudition);
 
 router.post(
   "/generer-planning/:evenementAuditionId",
-
-  "/generer-planning/:evenementAuditionId",
-
   auditionController.genererPlanification
 );
 

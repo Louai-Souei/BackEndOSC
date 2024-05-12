@@ -25,6 +25,14 @@ const concertSchema = new Schema({
       confirmation: { type: Boolean, default: false },
     },
   ],
+  presences: [
+    {
+      choriste: { type: Schema.Types.ObjectId, ref: "User" },
+      present: { type: Boolean, default: false },
+      raison: { type: String, default: "" },
+    },
+  ],
+
   saison: { type: mongoose.Schema.Types.ObjectId, ref: "Saison" },
 });
 

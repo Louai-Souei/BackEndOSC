@@ -1,7 +1,7 @@
-const express = require('express');
+const express = require("express");
 const router = express.Router();
-const concertController = require('../controllers/concert');
-const auth = require('../middlewares/auth');
+const concertController = require("../controllers/concert");
+const auth = require("../middlewares/auth");
 /**
  * @swagger
  * /concert/concerts/statistics:
@@ -33,7 +33,12 @@ const auth = require('../middlewares/auth');
  *   name: Concerts
  *   description: API operations related to concerts
  */
-router.get('/concerts/statistics', auth.authMiddleware, auth.isAdmin, concertController.getConcertStatistics);
+router.get(
+  "/concerts/statistics",
+  auth.authMiddleware,
+  auth.isAdmin,
+  concertController.getConcertStatistics
+);
 
 /**
  * @swagger
@@ -238,13 +243,41 @@ router.get('/concerts/statistics', auth.authMiddleware, auth.isAdmin, concertCon
  */
 
 // Routes pour gérer les concerts
-router.post('/', auth.authMiddleware, auth.isAdmin, concertController.createConcert); 
-router.get('/',auth.authMiddleware, auth.isAdmin, concertController.getAllConcerts); 
-router.put('/:id', auth.authMiddleware, auth.isAdmin,concertController.updateConcert); 
-router.delete('/:id', auth.authMiddleware, auth.isAdmin, concertController.deleteConcert); 
-router.post('/:id/confirmerpresence', auth.authMiddleware, auth.isChoriste, concertController.confirmerpresenceConcert);
+router.post(
+  "/",
+  auth.authMiddleware,
+  auth.isAdmin,
+  concertController.createConcert
+);
+router.get(
+  "/",
+  auth.authMiddleware,
+  auth.isAdmin,
+  concertController.getAllConcerts
+);
+router.put(
+  "/:id",
+  auth.authMiddleware,
+  auth.isAdmin,
+  concertController.updateConcert
+);
+router.delete(
+  "/:id",
+  auth.authMiddleware,
+  auth.isAdmin,
+  concertController.deleteConcert
+);
+router.post(
+  "/:id/confirmerpresence",
+  auth.authMiddleware,
+  auth.isChoriste,
+  concertController.confirmerpresenceConcert
+);
 
-router.get('/:id/confirmedChoristes', auth.authMiddleware, auth.isAdmin, concertController.getConfirmedChoristesForConcert);
+router.get(
+  "/:id/confirmedChoristes",
+  concertController.getConfirmedChoristesForConcert
+);
 /**
  * @swagger
  * /concert/{id}/confirmedChoristes:
@@ -275,7 +308,8 @@ router.get('/:id/confirmedChoristes', auth.authMiddleware, auth.isAdmin, concert
  *       500:
  *         description: Internal server error
  */
-router.post('/:id/ajouterpresence', auth.authMiddleware, auth.isAdminOrChoriste,concertController.ajouterPresenceManuelle);
+// router.post('/:id/ajouterpresence', auth.authMiddleware, auth.isAdminOrChoriste,concertController.ajouterPresenceManuelle);
+router.post("/:id/ajouterpresence", concertController.ajouterPresenceManuelle);
 /**
  * @swagger
  * /concert/{id}/ajouterpresence:
@@ -312,7 +346,12 @@ router.post('/:id/ajouterpresence', auth.authMiddleware, auth.isAdminOrChoriste,
  *       500:
  *         description: Internal server error
  */
-router.post('/:id/indiquerconfirmation', auth.authMiddleware, auth.isChoriste, concertController.indiquerpresenceConcert);
+router.post(
+  "/:id/indiquerconfirmation",
+  auth.authMiddleware,
+  auth.isChoriste,
+  concertController.indiquerpresenceConcert
+);
 /**
  * @swagger
  * /concert/{id}/indiquerconfirmation:
@@ -338,7 +377,5 @@ router.post('/:id/indiquerconfirmation', auth.authMiddleware, auth.isChoriste, c
  *       500:
  *         description: Internal server error
  */
-
-
 
 module.exports = router;
