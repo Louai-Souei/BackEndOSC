@@ -242,10 +242,14 @@ router.post("/", absenceController.createAbsence);
  *         description: Server error while fetching choristes' attendance details
  */
 
+// router.get(
+//   "/getparticipants/:repetitionId/:tessiture",
+//   auth.authMiddleware,
+//   auth.ischefpupitre,
+//   absenceController.getChoristesByRepetitionAndPupitre
+// );
 router.get(
   "/getparticipants/:repetitionId/:tessiture",
-  auth.authMiddleware,
-  auth.ischefpupitre,
   absenceController.getChoristesByRepetitionAndPupitre
 );
 
@@ -320,14 +324,10 @@ router.get(
   absenceController.getChoristesByConcertAndPupitre
 );
 
-
-
-
 router.delete(
   "/getparticipants/:participantId",
   absenceController.deleteParticipant
 );
-
 
 /**
  * @swagger

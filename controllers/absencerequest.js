@@ -224,12 +224,16 @@ const getChoristesByConcertAndPupitre = async (req, res) => {
         const nbPresence = await countPresence(choriste._id);
         const nbAbsence = await countAbsence(choriste._id);
 
+        // Ajout du champ 'invite' de chaque choriste
+        const invite = confirmation.invite;
+
         choristesParPupitre[pupitre.tessiture].push({
           id: choriste._id,
           nom: choriste.nom,
           prenom: choriste.prenom,
           Nb_presence: nbPresence,
           Nb_absence: nbAbsence,
+          invite: invite, // Champ invite ajouté
         });
       }
     }
@@ -263,6 +267,7 @@ const getChoristesByConcertAndPupitre = async (req, res) => {
   }
 };
 
+
 const countPresence = async (userId) => {
   const concertsPresence = await Concert.countDocuments({
     confirmations: { $elemMatch: { choriste: userId, confirmation: true } },
@@ -283,13 +288,10 @@ const countAbsence = async (userId) => {
   const repetitionsAbsence = await Repetition.countDocuments({
     participant: userId,
   }).exec();
-
-  // Compter les concerts où le choriste n'apparaît pas du tout dans la liste des confirmations
   const concertsWithoutConfirmation = await Concert.countDocuments({
     confirmations: { $not: { $elemMatch: { choriste: userId } } }
   }).exec();
 
-  // Calcul du nombre total d'absences en tenant compte de chaque absence unique
   const totalAbsence = concertsAbsence + repetitionsAbsence + concertsWithoutConfirmation;
 
   return totalAbsence;

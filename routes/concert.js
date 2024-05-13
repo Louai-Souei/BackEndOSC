@@ -259,10 +259,10 @@ router.get(
   concertController.getAllConcerts
 );
 router.get(
-    "/:id",
-  
-    concertController.getConcertById
-  );
+  "/:id",
+
+  concertController.getConcertById
+);
 
 router.put(
   "/:id",
@@ -277,15 +277,12 @@ router.delete(
   concertController.deleteConcert
 );
 
-
 router.post(
   "/:id/confirmerpresence",
   auth.authMiddleware,
   auth.isChoriste,
   concertController.confirmerpresenceConcert
 );
-
-
 
 // router.get(
 //   "/:id/confirmedChoristes",
@@ -294,12 +291,24 @@ router.post(
 //   concertController.getConfirmedChoristesForConcert
 // );
 
-
 router.get(
   "/:id/confirmedChoristes",
   concertController.getConfirmedChoristesForConcert
 );
 
+router.put("/:concertId/invite", async (req, res) => {
+  const { concertId } = req.params;
+  const { choristeId } = req.body;
+  try {
+    const updatedConcert = await concertController.updateConcertInvite(
+      choristeId,
+      concertId
+    );
+    res.status(200).json({ model: updatedConcert });
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
 
 /**
  * @swagger
@@ -374,8 +383,6 @@ router.post(
  *         description: Internal server error
  */
 
-
-
 // router.post(
 //   "/:id/indiquerconfirmation",
 //   auth.authMiddleware,
@@ -385,10 +392,9 @@ router.post(
 
 router.post(
   "/:id/indiquerconfirmation",
-  
+
   concertController.indiquerpresenceConcert
 );
-
 
 /**
  * @swagger

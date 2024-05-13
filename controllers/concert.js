@@ -159,7 +159,7 @@ const concertController = {
   },
 
 
-  
+
 
   indiquerpresenceConcert: async (req, res) => {
     try {
@@ -204,6 +204,7 @@ const concertController = {
       console.log(error);
     }
   },
+  
 
   getConfirmedChoristesForConcert: async (req, res) => {
     try {
@@ -347,6 +348,42 @@ const concertController = {
       res.status(500).json({ success: false, error: error.message });
     }
   },
+
+
+
+  async updateConcertInvite(choristeId, concertId) {
+    try {
+        // Recherche du concert dans la base de données en utilisant l'ID fourni dans la route
+        const concert = await Concert.findById(concertId);
+
+        // Vérifie si le concert existe
+        if (!concert) {
+            throw new Error("Concert not found");
+        }
+        
+        // Recherche de la confirmation du choriste dans les confirmations du concert
+        const confirmationIndex = concert.confirmations.findIndex(
+            (confirmation) => confirmation.choriste.toString() === choristeId
+        );
+
+        // Vérifie si la confirmation du choriste existe
+        if (confirmationIndex === -1) {
+            throw new Error("Choriste not found in concert confirmations");
+        }
+        
+        // Met à jour le champ invite à true dans la confirmation du choriste
+        concert.confirmations[confirmationIndex].invite = true;
+
+        // Enregistre les modifications apportées au concert dans la base de données
+        const updatedConcert = await concert.save();
+        
+        return updatedConcert;
+    } catch (error) {
+        throw new Error("Error updating concert invite: " + error.message);
+    }
+}
+
+
 };
 
 module.exports = concertController;
