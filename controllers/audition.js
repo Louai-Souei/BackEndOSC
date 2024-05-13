@@ -323,7 +323,11 @@ async function genererPlanification(req, res) {
     const candidats = await Candidat.find({saison: saison});
     console.log('candidats: ', candidats);
     const nombreSeancesParJour = auditionPlanning.nombre_séance;
-    const dureeAuditionMinutes = parseInt(auditionPlanning.dureeAudition);
+    const dureeAuditionMinutes = auditionPlanning.dureeAudition;
+
+    const nombreTotalSeances = Math.ceil(
+      candidatsNonPresentes.length / nombreSeancesParJour
+    );
 
     const planning = [];
 
@@ -352,6 +356,7 @@ async function genererPlanification(req, res) {
             console.warn(
               "La date de fin de l'audition dépasse la date spécifiée."
             );
+           
             return res.status(400).json({
               success: false,
               error: "La date de fin de l'audition dépasse la date spécifiée.",
@@ -570,22 +575,22 @@ const getAuditionEnAttente = async (req, res) => {
         });
     }
 };
-module.exports = {
-  deleteAudition,
-  updateAudition,
-  createAudition,
-  getAuditionById,
-  genererPlanification,
-  lancerEvenementAudition,
-  getAudition,
-  getAuditionById,
-  genererPlanification,
-  generateAndSendAuditionPlan,
-  genererPlanificationabsence,
-  CheckEvenementAudition,
-  updateEvenementAudition,
-  getEvenementAudition,
-  checkNextEvent,
-  getAuditionEnAttente
+  module.exports = {
+    deleteAudition,
+    updateAudition,
+    createAudition,
+    getAuditionById,
+    genererPlanification,
+    lancerEvenementAudition,
+    getAudition,
+    getAuditionById,
+    genererPlanification,
+    generateAndSendAuditionPlan,
+    genererPlanificationabsence,
+    CheckEvenementAudition,
+    updateEvenementAudition,
+    getEvenementAudition,
+    checkNextEvent,
+    getAuditionEnAttente
   
-}
+  };

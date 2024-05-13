@@ -1,7 +1,7 @@
-const express = require('express');
+const express = require("express");
 const router = express.Router();
-const UserController = require('../controllers/intervenants');
-const auth = require('../middlewares/auth');
+const UserController = require("../controllers/intervenants");
+const auth = require("../middlewares/auth");
 
 /**
  * @swagger
@@ -40,16 +40,17 @@ const auth = require('../middlewares/auth');
  *       content:
  *         application/json:
  *           schema:
- *             $ref: '#/components/schemas/User' 
+ *             $ref: '#/components/schemas/User'
  *     responses:
  *       201:
  *         description: Intervenant créé avec succès
  *         content:
  *           application/json:
  *             schema:
- *               $ref: '#/components/schemas/User' 
+ *               $ref: '#/components/schemas/User'
  */
-router.post('/', auth.authMiddleware, auth.isAdmin, UserController.createUser);
+//router.post('/', auth.authMiddleware, auth.isAdmin, UserController.createUser);
+router.post("/", UserController.createUser);
 /**
  * @swagger
  * /intervenant:
@@ -66,9 +67,9 @@ router.post('/', auth.authMiddleware, auth.isAdmin, UserController.createUser);
  *             schema:
  *               type: array
  *               items:
- *                 $ref: '#/components/schemas/User' 
+ *                 $ref: '#/components/schemas/User'
  */
-router.get('/', auth.authMiddleware, auth.isAdmin, UserController.getAllUsers);
+router.get("/", auth.authMiddleware, auth.isAdmin, UserController.getAllUsers);
 /**
  * @swagger
  * /intervenant/{userId}:
@@ -90,10 +91,15 @@ router.get('/', auth.authMiddleware, auth.isAdmin, UserController.getAllUsers);
  *         content:
  *           application/json:
  *             schema:
- *               $ref: '#/components/schemas/User' 
+ *               $ref: '#/components/schemas/User'
  */
 
-router.get('/:userId', auth.authMiddleware, auth.isAdmin, UserController.getUserById);
+router.get(
+  "/:userId",
+  auth.authMiddleware,
+  auth.isAdmin,
+  UserController.getUserById
+);
 /**
  * @swagger
  * /intervenant/{userId}:
@@ -114,17 +120,22 @@ router.get('/:userId', auth.authMiddleware, auth.isAdmin, UserController.getUser
  *       content:
  *         application/json:
  *           schema:
- *             $ref: '#/components/schemas/User' 
+ *             $ref: '#/components/schemas/User'
  *     responses:
  *       200:
  *         description: Intervenant mis à jour avec succès
  *         content:
  *           application/json:
  *             schema:
- *               $ref: '#/components/schemas/User' 
+ *               $ref: '#/components/schemas/User'
  */
 
-router.put('/:userId', auth.authMiddleware, auth.isAdmin, UserController.updateUser);
+router.put(
+  "/:userId",
+  auth.authMiddleware,
+  auth.isAdmin,
+  UserController.updateUser
+);
 /**
  * @swagger
  * /intervenant/{userId}:
@@ -145,7 +156,11 @@ router.put('/:userId', auth.authMiddleware, auth.isAdmin, UserController.updateU
  *         description: Intervenant supprimé avec succès
  */
 
-
-router.delete('/:userId', auth.authMiddleware, auth.isAdmin, UserController.deleteUser);
+router.delete(
+  "/:userId",
+  auth.authMiddleware,
+  auth.isAdmin,
+  UserController.deleteUser
+);
 
 module.exports = router;

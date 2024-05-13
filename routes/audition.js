@@ -17,6 +17,10 @@ router.post(
   auditionController.genererPlanificationabsence
 );
 // Route pour générer le planning d'auditions
+router.post(
+  "/generer-planning/:evenementAuditionId",
+  auditionController.genererPlanification
+);
 
 /**
  * @swagger
@@ -135,11 +139,7 @@ router.patch(
   auditionController.updateEvenementAudition
 );
 
-router.get(
-  "/get/EvenementAudition",
-  auditionController.getEvenementAudition
-);
-
+router.get("/get/EvenementAudition", auditionController.getEvenementAudition);
 
 router.post(
   "/generer-planning/:evenementAuditionId/:saison",
