@@ -1,78 +1,84 @@
-const User = require('../models/utilisateurs');
-const StatusHistory=require('../models/StatusHistory');
-const Concert =require('../models/concert');
-const Repetition=require('../models/repetition')
-const Absence = require('../models/absence');
-const Saison =require('../models/saison');
-const Oeuvre =require('../models/oeuvres');
-const {getChoristesNominés,getChoristesÉliminés}=require('../controllers/absenceElemination')
-
+const User = require("../models/utilisateurs");
+const StatusHistory = require("../models/StatusHistory");
+const Concert = require("../models/concert");
+const Repetition = require("../models/repetition");
+const Absence = require("../models/absence");
+const Saison = require("../models/saison");
+const Oeuvre = require("../models/oeuvres");
+const {
+  getChoristesNominés,
+  getChoristesÉliminés,
+} = require("../controllers/absenceElemination");
 
 const getProfileAndStatusHistory = async (req, res) => {
   try {
     const userId = req.params.id;
 
-
     const user = await User.findById(userId);
 
     if (!user) {
-      return res.status(404).json({ success: false, message: 'Utilisateur non trouvé.' });
+      return res
+        .status(404)
+        .json({ success: false, message: "Utilisateur non trouvé." });
     }
+
     const statusHistory = user.statusHistory || [];
+    let currentStatus = "Inactif";
+    let firstSeasonYear = null;
 
-
-    let currentStatus = 'Inactif';
-
-    if (statusHistory.length === 0) {
-      currentStatus = 'Choriste Junior';
+    if (statusHistory.length > 0) {
+      firstSeasonYear = statusHistory[0].season;
     } else {
-
-      const concertsValidated = user.concertsValidated;
-      const repetitionsValidated = user.repetitionsValidated;
-
-
-      const firstSeasonYear = statusHistory[0].season;
-
-
-      const currentYear = new Date().getFullYear();
-
-
-      const yearsOfMembership = currentYear - firstSeasonYear + 1;
-
-      if (yearsOfMembership === 1) {
-        currentStatus = 'Choriste'; // Devient choriste la saison d'après la première
-      } else if (yearsOfMembership === 3 && (concertsValidated >= 10 || repetitionsValidated >= 20)) {
-        currentStatus = 'Choriste Senior'; // Devient choriste senior après 3 ans et conditions validées
-      } else if (firstSeasonYear === 2018) {
-        currentStatus = 'Veteran'; // Fait partie de la première promo
+      const saisonActive = await Saison.findOne({ isActive: true });
+      if (saisonActive) {
+        firstSeasonYear = saisonActive.annee;
+      } else {
+        throw new Error("Aucune saison active trouvée.");
       }
     }
 
+    const currentYear = new Date().getFullYear();
+    const yearsOfMembership = currentYear - firstSeasonYear + 1;
 
-    res.status(200).json({ success: true, data: { profile: user.toPublic(), statusHistory, currentStatus } });
+    if (yearsOfMembership === 1) {
+      currentStatus = "Choriste"; // Devient choriste la saison d'après la première
+    } else if (
+      yearsOfMembership === 3 &&
+      (user.concertsValidated >= 10 || user.repetitionsValidated >= 20)
+    ) {
+      currentStatus = "Choriste Senior"; // Devient choriste senior après 3 ans et conditions validées
+    } else if (firstSeasonYear === 2018) {
+      currentStatus = "Veteran"; // Fait partie de la première promo
+    } else {
+      currentStatus = "Choriste Junior"; // Par défaut, considérez l'utilisateur comme un choriste junior
+    }
+
+    res.status(200).json({
+      success: true,
+      data: { profile: user.toPublic(), statusHistory, currentStatus },
+    });
   } catch (error) {
     res.status(500).json({ success: false, error: error.message });
   }
-}
+};
 
 const getListeChoristes = async () => {
   try {
-    
-    const choristes = await User.find({ role: 'choriste' });
+    const choristes = await User.find({ role: "choriste" });
 
-    
     return choristes;
   } catch (error) {
-    
     console.error(error);
-    throw new Error('Erreur lors de la récupération de la liste des choristes.');
+    throw new Error(
+      "Erreur lors de la récupération de la liste des choristes."
+    );
   }
 };
 const voirProfilChoriste = async (idUser) => {
   try {
     const choriste = await User.findById(idUser);
     if (!choriste) {
-      throw new Error('Choriste non trouvé.');
+      throw new Error("Choriste non trouvé.");
     }
 
     // Récupérer les informations du choriste
@@ -89,7 +95,7 @@ const voirProfilChoriste = async (idUser) => {
     };
   } catch (error) {
     console.error(error);
-    throw new Error('Erreur lors de la récupération du profil du choriste.');
+    throw new Error("Erreur lors de la récupération du profil du choriste.");
   }
 };
 
@@ -100,15 +106,19 @@ const getProfile = async (req, res) => {
     const user = await User.findById(userId).exec();
 
     if (!user) {
-      return res.status(404).json({ success: false, message: 'Utilisateur non trouvé.' });
+      return res
+        .status(404)
+        .json({ success: false, message: "Utilisateur non trouvé." });
     }
 
-    const statusHistory = await StatusHistory.find({ utilisateur: userId }).sort({ date: 'desc' }).exec();
+    const statusHistory = await StatusHistory.find({ utilisateur: userId })
+      .sort({ date: "desc" })
+      .exec();
 
-    let currentStatus = 'Inactif';
+    let currentStatus = "Inactif";
 
     if (!statusHistory || statusHistory.length === 0) {
-      currentStatus = 'Choriste Junior';
+      currentStatus = "Choriste Junior";
     } else {
       const latestStatus = statusHistory[0]; // Obtenez le statut le plus récent
 
@@ -116,7 +126,10 @@ const getProfile = async (req, res) => {
       currentStatus = latestStatus.nouveauStatus;
     }
 
-    res.status(200).json({ success: true, data: { profile: user.toPublic(), statusHistory, currentStatus } });
+    res.status(200).json({
+      success: true,
+      data: { profile: user.toPublic(), statusHistory, currentStatus },
+    });
   } catch (error) {
     res.status(500).json({ success: false, error: error.message });
   }
@@ -124,11 +137,9 @@ const getProfile = async (req, res) => {
 
 const generateStatistics = async (req, res) => {
   try {
-  
     const concerts = await Concert.find();
 
-    
-    const choristes = await User.find({ role: 'choriste' });
+    const choristes = await User.find({ role: "choriste" });
 
     const statistiquesChoristes = [];
 
@@ -141,7 +152,9 @@ const generateStatistics = async (req, res) => {
       let nbConcerts = 0;
 
       for (const concert of concerts) {
-        const confirmation = concert.confirmations.find(conf => conf.choriste.equals(choriste._id));
+        const confirmation = concert.confirmations.find((conf) =>
+          conf.choriste.equals(choriste._id)
+        );
 
         if (confirmation) {
           nbConcerts++;
@@ -163,7 +176,7 @@ const generateStatistics = async (req, res) => {
         {
           $group: {
             _id: null,
-            nbRepetitions: { $sum: '$nbr_repetition' },
+            nbRepetitions: { $sum: "$nbr_repetition" },
             nbPresenceRepetitions: { $sum: 1 },
           },
         },
@@ -171,7 +184,8 @@ const generateStatistics = async (req, res) => {
 
       if (repetitionStatistiquesChoriste.length > 0) {
         nbRepetitions = repetitionStatistiquesChoriste[0].nbRepetitions;
-        nbPresenceRepetitions = repetitionStatistiquesChoriste[0].nbPresenceRepetitions;
+        nbPresenceRepetitions =
+          repetitionStatistiquesChoriste[0].nbPresenceRepetitions;
         nbAbsenceRepetitions = nbRepetitions - nbPresenceRepetitions;
       }
 
@@ -195,7 +209,6 @@ const generateStatistics = async (req, res) => {
   }
 };
 
-
 const getChoristeActivityHistory = async (req, res) => {
   const memberId = req.params.choristeId;
   const oeuvreName = req.query.oeuvreName;
@@ -213,7 +226,7 @@ const getChoristeActivityHistory = async (req, res) => {
       path: "programme._id",
       model: Oeuvre,
     });
- console.log(concerts)
+    console.log(concerts);
     const filteredConcerts = oeuvreName
       ? concerts.filter((concert) =>
           concert.programme.some((item) => item._id.titre === oeuvreName)
@@ -221,7 +234,7 @@ const getChoristeActivityHistory = async (req, res) => {
       : concerts;
 
     const repetitions = await Repetition.find({
-      "participant": memberId,
+      participant: memberId,
     });
 
     const response = {
@@ -238,7 +251,36 @@ const getChoristeActivityHistory = async (req, res) => {
   }
 };
 
+const getUserActivityHistory = async (req, res) => {
+  try {
+    const userId = req.params.choristeId;
 
+    const user = await User.findById(userId)
+      .populate("absence")
+      .populate("concerts") // Assurez-vous que "concerts" est correctement défini dans votre modèle d'utilisateur
+      .populate("repetitions"); // Assurez-vous que "repetitions" est correctement défini dans votre modèle d'utilisateur
+
+    // Vérifiez si l'utilisateur existe
+    if (!user) {
+      return res
+        .status(404)
+        .json({ success: false, message: "Utilisateur non trouvé." });
+    }
+
+    // Récupérez les détails d'activité de l'utilisateur
+    const activityHistory = {
+      absenceCount: user.absencecount,
+      concertsValidated: user.concertsValidated,
+      repetitionsValidated: user.repetitionsValidated,
+      concerts: user.concerts, // Les détails des concerts auxquels l'utilisateur a participé
+      // Ajoutez d'autres détails d'activité si nécessaire en fonction de votre modèle
+    };
+
+    res.status(200).json({ success: true, data: activityHistory });
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+};
 
 module.exports = {
   getProfileAndStatusHistory,
@@ -247,4 +289,5 @@ module.exports = {
   voirProfilChoriste,
   getChoristeActivityHistory,
   generateStatistics,
+  getUserActivityHistory,
 };

@@ -59,6 +59,10 @@ const UserSchema = new Schema({
     default: 0,
   },
   pupitre: { type: mongoose.Schema.Types.ObjectId, ref: "Pupitre" },
+  repetitions: [{ type: mongoose.Schema.Types.ObjectId, ref: "Repetition" }],
+
+  // Références aux concerts auxquels l'utilisateur a participé
+  concerts: [{ type: mongoose.Schema.Types.ObjectId, ref: "Concert" }],
 });
 
 UserSchema.pre("save", async function (next) {
