@@ -133,6 +133,8 @@ const createAbsence = async (req, res) => {
   }
 };
 
+
+
 const getChoristesByRepetitionAndPupitre = async (req, res) => {
   try {
     const repetitionId = req.params.repetitionId;
@@ -188,6 +190,10 @@ const getChoristesByRepetitionAndPupitre = async (req, res) => {
     });
   }
 };
+
+
+
+
 
 const getChoristesByConcertAndPupitre = async (req, res) => {
   try {

@@ -121,8 +121,8 @@ io.listen(8000);
 
 mongoose
   .connect(
-    "mongodb+srv://hendlegleg:hend12345@cluster0.fswjx.mongodb.net/database",
-    //"mongodb://127.0.0.1:27017/database",
+    //"mongodb+srv://hendlegleg:hend12345@cluster0.fswjx.mongodb.net/database",
+    "mongodb://127.0.0.1:27017/database",
     {
       /*useNewUrlParser: true, useUnifiedTopology: true*/
     }
@@ -132,11 +132,11 @@ mongoose
 
 const app = express();
 //app.use(
- // cors({
-   // origin: "*",
-   // methods: ["POST", "GET", "DELETE", "PUT", "PATCH"],
-   // credentials: true,
- // })
+// cors({
+// origin: "*",
+// methods: ["POST", "GET", "DELETE", "PUT", "PATCH"],
+// credentials: true,
+// })
 //);
 app.use(express.json());
 app.get("/hello", (req, res) => {

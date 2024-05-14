@@ -299,7 +299,9 @@ router.post("/", auth.authMiddleware, auth.isAdmin, repetitionController.addRepe
  *               error: "Description de l'erreur interne"
  *               message: "Échec d'ajout de la répétition"
  */
-router.post("/add", auth.authMiddleware, auth.isAdmin, repetitionController.addRepetitionn);
+//router.post("/add", auth.authMiddleware, auth.isAdmin, repetitionController.addRepetitionn);
+router.post("/add", repetitionController.addRepetitionn);
+
 /**
  * @swagger
  * /repetitions/{id}:
