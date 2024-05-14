@@ -1,21 +1,13 @@
-const mongoose = require('mongoose');
+const mongoose = require("mongoose");
 const Saison = require("./saison");
 const Schema = mongoose.Schema;
 
-const pupitreSchema = new Schema({
-  num_pupitre: { type: Number, required: true },
-  tessiture: {
-    type: String,
-    enum: ["Soprano", "Alto", "Ténor", "Basse"],
-    required: true,
-  },
-  besoin: { type: Number, required: true },
-  choristes: [{ type: Schema.Types.ObjectId, ref: "User" }],
-  chefs: [{ type: Schema.Types.ObjectId, ref: "User" }],
+const listeFinaleSchema = new Schema({
+    
+  candidat: { type: mongoose.Schema.Types.ObjectId, ref: "Candidat" },
   saison: { type: mongoose.Schema.Types.ObjectId, ref: "Saison" },
 });
-
-pupitreSchema.pre("save", async function (next) {
+listeFinaleSchema.pre("save", async function (next) {
   try {
     // Recherche de la saison active
     const saisonActive = await Saison.findOne({ isActive: true });
@@ -34,5 +26,5 @@ pupitreSchema.pre("save", async function (next) {
   }
 });
 
-const Pupitre = mongoose.model('Pupitre', pupitreSchema);
-module.exports = Pupitre;
+const listeFinale = mongoose.model("listeFinale", listeFinaleSchema);
+module.exports = listeFinale;

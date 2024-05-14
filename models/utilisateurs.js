@@ -1,62 +1,83 @@
 const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
 const AbsenceRequest = require('../models/absence');
+const Saison = require("./saison");
 
 const UserSchema = new Schema({
-    nom: { type: String },
-    prenom: { type: String},
-    email: {
-        type: String,
-        required: true,
-        unique: true,
-        validate: {
-            validator: function (v) {
-                return /\S+@\S+\.\S+/.test(v);
-            },
-            message: 'L\'adresse e-mail doit contenir le caractère "@".',
-        },
+  nom: { type: String },
+  prenom: { type: String },
+  email: {
+    type: String,
+    required: true,
+    unique: true,
+    validate: {
+      validator: function (v) {
+        return /\S+@\S+\.\S+/.test(v);
+      },
+      message: 'L\'adresse e-mail doit contenir le caractère "@".',
     },
-    password:  { type: String, required: true },
-    role: { type: String,
-        enum: ["choriste",'manager de choeur','chef de pupitre', 'admin'],
-        default: 'choriste' },
-    StatusHistory: {type: mongoose.Schema.Types.ObjectId, ref: 'StatusHistory' },
-    demandeConge: {type: Boolean, default : false},
-    estEnConge: { type: Boolean, default: false }, 
-    conge : {type: String, enum : ['enattente','enconge']},
-    dateDebutConge: { type: Date }, 
-    dateFinConge: { type: Date }, 
-    statusChanged: { type: Boolean , default: false },
-    AbsencestatusChanged: { type: Boolean , default: false },
-    active: { type: Boolean, default: true }, 
-    dateEntreeChoeur: { type: Date }, 
-    dateSortieChoeur: { type: Date },
-    tessiture: {type : String }, 
-    taille_en_m  : {type: String},
-    nbsaison:{type:Number}, 
-    approved:{type: Boolean},
-    absence: [{ type: mongoose.Schema.Types.ObjectId, ref: 'absence' }],
-    elimination:{type:String, enum:['nomine','elimine']},
-    eliminationDuree: {
-        type: Number,
-        default: 365,
-      },
-    eliminationReason: {
-        type: String, 
-      },
-    absencecount:{
-        type:Number,
-        default:0
-      },
-     
-      concertsValidated:{type:Number,
-    default:0},
-    repetitionsValidated:{
-        type:Number,
-        default:0
-    },
-      pupitre :{type: mongoose.Schema.Types.ObjectId, ref: 'Pupitre'}
-    
+  },
+  password: { type: String, required: true },
+  role: {
+    type: String,
+    enum: ["choriste", "manager de choeur", "chef de pupitre", "admin"],
+    default: "choriste",
+  },
+  StatusHistory: { type: mongoose.Schema.Types.ObjectId, ref: "StatusHistory" },
+  demandeConge: { type: Boolean, default: false },
+  estEnConge: { type: Boolean, default: false },
+  conge: { type: String, enum: ["enattente", "enconge"] },
+  dateDebutConge: { type: Date },
+  dateFinConge: { type: Date },
+  statusChanged: { type: Boolean, default: false },
+  AbsencestatusChanged: { type: Boolean, default: false },
+  active: { type: Boolean, default: true },
+  dateEntreeChoeur: { type: Date },
+  dateSortieChoeur: { type: Date },
+  tessiture: { type: String },
+  taille_en_m: { type: String },
+  nbsaison: { type: Number },
+  approved: { type: Boolean },
+  absence: [{ type: mongoose.Schema.Types.ObjectId, ref: "absence" }],
+  elimination: { type: String, enum: ["nomine", "elimine"] },
+  eliminationDuree: {
+    type: Number,
+    default: 365,
+  },
+  saison: { type: mongoose.Schema.Types.ObjectId, ref: "Saison" },
+  eliminationReason: {
+    type: String,
+  },
+  absencecount: {
+    type: Number,
+    default: 0,
+  },
+
+  concertsValidated: { type: Number, default: 0 },
+  repetitionsValidated: {
+    type: Number,
+    default: 0,
+  },
+  pupitre: { type: mongoose.Schema.Types.ObjectId, ref: "Pupitre" },
+});
+
+UserSchema.pre("save", async function (next) {
+  try {
+    // Recherche de la saison active
+    const saisonActive = await Saison.findOne({ isActive: true });
+    if (saisonActive) {
+      this.saison = saisonActive._id; // Définit l'ID de la saison active sur l'instance d'œuvre
+    } else {
+      throw new Error("Aucune saison active trouvée.");
+    }
+    next();
+  } catch (error) {
+    console.error(
+      "Erreur lors de la récupération de la saison active :",
+      error.message
+    );
+    next(error);
+  }
 });
 
 UserSchema.virtual('name').get(function () {

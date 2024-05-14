@@ -1,5 +1,8 @@
 const Oeuvres =require('../models/oeuvres');
 const Concert =require('../models/concert');
+const fs = require('fs');
+const path = require('path');
+const excelToJson = require('convert-excel-to-json');
 
 // Create
 const createOeuvre = async (req, res) => {
@@ -139,6 +142,60 @@ const OeuvreStatistics = async (req, res) => {
   }
 };
 
+const createOeuvreFromExcel = async (req, res) => {
+  try {
+
+    console.log(req.file.filename);
+    const result = excelToJson({
+      sourceFile: path.join(__dirname, '../', '/public/csv/' + req.file.filename),
+      header: {
+        rows: 1
+      },
+      columnToKey: {
+        '*': '{{columnHeader}}'
+      },
+      sheets: ['Feuil1', 'Feuil2']
+    });
+
+    let oeuvresIds = [];
+
+    if (result != null) {
+
+      if (result.Feuil1 != null) {
+        // SAVE OEUVRES 
+       
+        try {
+          const oeuvresSaved = await Oeuvres.insertMany(result.Feuil1);
+          await Promise.all(oeuvresSaved.map(async (element) => {
+            oeuvresIds.push(element.id);
+          }));
+        } catch (err) {
+          res.status(400).json(err);
+        }
+
+      }
+
+      if (result.Feuil2 != null){
+       
+          // SAVE CONCERT WITH PROGRAMME
+          await Promise.all(result.Feuil2.map(async (element) => {
+            const nouvelleConcert = new Concert(element);
+            console.log(oeuvresIds);
+            nouvelleConcert.programme = oeuvresIds ; 
+            await nouvelleConcert.save()              
+          }));
+      }
+
+      res.status(200).json({ message: 'Concerts et programmes sont importés avec succees' });
+
+    } else {
+      return res.status(404).json({ message: 'Verifier format du fichier' });
+    }
+  } catch (error) {
+    res.status(400).json(error)
+  }
+};
+
 
   module.exports = {
     createOeuvre,
@@ -147,4 +204,5 @@ const OeuvreStatistics = async (req, res) => {
     updateOeuvre,
     deleteOeuvre,
     OeuvreStatistics,
+    createOeuvreFromExcel
   };

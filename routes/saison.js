@@ -98,7 +98,7 @@ const auth = require('../middlewares/auth');
  *       '500':
  *         $ref: '#/components/responses/ErrorResponse'
  */
-router.post('/', auth.authMiddleware, auth.isAdmin, saisonController.createSaison);
+router.post('/', saisonController.createSaison);
 
 /**
  * @swagger
@@ -115,6 +115,11 @@ router.post('/', auth.authMiddleware, auth.isAdmin, saisonController.createSaiso
  *         $ref: '#/components/responses/ErrorResponse'
  */
 router.get('/', auth.authMiddleware, auth.isAdmin, saisonController.getAllSaisons);
+
+router.get(
+  "/current-saison",
+  saisonController.getCurrentSaison
+);
 
 /**
  * @swagger

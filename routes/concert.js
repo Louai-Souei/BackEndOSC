@@ -243,45 +243,16 @@ router.get(
  */
 
 // Routes pour gérer les concerts
-//router.post('/', auth.authMiddleware, auth.isAdmin, concertController.createConcert);
-router.post("/", concertController.createConcert);
-
-// router.get(
-//   "/",
-//   auth.authMiddleware,
-//   auth.isAdmin,
-//   concertController.getAllConcerts
-// );
-
-router.get(
-  "/",
-
-  concertController.getAllConcerts
-);
+router.post('/addConcertAndProgramme', concertController.createConcertAndProg);
+router.post('/', auth.authMiddleware, auth.isAdmin, concertController.createConcert); 
+router.get('/listConcerts', concertController.getAllConcerts); 
+router.put('/:id', auth.authMiddleware, auth.isAdmin,concertController.updateConcert); 
+router.delete('/delete-concert/:id', concertController.deleteConcert); 
+router.post('/:id/confirmerpresence', auth.authMiddleware, auth.isChoriste, concertController.confirmerpresenceConcert);
 router.get(
   "/:id",
 
   concertController.getConcertById
-);
-
-router.put(
-  "/:id",
-  auth.authMiddleware,
-  auth.isAdmin,
-  concertController.updateConcert
-);
-router.delete(
-  "/:id",
-  auth.authMiddleware,
-  auth.isAdmin,
-  concertController.deleteConcert
-);
-
-router.post(
-  "/:id/confirmerpresence",
-  auth.authMiddleware,
-  auth.isChoriste,
-  concertController.confirmerpresenceConcert
 );
 
 // router.get(
