@@ -29,20 +29,19 @@ const getUser = (userId) => {
   return onlineUsers.find((user) => user.userId === userId);
 };
 io.on("connection", function (socket) {
-  console.log("a user connected");
-  console.log(socket.id);
+  // console.log("a user connected");
+  // console.log(socket.id);
 
-  socket.on("userLoggedIn", (userId) => {
-    addNewUser(userId, socket.id);
-console.log('onlineUsers: ', onlineUsers);
-
+  socket.on("userLoggedIn", ({ userId, socketId }) => {
+    addNewUser(userId, socketId);
+    console.log("userLoggedIn///onlineUsers: ", onlineUsers);
   });
 
   socket.on("disconnect", () => {
     removeUser(socket.id);
-    console.log("a user disconnected");
+    // console.log("a user disconnected");
+    //console.log("onlineUsers: ", onlineUsers);
   });
 });
 
 module.exports = { io, onlineUsers };
-
