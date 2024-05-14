@@ -30,6 +30,8 @@ const testnotif = async (req, res, next) => {
               },
             };
 
+            console.log(req.notificationdetails);
+
             await sendNotification(req, null, async () => {
               res
                 .status(200)
