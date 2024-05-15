@@ -239,7 +239,11 @@ router.post('/', absenceController.createAbsence);
  */
 
 
-router.get("/getparticipants/:repetitionId/:tessiture", auth.authMiddleware, auth.ischefpupitre, absenceController.getChoristesByRepetitionAndPupitre);
+// router.get("/getparticipants/:repetitionId/:tessiture", auth.authMiddleware, auth.ischefpupitre, absenceController.getChoristesByRepetitionAndPupitre);
+router.get(
+  "/getparticipants/:repetitionId/:tessiture",
+  absenceController.getChoristesByRepetitionAndPupitre
+);
 
 /**
  * @swagger
