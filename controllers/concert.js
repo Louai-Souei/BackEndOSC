@@ -71,7 +71,6 @@ const concertController = {
       // }
 
       const newConcert = await Concert.create(req.body);
-
       await QRCode.toFile(
         `./image QR/qrcode-${newConcert._id}.png`,
         `http://localhost:5000/api/concerts/${newConcert._id}/confirmerpresence`,
@@ -376,7 +375,7 @@ const concertController = {
         const savedConcert = await concert.save();
 
         await QRCode.toFile(
-          `C:\\Users\\tinne\\OneDrive\\Desktop\\ProjetBackend\\image QR\\qrcode-${savedConcert._id}.png`,
+          `.image QR/qrcode-${savedConcert._id}.png`,
           `http://localhost:5000/api/concerts/${savedConcert._id}/confirmerpresence`,
           {
             color: {

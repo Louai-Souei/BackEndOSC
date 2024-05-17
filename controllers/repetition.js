@@ -120,7 +120,7 @@ const addRepetitionn = async (req, res) => {
 
     await newRepetition.save();
     await QRCode.toFile(
-      `./image QR/qrcode-qrcode-${newRepetition._id}.png`,
+      `./imageQR/qrcode-${newRepetition._id}.png`,
       `http://localhost:5000/api/repetitions/${newRepetition._id}/confirmerpresence`,
       {
         color: {
@@ -162,7 +162,6 @@ const addRepetition = async (req, res) => {
   try {
     const newRepetition = new Repetition(req.body);
     await newRepetition.save();
-<<<<<<< HEAD
     // await QRCode.toFile(
     //   `./image QR/qrcode-qrcode-${newRepetition._id}.png`,
     //   `http://localhost:5000/api/repetitions/${newRepetition._id}/confirmerpresence`,
@@ -173,9 +172,9 @@ const addRepetition = async (req, res) => {
     //     },
     //   }
     // );
-=======
+
     await QRCode.toFile(
-      `C:\\Users\\tinne\\OneDrive\\Desktop\\ProjetBackend\\image QR\\qrcode-${newRepetition._id}.png`,
+      `./imageQR/qrcode-${newRepetition._id}.png`,
       `http://localhost:5000/api/repetitions/${newRepetition._id}/confirmerpresence`,
       {
         color: {
@@ -184,7 +183,6 @@ const addRepetition = async (req, res) => {
         },
       }
     );
->>>>>>> b28d69314fc879475504d350206210c8f57dbd03
 
     res.status(200).json({
       repetition: newRepetition,

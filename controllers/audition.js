@@ -20,7 +20,6 @@ const createAudition = async (req, res) => {
       evaluation,
       decisioneventuelle,
       remarque,
-      remarque,
     } = req.body;
 
     // Vérification des données requises
