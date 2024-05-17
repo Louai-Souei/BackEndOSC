@@ -27,20 +27,20 @@ const candidatSchema = new Schema(
     estPresent: { type: Boolean, default: false },
     decisioneventuelle: {
       type: String,
-      enum: ["retenu", "en attente", "refuse"],
+      enum: ["retenu", "en attente", "refuse", "finale"],
       default: "en attente",
     },
     token: { type: String },
     saison: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "Saison"
+      ref: "Saison",
     },
   },
   {
     timestamps: true,
   }
 );
-// Fonction pour obtenir l'ID de la saison active
+
 candidatSchema.pre("save", async function (next) {
   try {
     // Recherche de la saison active
@@ -59,7 +59,6 @@ candidatSchema.pre("save", async function (next) {
     next(error);
   }
 });
-
 
 const Candidat = mongoose.model("Candidat", candidatSchema);
 

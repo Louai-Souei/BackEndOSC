@@ -1,4 +1,4 @@
-const mongoose = require('mongoose');
+const mongoose = require("mongoose");
 
 const saisonSchema = new mongoose.Schema({
   name: { type: String, required: false },
@@ -11,6 +11,6 @@ const saisonSchema = new mongoose.Schema({
   isActive: { type: Boolean, default: true },
 });
 
-const Saison = mongoose.model('Saison', saisonSchema);
+const Saison = mongoose.model("Saison", saisonSchema);
 
 module.exports = Saison;

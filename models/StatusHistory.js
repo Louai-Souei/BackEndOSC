@@ -1,4 +1,4 @@
-const mongoose = require('mongoose');
+const mongoose = require("mongoose");
 const Schema = mongoose.Schema;
 
 const StatusHistorySchema = new Schema({
@@ -12,8 +12,7 @@ const StatusHistorySchema = new Schema({
   nbsaison: { type: Number },
   date: { type: Date, default: Date.now },
 });
-    
 
-    const StatusHistory = mongoose.model('StatusHistory', StatusHistorySchema);
+const StatusHistory = mongoose.model("StatusHistory", StatusHistorySchema);
 
-    module.exports = StatusHistory;
+module.exports = StatusHistory;

@@ -1,4 +1,4 @@
-const mongoose = require('mongoose');
+const mongoose = require("mongoose");
 const Saison = require("./saison");
 const Schema = mongoose.Schema;
 
@@ -26,6 +26,8 @@ const concertSchema = new Schema({
       invite: { type: Boolean, default: false },
     },
   ],
+  repetition: [{ type: Schema.Types.ObjectId, ref: "Repetition" }],
+
   programme:[{
     type: mongoose.Schema.Types.ObjectId,
     ref: 'oeuvres',

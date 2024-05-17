@@ -1,4 +1,4 @@
-const mongoose = require('mongoose');
+const mongoose = require("mongoose");
 const Saison = require("./saison");
 const Schema = mongoose.Schema;
 
@@ -7,7 +7,7 @@ const EvenementAuditionSchema = new Schema({
   nombre_séance: { type: Number, required: true },
   dureeAudition: { type: String, required: true },
   Date_fin_Audition: { type: Date, required: true },
-  date: { type: Date, required: true, default: Date.now() },
+  date: { type: Date, default: Date.now() },
   lienFormulaire: { type: String },
   isPlaned: { type: Boolean, default: false },
   isClosed: { type: Boolean, default: false },
@@ -31,6 +31,9 @@ EvenementAuditionSchema.pre("save", async function (next) {
     next(error);
   }
 });
-  
-  const EvenementAudition = mongoose.model('EvenementAudition', EvenementAuditionSchema);
-  module.exports = EvenementAudition;
+
+const EvenementAudition = mongoose.model(
+  "EvenementAudition",
+  EvenementAuditionSchema
+);
+module.exports = EvenementAudition;

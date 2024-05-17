@@ -1,4 +1,4 @@
-const mongoose = require('mongoose');
+const mongoose = require("mongoose");
 const Schema = mongoose.Schema;
 const Saison = require("./saison");
 
@@ -29,7 +29,6 @@ verifmailSchema.pre("save", async function (next) {
   }
 });
 
-
-const Verifmail = mongoose.model('Verifmail', verifmailSchema);
+const Verifmail = mongoose.model("Verifmail", verifmailSchema);
 
 module.exports = Verifmail;
