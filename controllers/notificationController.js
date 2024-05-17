@@ -4,13 +4,14 @@ const Notification = require("../models/notifications");
 exports.sendNotification = async (req, res, next) => {
   try {
     const { userSocketId, notif_body } = req.notificationdetails;
+    console.log("notif_body: ", notif_body);
+    console.log("userSocketId: ", userSocketId);
 
     io.to(userSocketId).emit("SendNotif", notif_body);
     io.to(userSocketId).emit("getNotification", {
       message: notif_body,
     });
   } catch (error) {
-
     if (res && res.status && res.json) {
       res
         .status(500)
@@ -63,8 +64,6 @@ exports.getAllNotifications = async (req, res) => {
 exports.addNotification = async (req, res) => {
   const { userId, newMessage } = req.body;
 
-  
-  
   try {
     let notification = await Notification.findOne({ user: userId });
 
@@ -78,9 +77,7 @@ exports.addNotification = async (req, res) => {
       notification.messages.push(newMessage);
       await notification.save();
     }
-
-  } catch (error) {
-  }
+  } catch (error) {}
 };
 exports.deleteNotificationByUserId = async (req, res) => {
   try {

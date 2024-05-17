@@ -17,6 +17,10 @@ router.post(
   auditionController.genererPlanificationabsence
 );
 // Route pour générer le planning d'auditions
+router.post(
+  "/generer-planning/:evenementAuditionId",
+  auditionController.genererPlanification
+);
 
 /**
  * @swagger

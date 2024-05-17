@@ -3,29 +3,30 @@ const Saison = require("./saison");
 const Schema = mongoose.Schema;
 
 const concertSchema = new Schema({
-  // presence: {
-  // type: Boolean,
-  //},
-  date: { type: String, required: true },
+  presence: {
+    type: Boolean,
+  },
+  date: { type: Date, required: true },
   lieu: { type: String, required: true },
-  //heure: { type: Date, required: true },
+  heure: { type: Date, required: true },
   affiche_url: { type: String },
   // programme: [
-  // {
-  //  programme: { type: Schema.Types.ObjectId, ref: "Programme" },
-  //  requiresChoir: { type: Boolean, default: true },
-  // },
+  //   {
+  //     programme: { type: Schema.Types.ObjectId, ref: "Programme" },
+  //     requiresChoir: { type: Boolean, default: true },
+  //   },
   // ],
-  // planning: { type: Schema.Types.ObjectId, ref: "Repetition" },
-  // nom_concert: { type: String, require: true },
-  // placement: { type: Schema.Types.ObjectId, ref: "Placement" },
+  planning: { type: Schema.Types.ObjectId, ref: "Repetition" },
+  nom_concert: { type: String, require: true },
+  placement: { type: Schema.Types.ObjectId, ref: "Placement" },
+  confirmations: [
+    {
+      choriste: { type: Schema.Types.ObjectId, ref: "User" },
+      confirmation: { type: Boolean, default: false },
+      invite: { type: Boolean, default: false },
+    },
+  ],
   repetition: [{ type: Schema.Types.ObjectId, ref: "Repetition" }],
-  // confirmations: [
-  // {
-  //  choriste: { type: Schema.Types.ObjectId, ref: "User" },
-  //  confirmation: { type: Boolean, default: false },
-  //},
-  // ],
 
   programme: [
     {
@@ -33,7 +34,6 @@ const concertSchema = new Schema({
       ref: "oeuvres",
     },
   ],
-
   saison: { type: mongoose.Schema.Types.ObjectId, ref: "Saison" },
 });
 

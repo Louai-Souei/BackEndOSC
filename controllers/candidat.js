@@ -127,22 +127,18 @@ const addEmailCandidat = async (req, res) => {
     const emailSent = await sendEmail(candidat.email, "Verify Email", url);
 
     if (emailSent) {
-      return res
-        .status(201)
-        .send({
-          message: "An Email has been sent to your account, please verify",
-        });
+      return res.status(201).send({
+        message: "An Email has been sent to your account, please verify",
+      });
     } else {
       await Verifmail.findOneAndDelete({ _id: candidat._id });
       throw new Error("Error sending verification email");
     }
   } catch (error) {
     console.error("Error in addEmailCandidat:", error);
-    return res
-      .status(500)
-      .send({
-        error: "Error creating candidate and sending verification email",
-      });
+    return res.status(500).send({
+      error: "Error creating candidate and sending verification email",
+    });
   }
 };
 const verifyEmailToken = async (req, res) => {
@@ -156,26 +152,38 @@ const verifyEmailToken = async (req, res) => {
 
     if (!candidat) {
       console.log("Candidat not found");
-      return res.status(400).send({ message: "Invalid link" });
+      return res.redirect(
+        "http://localhost:3000/email-verified-result?result=invalidLink"
+      );
     }
 
-    // Mise à jour du statut de vérification de l'e-mail
     await Verifmail.findByIdAndUpdate(id, { verified: true });
 
-    res.status(200).send({ message: "Email verified successfully" });
+    return res.redirect(
+      "http://localhost:3000/email-verified-result?result=success"
+    );
   } catch (error) {
     if (error instanceof jwt.TokenExpiredError) {
-      res.status(400).send({ message: "Token has expired" });
+      return res.redirect(
+        "http://localhost:3000/email-verified-result?result=tokenExpired"
+      );
     } else if (error instanceof jwt.JsonWebTokenError) {
-      res.status(400).send({ message: "Invalid token" });
+      return res.redirect(
+        "http://localhost:3000/email-verified-result?result=invalidToken"
+      );
     } else if (error.name === "MongoError" && error.code === 11000) {
-      res.status(500).send({ message: "Duplicate key error" });
+      return res.redirect(
+        "http://localhost:3000/email-verified-result?result=dbError"
+      );
     } else {
       console.error("Error in verifyEmailToken:", error);
-      res.status(500).send({ message: "Internal Server Error" });
+      return res.redirect(
+        "http://localhost:3000/email-verified-result?result=internalError"
+      );
     }
   }
 };
+
 const createCandidat = async (req, res) => {
   try {
     const { id } = req.params;
