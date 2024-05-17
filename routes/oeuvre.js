@@ -2,6 +2,10 @@ const express = require("express");
 const router = express.Router();
 const oeuvreController = require("../controllers/oeuvre");
 const auth = require("../middlewares/auth");
+const multer = require("multer");
+const fs = require("fs");
+const path = require("path");
+
 router.get(
   "/statistics",
   auth.authMiddleware,
@@ -300,5 +304,41 @@ router.delete(
  *       500:
  *         description: Internal server error
  */
+
+const storage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    if (!fs.existsSync("public")) {
+      fs.mkdirSync("public");
+    }
+
+    if (!fs.existsSync("public/csv")) {
+      fs.mkdirSync("public/csv");
+    }
+
+    cb(null, "public/csv");
+  },
+  filename: function (req, file, cb) {
+    cb(null, Date.now() + file.originalname);
+  },
+});
+
+const upload = multer({
+  storage: storage,
+  fileFilter: function (req, file, cb) {
+    var ext = path.extname(file.originalname);
+
+    if (ext !== ".csv") {
+      return cb(new Error("Only csvs are allowed!"));
+    }
+
+    cb(null, true);
+  },
+});
+
+router.post(
+  "/importOeuvreAndConcertFromExcel",
+  upload.single("csvFile"),
+  oeuvreController.createOeuvreFromExcel
+);
 
 module.exports = router;

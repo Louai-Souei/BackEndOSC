@@ -1,22 +1,16 @@
 const mongoose = require("mongoose");
 const Schema = mongoose.Schema;
 const Saison = require("./saison");
-const OeuvresSchema = new Schema({
-  titre: { type: String},
-  compositeurs: { type: String },
-  arrangeurs: { type: String },
-  annee: { type: String },
-  genre: { type: String },
-  paroles: { type: String },
-  partition: { type: String },
-  presence_choeur: { type: Boolean, default: true },
-  saison: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: "Saison",
-  },
+
+const variableslSchema = new Schema({
+  AcceptationEmails: { type: Boolean, default: false },
+  AuditionEmails: { type: Boolean, default: false },
+  listeGenerated: { type: Boolean, default: false },
+
+  saison: { type: mongoose.Schema.Types.ObjectId, ref: "Saison" },
 });
 
-OeuvresSchema.pre("save", async function (next) {
+variableslSchema.pre("save", async function (next) {
   try {
     // Recherche de la saison active
     const saisonActive = await Saison.findOne({ isActive: true });
@@ -35,5 +29,6 @@ OeuvresSchema.pre("save", async function (next) {
   }
 });
 
-const Oeuvres = mongoose.model("oeuvres", OeuvresSchema);
-module.exports = Oeuvres;
+const variablesSchema = mongoose.model("Variables", variableslSchema);
+
+module.exports = variablesSchema;

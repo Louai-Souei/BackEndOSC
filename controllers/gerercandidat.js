@@ -6,6 +6,7 @@ const User = require("../models/utilisateurs");
 const bcrypt = require("bcrypt");
 const uuid = require("uuid");
 const Pupitre = require("../models/pupitre");
+const variablesController = require("./variablesController");
 function generateUniqueToken() {
   return uuid.v4();
 }

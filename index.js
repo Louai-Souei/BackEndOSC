@@ -10,6 +10,7 @@ const userRoutes = require("./routes/utilisateur");
 const auditionRoutes = require("./routes/audition");
 const repetitionRoutes = require("./routes/repetition");
 const gererRoutes = require("./routes/gerercandidat");
+const listeFinaleRoutes = require("./routes/listeFinale.js");
 const oeuvreRoutes = require("./routes/oeuvre");
 const candidatRoutes = require("./routes/candidat");
 const formulaireRoutes = require("./routes/formulaire");
@@ -23,6 +24,7 @@ const AbsenceRoutes = require("./routes/absenceRequest.js");
 const tessitureRoutes = require("./routes/tessiture");
 const pupitreRoutes = require("./routes/pupitre");
 const repetitioncontroller = require("./controllers/repetition");
+const variablesRoutes = require("./routes/variables.js");
 const notificationRoutes = require("./routes/notification");
 const besoinRoutes = require("./routes/besoinpupitre");
 cron.schedule("22 20 * * *", repetitioncontroller.envoyerNotificationChoristes);
@@ -121,6 +123,7 @@ io.listen(8000);
 mongoose
   .connect(
     "mongodb+srv://hendlegleg:hend12345@cluster0.fswjx.mongodb.net/database",
+
     {
       /*useNewUrlParser: true, useUnifiedTopology: true*/
     }
@@ -137,7 +140,7 @@ const app = express();
 //   })
 // );
 app.use(express.json());
-app.get("/", (req, res) => {
+app.get("/hello", (req, res) => {
   res.json("hello to our project ");
 });
 app.use((req, res, next) => {
@@ -239,7 +242,7 @@ app.use("/api/absence", AbsenceRoutes);
 app.use("/api/tessiture", tessitureRoutes);
 app.use("/api/auth", authRoutes);
 // app.use('/api/concert', concertsRoutes);
-app.use("/api/concert", concertsRoutes);
+//app.use("/api/concert", concertsRoutes);
 app.use("/api/saisons", saisonRoutes);
 app.use("/api/programme", programmeRoutes);
 app.use("/api/users", userRoutes);
@@ -252,6 +255,8 @@ app.use("/api/besoinpupitre", besoinRoutes);
 app.use("/api/reset", dbresetController);
 app.use("/api/intervenant", intervenantRoutes);
 app.use("/api/notification", notificationRoutes);
+app.use("/api/liste-finale", listeFinaleRoutes);
+app.use("/api/variables", variablesRoutes);
 
 module.exports = app;
 //module.exports.io = io;
