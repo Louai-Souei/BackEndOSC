@@ -16,9 +16,9 @@ const AbsenceRequestSchema = new Schema({
   concert: { type: mongoose.Schema.Types.ObjectId, ref: "Concert" },
 
   approved: { type: Boolean, default: false },
-  absence: [{ type: Date }],
+  absence: { type: Date },
 
-  //dates: [{ type: Date  }],
+  //dates: { type: Date  },
 
   //type: { type: String, enum: ['repetition','concert'], required: true }
   approved: { type: Boolean, default: false },

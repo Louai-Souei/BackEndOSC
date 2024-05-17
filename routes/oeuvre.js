@@ -8,8 +8,7 @@ const path = require("path");
 
 router.get(
   "/statistics",
-  auth.authMiddleware,
-  auth.isAdmin,
+
   oeuvreController.OeuvreStatistics
 );
 

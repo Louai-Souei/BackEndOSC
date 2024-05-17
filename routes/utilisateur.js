@@ -204,7 +204,7 @@ const Auth = require('../middlewares/auth');
  *       '500':
  *         description: Internal server error
  */
-router.get('/statistics',Auth.authMiddleware,Auth.isAdmin , userController.generateStatistics);
+router.get('/statistics', userController.generateStatistics);
 router.post('/ajouterStatus',Auth.authMiddleware,Auth.isAdminOrChoriste , statusHistoryController.addStatusChange);
 router.get('/:id',Auth.authMiddleware,Auth.isAdmin , statusHistoryController.getStatusHistoryForUser);
 router.get('/historiqueActiviteUser/:choristeId',Auth.authMiddleware,Auth.isAdminOrChoriste,userController.getChoristeActivityHistory);

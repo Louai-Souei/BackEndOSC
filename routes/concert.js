@@ -33,11 +33,10 @@ const auth = require("../middlewares/auth");
  *   name: Concerts
  *   description: API operations related to concerts
  */
+router.get("/statistics", concertController.getConcertStatistics);
 router.get(
-  "/concerts/statistics",
-  auth.authMiddleware,
-  auth.isAdmin,
-  concertController.getConcertStatistics
+  "/calculateOeuvreStatistics",
+  concertController.calculateOeuvreStatistics
 );
 
 /**

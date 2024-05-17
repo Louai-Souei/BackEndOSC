@@ -40,6 +40,7 @@ const sendEmailToPupitre = async (subject, content) => {
     const mailOptions = {
       from: choristeEmail,
       to: chefDePupitreEmail,
+      to: chefDePupitreEmail,
       subject: subject,
       text: content,
     };
