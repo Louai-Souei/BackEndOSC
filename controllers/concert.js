@@ -374,9 +374,10 @@ const concertController = {
         dto.concert.programme = listIds;
         const concert = new Concert(dto.concert);
         const savedConcert = await concert.save();
+        console.log(savedConcert._id);
 
         await QRCode.toFile(
-          `.image QR/qrcode-${savedConcert._id}.png`,
+          `./imageQR/qrcode-${savedConcert._id}.png`,
           `http://localhost:5000/api/concerts/${savedConcert._id}/confirmerpresence`,
           {
             color: {

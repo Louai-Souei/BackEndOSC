@@ -34,10 +34,10 @@ const auth = require("../middlewares/auth");
  *   description: API operations related to concerts
  */
 router.get("/statistics", concertController.getConcertStatistics);
-router.get(
-  "/calculateOeuvreStatistics",
-  concertController.calculateOeuvreStatistics
-);
+// router.get(
+//   "/calculateOeuvreStatistics",
+//   concertController.calculateOeuvreStatistics
+// );
 
 /**
  * @swagger
