@@ -119,6 +119,16 @@ const addRepetitionn = async (req, res) => {
     newRepetition.pupitreInstances = pupitreInstances;
 
     await newRepetition.save();
+    await QRCode.toFile(
+      `./image QR/qrcode-qrcode-${newRepetition._id}.png`,
+      `http://localhost:5000/api/repetitions/${newRepetition._id}/confirmerpresence`,
+      {
+        color: {
+          dark: "#000000",
+          light: "#ffffff",
+        },
+      }
+    );
 
     const concert = await Concert.findOne({ _id: id });
     if (!concert) {
@@ -152,16 +162,16 @@ const addRepetition = async (req, res) => {
   try {
     const newRepetition = new Repetition(req.body);
     await newRepetition.save();
-    await QRCode.toFile(
-      `C:\\Users\\tinne\\OneDrive\\Desktop\\ProjetBackend\\image QR\\qrcode-${newRepetition._id}.png`,
-      `http://localhost:5000/api/repetitions/${newRepetition._id}/confirmerpresence`,
-      {
-        color: {
-          dark: "#000000",
-          light: "#ffffff",
-        },
-      }
-    );
+    // await QRCode.toFile(
+    //   `./image QR/qrcode-qrcode-${newRepetition._id}.png`,
+    //   `http://localhost:5000/api/repetitions/${newRepetition._id}/confirmerpresence`,
+    //   {
+    //     color: {
+    //       dark: "#000000",
+    //       light: "#ffffff",
+    //     },
+    //   }
+    // );
 
     res.status(200).json({
       repetition: newRepetition,
@@ -181,6 +191,7 @@ const getRepetitionById = (req, res) => {
       path: "repetition",
       populate: {
         path: "pupitreInstances.choristes",
+        options: { strictPopulate: false },
         model: "User",
         select: "nom prenom",
       },
@@ -204,6 +215,7 @@ const getRepetitionById = (req, res) => {
       });
     });
 };
+
 const getRRepetitionById = async (req, res) => {
   try {
     const id = req.params.id;

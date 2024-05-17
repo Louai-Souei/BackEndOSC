@@ -303,15 +303,15 @@ const updateEvenementAudition = async (req, res) => {
 async function genererPlanification(req, res) {
   try {
     const { evenementAuditionId, saison } = req.params;
-    console.log('evenementAuditionId: ', evenementAuditionId);
-    console.log('saison: ', saison);
+    console.log("evenementAuditionId: ", evenementAuditionId);
+    console.log("saison: ", saison);
     const { startTime } = req.body;
     const auditionPlanning = await EvenementAudition.findOne({
       _id: evenementAuditionId,
     });
 
-    const candidats = await Candidat.find({saison: saison});
-    console.log('candidats: ', candidats);
+    const candidats = await Candidat.find({ saison: saison });
+    console.log("candidats: ", candidats);
     const nombreSeancesParJour = auditionPlanning.nombre_séance;
     const dureeAuditionMinutes = parseInt(auditionPlanning.dureeAudition);
 
@@ -340,7 +340,6 @@ async function genererPlanification(req, res) {
             .add(seance * dureeAuditionMinutes, "minutes");
           const dateFinSeance = dateDebutSeance
             .clone()
-            .add(dureeAuditionMinutes, "minutes");
             .add(dureeAuditionMinutes, "minutes");
 
           if (dateFinSeance.isAfter(auditionPlanning.Date_fin_Audition)) {

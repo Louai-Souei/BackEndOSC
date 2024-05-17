@@ -8,28 +8,29 @@ const concertSchema = new Schema({
   //},
   date: { type: String, required: true },
   lieu: { type: String, required: true },
-  heure: { type: Date, required: true },
-  affiche: { type: String },
+  //heure: { type: Date, required: true },
+  affiche_url: { type: String },
+  // programme: [
+  // {
+  //  programme: { type: Schema.Types.ObjectId, ref: "Programme" },
+  //  requiresChoir: { type: Boolean, default: true },
+  // },
+  // ],
+  // planning: { type: Schema.Types.ObjectId, ref: "Repetition" },
+  // nom_concert: { type: String, require: true },
+  // placement: { type: Schema.Types.ObjectId, ref: "Placement" },
+  repetition: [{ type: Schema.Types.ObjectId, ref: "Repetition" }],
+  // confirmations: [
+  // {
+  //  choriste: { type: Schema.Types.ObjectId, ref: "User" },
+  //  confirmation: { type: Boolean, default: false },
+  //},
+  // ],
+
   programme: [
     {
-      programme: { type: Schema.Types.ObjectId, ref: "Programme" },
-      requiresChoir: { type: Boolean, default: true },
-    },
-  ],
-  planning: { type: Schema.Types.ObjectId, ref: "Repetition" },
-  nom_concert: { type: String, require: true },
-  placement: { type: Schema.Types.ObjectId, ref: "Placement" },
-  confirmations: [
-    {
-      choriste: { type: Schema.Types.ObjectId, ref: "User" },
-      confirmation: { type: Boolean, default: false },
-    },
-  ],
-  presences: [
-    {
-      choriste: { type: Schema.Types.ObjectId, ref: "User" },
-      present: { type: Boolean, default: false },
-      raison: { type: String, default: "" },
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "oeuvres",
     },
   ],
 

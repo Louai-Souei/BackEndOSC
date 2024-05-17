@@ -53,19 +53,6 @@ const sendEmailToPupitre = async (subject, content) => {
 };
 const concertController = {
   createConcert: async (req, res) => {
-    const newConcert = await Concert.create(req.body);
-
-    await QRCode.toFile(
-      `C:\\Users\\tinne\\OneDrive\\Desktop\\ProjetBackend\\image QR\\qrcode-${newConcert._id}.png`,
-      `http://localhost:5000/api/concerts/${newConcert._id}/confirmerpresence`,
-      {
-        color: {
-          dark: "#000000",
-          light: "#ffffff",
-        },
-      }
-    );
-
     try {
       const { presence, date, lieu, heure, programme, planning, nom_concert } =
         req.body;
@@ -77,13 +64,25 @@ const concertController = {
           .status(400)
           .json({ message: "Un concert existe déjà à cette date." });
       }
-      if (!nom_concert) {
-        return res
-          .status(400)
-          .json({ success: false, error: "Certains champs sont manquants." });
-      }
+      // if (!nom_concert) {
+      //   return res
+      //     .status(400)
+      //     .json({ success: false, error: "Certains champs sont manquants." });
+      // }
 
       const newConcert = await Concert.create(req.body);
+
+      await QRCode.toFile(
+        `./image QR/qrcode-${newConcert._id}.png`,
+        `http://localhost:5000/api/concerts/${newConcert._id}/confirmerpresence`,
+        {
+          color: {
+            dark: "#000000",
+            light: "#ffffff",
+          },
+        }
+      );
+
       res.status(201).json({ model: newConcert });
     } catch (error) {
       res.status(500).json({ success: false, error: error.message });
@@ -236,7 +235,6 @@ const concertController = {
   //     // Ajoutez manuellement la confirmation de présence du choriste avec la raison fournie
   //     concert.confirmations.push({ choriste: choristeId, confirmation: true, raison: raison });
   //     await concert.save();
-
   //     res.status(200).json({ message: "Présence ajoutée manuellement avec succès." });
   //   } catch (error) {
   //     res.status(500).json({ success: false, error: error.message });
@@ -364,15 +362,10 @@ const concertController = {
 
   createConcertAndProg: async (req, res) => {
     try {
-      console.log(req.body);
       const dto = new concert_oeuvre_dto(req.body);
       let listIds = [];
       await Promise.all(
         dto.programme.map(async (element) => {
-          // const nouvelleOeuvre = new Oeuvre(element);
-          // const savedOeuvre = await nouvelleOeuvre.save().then(savedDoc => {
-          // listIds.push(savedDoc.id);
-          // });
           listIds.push(element._id);
         })
       );
@@ -381,6 +374,18 @@ const concertController = {
         dto.concert.programme = listIds;
         const concert = new Concert(dto.concert);
         const savedConcert = await concert.save();
+
+        await QRCode.toFile(
+          `C:\\Users\\tinne\\OneDrive\\Desktop\\ProjetBackend\\image QR\\qrcode-${savedConcert._id}.png`,
+          `http://localhost:5000/api/concerts/${savedConcert._id}/confirmerpresence`,
+          {
+            color: {
+              dark: "#000000",
+              light: "#ffffff",
+            },
+          }
+        );
+
         res.status(201).json(savedConcert);
       } else {
         return res.status(404).json({ message: "Programme est obligatoire" });

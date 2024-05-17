@@ -242,12 +242,11 @@ router.get(
  *         - nom_concert
  */
 
-// Routes pour gérer les concerts
 router.post("/addConcertAndProgramme", concertController.createConcertAndProg);
+
 router.post(
   "/",
-  auth.authMiddleware,
-  auth.isAdmin,
+
   concertController.createConcert
 );
 router.get("/listConcerts", concertController.getAllConcerts);
