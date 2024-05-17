@@ -7,7 +7,7 @@ const EvenementAuditionSchema = new Schema({
   nombre_séance: { type: Number, required: true },
   dureeAudition: { type: String, required: true },
   Date_fin_Audition: { type: Date, required: true },
-  date: { type: Date, required: true, default: Date.now() },
+  date: { type: Date, default: Date.now() },
   lienFormulaire: { type: String },
   isPlaned: { type: Boolean, default: false },
   isClosed: { type: Boolean, default: false },

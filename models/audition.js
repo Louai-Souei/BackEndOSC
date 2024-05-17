@@ -22,7 +22,7 @@ const AuditionSchema = new Schema({
   },
   decisioneventuelle: {
     type: String,
-    enum: ["retenu", "en attente", "refuse"],
+    enum: ["retenu", "en attente", "refuse", "Final"],
     default: "en attente",
   },
   remarque: { type: String },

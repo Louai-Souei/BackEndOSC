@@ -1,4 +1,3 @@
-const jwt = require("jsonwebtoken");
 const nodemailer = require("nodemailer");
 require("dotenv").config();
 const Candidat = require("../models/candidat");
@@ -89,21 +88,25 @@ exports.getListeCandidatsParPupitre = async (req, res) => {
 
 exports.envoyerEmailAcceptation = async (req, res) => {
   try {
-    const auditions = await listeFinale.find();
-    const candidatsRetenusIds = auditions.map((audition) => audition.candidat);
+    const { selectedRows } = req.body;
+
+    if (selectedRows.length === 0) {
+      return res.status(400).json({ message: "Aucun candidat sélectionné." });
+    }
+
     let countEmailsSent = 0;
 
-    for (const id of candidatsRetenusIds) {
+    for (const id of selectedRows) {
       try {
         const candidat = await Candidat.findById(id);
 
         if (!candidat.token) {
           const token = generateUniqueToken();
           candidat.token = token;
-          const confirmationLink = `http://localhost:5000/api/gerer/confirmation-presence/${candidat.id}/${token}?decision=confirm`;
+          const confirmationLink = `http://localhost:3000/accept/${candidat.id}/${token}`;
 
           const mailOptions = {
-            from: "hendlegleg1@gmail.com",
+            from: "votreemail@gmail.com",
             to: candidat.email,
             subject: "Votre acceptation dans le chœur",
             text: `Cher ${candidat.nom}, Félicitations! Vous avez été retenu pour rejoindre le chœur. Veuillez confirmer votre présence en cliquant sur ce lien : ${confirmationLink}. Cordialement.`,
@@ -118,6 +121,11 @@ exports.envoyerEmailAcceptation = async (req, res) => {
           await transporter.sendMail(mailOptions);
           console.log(`Email envoyé à ${candidat.email}`);
           await candidat.save();
+          const audition = await Audition.findOne({ candidat: candidat._id });
+          audition.decisioneventuelle = "Final";
+          await audition.save();
+
+          countEmailsSent++;
           countEmailsSent++;
         } else {
           console.log(
@@ -138,27 +146,19 @@ exports.envoyerEmailAcceptation = async (req, res) => {
 
     res.status(200).json({ message });
   } catch (error) {
-    console.error(
-      "Erreur lors de l'enregistrement des candidats retenus :",
-      error
-    );
+    console.error("Erreur lors de l'envoi des emails d'acceptation :", error);
     res.status(500).json({
-      message: "Erreur lors de l'enregistrement des candidats retenus.",
+      message: "Erreur lors de l'envoi des emails d'acceptation.",
     });
   }
 };
-
 exports.confirmAcceptanceByEmail = async (req, res) => {
   try {
-    const { id, token } = req.params;
-    console.log("ID du candidat :", id);
-    console.log("Token reçu :", token);
+    const { id } = req.params;
 
     const candidat = await Candidat.findByIdAndUpdate(id, {
       estConfirme: true,
     });
-
-    console.log("Candidat trouvé :", candidat);
 
     if (!candidat) {
       return res.status(400).send({ message: "Invalid link" });
@@ -166,21 +166,10 @@ exports.confirmAcceptanceByEmail = async (req, res) => {
 
     res.status(200).send({ message: "Acceptance confirmed successfully" });
   } catch (error) {
-    if (error instanceof jwt.TokenExpiredError) {
-      console.log("Token has expired");
-      res.status(400).send({ message: "Token has expired" });
-    } else if (error instanceof jwt.JsonWebTokenError) {
-      console.log("Invalid token");
-      res.status(400).send({ message: "Invalid token" });
-    } else if (error.name === "MongoError" && error.code === 11000) {
-      console.log("Duplicate key error");
-      res.status(500).send({ message: "Duplicate key error" });
-    } else {
-      console.error("Error in confirmAcceptanceByEmail:", error);
-      res.status(500).send({ message: "Internal Server Error" });
-    }
+    res.status(500).send({ message: "Internal Server Error" });
   }
 };
+
 async function genererMotDePasse(candidatId) {
   try {
     const candidat = await Candidat.findById(candidatId);
@@ -227,42 +216,57 @@ const ajouterChoriste = async (candidat, tessiture) => {
   }
 };
 
-exports.envoyerEmailConfirmation = async () => {
+exports.envoyerEmailConfirmation = async (req, res) => {
+  const { selectedRows } = req.body;
+
+  if (selectedRows.length === 0) {
+    return res.status(400).json({ message: "Aucun candidat sélectionné." });
+  }
+
   try {
-    const candidat = await Candidat.findOne({ estConfirme: true });
+    for (const id of selectedRows) {
+      const candidat = await Candidat.findById(id);
 
-    if (!candidat) {
-      throw new Error("Aucun candidat confirmé trouvé");
-    }
+      if (!candidat) {
+        throw new Error(`Aucun candidat avec l'ID ${id} trouvé.`);
+      }
 
-    const token = candidat ? candidat.token : null;
-    const confirmationLink = `http://localhost:3000/${candidat.id}`;
+      // Générer un mot de passe aléatoire
+      const generatedPassword = Math.random().toString(36).slice(-8);
 
-    const generatedPassword = await genererMotDePasse(candidat._id);
-    const hashedPassword = await bcrypt.hash(generatedPassword, 10);
+      // Hasher le mot de passe
+      const hashedPassword = await bcrypt.hash(generatedPassword, 10);
 
-    candidat.motDePasse = hashedPassword;
-    await candidat.save();
+      // Mettre à jour le mot de passe du candidat
+      candidat.motDePasse = hashedPassword;
+      await candidat.save();
 
-    const mailOptions = {
-      from: "hendlegleg1@gmail.com",
-      to: candidat.email,
-      subject: "Confirmation d'inscription",
-      text: `Bonjour ${candidat.nom}, cliquez sur ce lien pour confirmer votre inscription : ${confirmationLink}. Voici vos informations de connexion : 
+      // Envoyer l'email de confirmation
+      const mailOptions = {
+        from: "votre_email@gmail.com",
+        to: candidat.email,
+        subject: "Confirmation d'inscription",
+        text: `Bonjour ${candidat.nom}, cliquez sur ce lien pour confirmer votre inscription : http://localhost:3000/${candidat.id}. Voici vos informations de connexion : 
       - Login : ${candidat.email} 
       - Mot de passe : ${generatedPassword}. 
-      Vous devez aussi signer la charte du choeur!`,
-    };
+      Vous devez également signer la charte du choeur!`,
+      };
 
-    await transporter.sendMail(mailOptions);
-    console.log(`Email de confirmation envoyé à ${candidat.email}`);
+      await transporter.sendMail(mailOptions);
+      console.log(`Email de confirmation envoyé à ${candidat.email}`);
+    }
 
-    return { message: "Email de confirmation envoyé avec succès" };
+    return res
+      .status(200)
+      .json({ message: "Emails de confirmation envoyés avec succès." });
   } catch (error) {
-    console.error("Erreur lors de l'envoi de l'email de confirmation :", error);
-    return { error: "Erreur lors de l'envoi de l'email de confirmation" };
+    console.error("Erreur lors de l'envoi des emails de confirmation :", error);
+    return res
+      .status(500)
+      .json({ error: "Erreur lors de l'envoi des emails de confirmation." });
   }
 };
+
 exports.confirmerEngagement = async (req, res) => {
   try {
     const candidat = await Candidat.findById(req.params.id);
@@ -341,9 +345,103 @@ exports.getListeCandidats = async (req, res) => {
 
 exports.getCandidatsRetenusParPupitre = async (req, res) => {
   try {
-    const auditionsRetenues = await Audition.find({
-      decisioneventuelle: "retenu",
+    const candidatsRetenus = await Audition.aggregate([
+      { $match: { decisioneventuelle: "retenu" } },
+      {
+        $lookup: {
+          from: "candidats",
+          localField: "candidat",
+          foreignField: "_id",
+          as: "candidatDetails",
+        },
+      },
+      { $unwind: "$candidatDetails" },
+      {
+        $group: {
+          _id: "$tessiture",
+          candidats: {
+            $push: {
+              _id: "$candidatDetails._id",
+              nom: "$candidatDetails.nom",
+              prenom: "$candidatDetails.prenom",
+              email: "$candidatDetails.email",
+            },
+          },
+        },
+      },
+    ]);
+    // Vérification des IDs inclus dans les données renvoyées
+    candidatsRetenus.forEach((pupitre) => {
+      console.log(`Tessiture: ${pupitre._id}`);
+      pupitre.candidats.forEach((candidat) => {
+        console.log(`ID du candidat: ${candidat._id}`);
+      });
     });
+    res.status(200).json(candidatsRetenus);
+  } catch (error) {
+    console.error(
+      "Erreur lors de la récupération des candidats retenus groupés par tessiture :",
+      error
+    );
+    res.status(500).json({
+      error:
+        "Erreur lors de la récupération des candidats retenus groupés par tessiture",
+    });
+  }
+};
+exports.getCandidatsconfirme = async (req, res) => {
+  try {
+    const candidatsRetenus = await Audition.aggregate([
+      { $match: { decisioneventuelle: "Final" } },
+      {
+        $lookup: {
+          from: "candidats",
+          localField: "candidat",
+          foreignField: "_id",
+          as: "candidatDetails",
+        },
+      },
+      { $unwind: "$candidatDetails" },
+      {
+        $match: { "candidatDetails.estConfirme": true }, // Filtrer les candidats confirmés
+      },
+      {
+        $group: {
+          _id: "$tessiture",
+          candidats: {
+            $push: {
+              _id: "$candidatDetails._id",
+              nom: "$candidatDetails.nom",
+              prenom: "$candidatDetails.prenom",
+              email: "$candidatDetails.email",
+            },
+          },
+        },
+      },
+    ]);
+    // Vérification des IDs inclus dans les données renvoyées
+    candidatsRetenus.forEach((pupitre) => {
+      console.log(`Tessiture: ${pupitre._id}`);
+      pupitre.candidats.forEach((candidat) => {
+        console.log(`ID du candidat: ${candidat._id}`);
+      });
+    });
+    res.status(200).json(candidatsRetenus);
+  } catch (error) {
+    console.error(
+      "Erreur lors de la récupération des candidats retenus groupés par tessiture :",
+      error
+    );
+    res.status(500).json({
+      error:
+        "Erreur lors de la récupération des candidats retenus groupés par tessiture",
+    });
+  }
+};
+
+exports.getListeCandidatsParPupitre = async (req, res) => {
+  try {
+    const besoinsPupitres = req.body || {};
 
     const candidatsParPupitre = {
       Soprano: [],
@@ -352,57 +450,28 @@ exports.getCandidatsRetenusParPupitre = async (req, res) => {
       Basse: [],
     };
 
-    await Promise.all(
-      auditionsRetenues.map(async (audition) => {
-        const candidat = await Candidat.findById(audition.candidat);
-        let numPupitre = null;
+    if (Object.keys(besoinsPupitres).length === 0) {
+      return res
+        .status(400)
+        .json({ error: "Besoin des pupitres non spécifié dans la requête" });
+    }
 
-        switch (audition.tessiture) {
-          case "Soprano":
-            numPupitre = 1;
-            break;
-          case "Alto":
-            numPupitre = 2;
-            break;
-          case "Ténor":
-            numPupitre = 3;
-            break;
-          case "Basse":
-            numPupitre = 4;
-            break;
-          default:
-            break;
-        }
+    const candidats = await Candidat.find();
+    for (const candidat of candidats) {
+      const tessiture = candidat.tessiture;
 
-        let existingPupitre = await Pupitre.findOne({
-          num_pupitre: numPupitre,
-          tessiture: audition.tessiture,
-        });
-
-        if (existingPupitre) {
-          if (!existingPupitre.choristes.includes(candidat._id)) {
-            existingPupitre.choristes.push(candidat._id);
-            await existingPupitre.save();
-          }
-        } else {
-          const newPupitreInstance = new Pupitre({
-            num_pupitre: numPupitre,
-            tessiture: audition.tessiture,
-            besoin: 1,
-            choristes: [candidat._id],
+      if (besoinsPupitres.hasOwnProperty(tessiture)) {
+        const besoinPupitre = besoinsPupitres[tessiture];
+        if (candidatsParPupitre[tessiture].length < besoinPupitre) {
+          candidatsParPupitre[tessiture].push({
+            id: candidat._id,
+            nom: candidat.nom,
+            prenom: candidat.prenom,
+            email: candidat.email,
           });
-
-          await newPupitreInstance.save();
         }
-
-        candidatsParPupitre[audition.tessiture].push({
-          id: candidat._id,
-          nom: candidat.nom,
-          prenom: candidat.prenom,
-          email: candidat.email,
-        });
-      })
-    );
+      }
+    }
 
     return res.status(200).json(candidatsParPupitre);
   } catch (error) {
@@ -415,100 +484,40 @@ exports.getCandidatsRetenusParPupitre = async (req, res) => {
     });
   }
 };
-
-exports.filtrerAuditions = async (req, res) => {
+exports.defineBesoinPupitre = async (req, res) => {
   try {
-    const { saisonId } = req.params;
-    let { autre, tenor, soprano, alto, basse } = req.body;
+    const besoinPupitres = req.body || {};
 
-    // Récupérer toutes les auditions de la saison avec la décision "retenu"
-    const auditions = await Audition.find({
-      // saison: saisonId,
-      decisioneventuelle: "retenu",
-    });
-
-    let auditionsFiltrees = [];
-
-    // Boucle pour chaque tessiture
-
-    let i = 0;
-
-    // Boucle pour soprano
-    while (soprano > 0 && i < auditions.length) {
-      const audition = auditions[i];
-      if (audition.tessiture.toLowerCase() === "soprano") {
-        auditionsFiltrees.push(audition);
-        soprano--;
-      }
-      i++;
-    }
-
-    i = 0; // Réinitialiser l'index pour la boucle suivante
-
-    // Boucle pour alto
-    while (alto > 0 && i < auditions.length) {
-      const audition = auditions[i];
-
-      if (audition.tessiture.toLowerCase() === "alto") {
-        console.log(
-          "audition.tessiture.toLowerCase(): ",
-          audition.tessiture.toLowerCase()
-        );
-        auditionsFiltrees.push(audition);
-        alto--;
-      }
-      i++;
-    }
-    i = 0; // Réinitialiser l'index pour la boucle suivante
-
-    // Boucle pour tenor
-    while (tenor > 0 && i < auditions.length) {
-      const audition = auditions[i];
-      if (audition.tessiture.toLowerCase() === "tenor") {
-        auditionsFiltrees.push(audition);
-        tenor--;
-      }
-      i++;
-    }
-
-    i = 0; // Réinitialiser l'index pour la boucle suivante
-
-    // Boucle pour autre
-    while (autre > 0 && i < auditions.length) {
-      const audition = auditions[i];
-      if (audition.tessiture.toLowerCase() === "autre") {
-        auditionsFiltrees.push(audition);
-        autre--;
-      }
-      i++;
-    }
-
-    i = 0; // Réinitialiser l'index pour la boucle suivante
-
-    // Boucle pour basse
-    while (basse > 0 && i < auditions.length) {
-      const audition = auditions[i];
-      if (audition.tessiture.toLowerCase() === "basse") {
-        auditionsFiltrees.push(audition);
-        basse--;
-      }
-      i++;
-    }
-
-    // Enregistrer les candidats dans listeFinaleSchema
-    const candidats = auditionsFiltrees.map((audition) => ({
-      candidat: audition.candidat,
-      // saison: saisonId,
-    }));
-    console.log("candidats: ", candidats);
-    const toUpdate = {
-      listeGenerated: true,
+    const candidatsParPupitre = {
+      Soprano: [],
+      Alto: [],
+      Ténor: [],
+      Basse: [],
     };
-    await listeFinale.insertMany(candidats);
-    await variablesController.updateVariables(toUpdate);
-    res.status(200).json(auditionsFiltrees);
+
+    if (Object.keys(besoinPupitres).length === 0) {
+      return res
+        .status(400)
+        .json({ error: "Besoin des pupitres non spécifié dans la requête" });
+    }
+
+    // Parcourir les besoins de pupitres et les stocker par tessiture
+    for (const tessiture in besoinPupitres) {
+      const besoin = besoinPupitres[tessiture];
+      if (candidatsParPupitre.hasOwnProperty(tessiture)) {
+        candidatsParPupitre[tessiture] = { besoin };
+      }
+    }
+
+    return res.status(200).json(candidatsParPupitre);
   } catch (error) {
-    console.error("Erreur lors du filtrage des auditions:", error);
-    res.status(500).json({ message: "Erreur lors du filtrage des auditions" });
+    console.error(
+      "Erreur lors de la définition des besoins de pupitre par tessiture :",
+      error
+    );
+    return res.status(500).json({
+      error:
+        "Erreur lors de la définition des besoins de pupitre par tessiture",
+    });
   }
 };

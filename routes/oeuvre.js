@@ -6,6 +6,10 @@ const multer = require("multer");
 const fs = require("fs");
 const path = require("path");
 
+const multer = require("multer");
+const fs = require("fs");
+const path = require("path");
+
 router.get(
   "/statistics",
   auth.authMiddleware,
@@ -169,12 +173,7 @@ router.get("/", oeuvreController.getAllOeuvres);
  *       '500':
  *         description: Server error
  */
-router.post(
-  "/",
-  auth.authMiddleware,
-  auth.isAdmin,
-  oeuvreController.createOeuvre
-);
+router.post("/", oeuvreController.createOeuvre);
 
 /**
  * @swagger

@@ -11,6 +11,7 @@ router.get("/:id", auditionController.getAuditionById);
 router.patch("/:id", auditionController.updateAudition);
 router.delete("/:id", auditionController.deleteAudition);
 router.get("/auditions/enattente", auditionController.getAuditionEnAttente);
+router.get("/auditions/enattente", auditionController.getAuditionEnAttente);
 router.post(
   "/genererplanabsence",
   auditionController.genererPlanificationabsence

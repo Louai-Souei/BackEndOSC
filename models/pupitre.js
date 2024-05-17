@@ -3,11 +3,10 @@ const Saison = require("./saison");
 const Schema = mongoose.Schema;
 
 const pupitreSchema = new Schema({
-  num_pupitre: { type: Number, required: true },
+  num_pupitre: { type: Number },
   tessiture: {
     type: String,
     enum: ["Soprano", "Alto", "Ténor", "Basse"],
-    required: true,
   },
   besoin: { type: Number, required: true },
   choristes: [{ type: Schema.Types.ObjectId, ref: "User" }],

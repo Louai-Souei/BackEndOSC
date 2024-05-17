@@ -59,12 +59,6 @@ router.post(
 
   gerercontroller.envoyerEmailConfirmation
 );
-router.get(
-  "/confirmation-presence/:id/:token",
-  gerercontroller.confirmAcceptanceByEmail
-);
-
-// router.get("/besoinpup", gerercontroller.filtrerAuditions);
 
 /**
  * @swagger
@@ -199,10 +193,15 @@ router.post(
 
 router.get(
   "/listeretenu",
-  Auth.authMiddleware,
-  Auth.isAdminOrManager,
+
   gerercontroller.getCandidatsRetenusParPupitre
 );
+router.get(
+  "/listeconfime",
+
+  gerercontroller.getCandidatsconfirme
+);
+router.get("/accept/:id/:token", gerercontroller.confirmAcceptanceByEmail);
 
 /**
  * @swagger
@@ -270,10 +269,10 @@ router.get(
  *               error: 'Erreur lors de la récupération des candidats par pupitre'
  */
 
+router.post("/besoin", gerercontroller.getListeCandidatsParPupitre);
+router.post("/besoin-pupitre", gerercontroller.defineBesoinPupitre);
 router.post(
-  "/besoin",
-  Auth.authMiddleware,
-  Auth.isAdminOrManager,
+  "/liste-candidats-par-pupitre",
   gerercontroller.getListeCandidatsParPupitre
 );
 
