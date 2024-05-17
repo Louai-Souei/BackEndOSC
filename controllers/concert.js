@@ -161,10 +161,7 @@ const concertController = {
     }
   },
 
-
-
-
-  indiquerpresenceConcert: async (req, res) => {
+indiquerpresenceConcert: async (req, res) => {
     try {
       const { id } = req.params;
       const { userid } = req.body;
@@ -174,22 +171,38 @@ const concertController = {
       if (!concert) {
         return res.status(404).json({ message: "Concert non trouvé!" });
       }
+
       const existingConfirmation = concert.confirmations.find(
         (conf) => conf.choriste.toString() === userid
       );
 
       if (existingConfirmation) {
-        console.log("Vous avez déjà confirmé votre présence à ce concert.");
-      }
+        if (existingConfirmation.emailSent) {
+          return res.status(400).json({
+            message:
+              "Vous avez déjà confirmé votre présence à ce concert et vous avez déjà reçu un e-mail.",
+          });
+        } else {
+          // Mettre à jour la confirmation existante pour indiquer que l'e-mail a été envoyé
+          existingConfirmation.emailSent = true;
+          await concert.save();
 
-      const utilisateur = await Utilisateur.findById(userid);
+          return res.status(200).json({
+            message:
+              "Vous avez déjà confirmé votre présence à ce concert. L'e-mail a déjà été envoyé au chef de pupitre.",
+          });
+        }
+      }
+         const utilisateur = await Utilisateur.findById(userid);
 
       if (!utilisateur) {
         return res.status(404).json({ message: "Utilisateur non trouvé!" });
       }
+
       concert.confirmations.push({
         choriste: utilisateur._id,
         confirmation: true,
+        emailSent: true,
       });
       await concert.save();
 
@@ -205,8 +218,17 @@ const concertController = {
     } catch (error) {
       res.status(500).json({ success: false, error: error });
       console.log(error);
-    }
-  },
+    }
+  },
+
+
+
+
+
+
+
+
+
   
 
   getConfirmedChoristesForConcert: async (req, res) => {
