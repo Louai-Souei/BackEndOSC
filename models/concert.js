@@ -28,10 +28,12 @@ const concertSchema = new Schema({
   ],
   repetition: [{ type: Schema.Types.ObjectId, ref: "Repetition" }],
 
-  programme:[{
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'oeuvres',
-  }],
+  programme: [
+    {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "oeuvres",
+    },
+  ],
   saison: { type: mongoose.Schema.Types.ObjectId, ref: "Saison" },
 });
 
@@ -53,8 +55,6 @@ concertSchema.pre("save", async function (next) {
     next(error);
   }
 });
-
-
 
 const Concert = mongoose.model("Concert", concertSchema);
 
