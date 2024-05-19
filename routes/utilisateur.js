@@ -215,6 +215,8 @@ router.get(
 );
 router.get("/:id/profile", userController.getProfile);
 
+router.get("/", userController.getListeChoristes);
 
+router.patch("/:id/role", userController.updateUserRole);
 
 module.exports = router;

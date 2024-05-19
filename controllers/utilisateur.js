@@ -5,6 +5,10 @@ const Repetition = require("../models/repetition");
 const Absence = require("../models/absence");
 const Saison = require("../models/saison");
 const Oeuvre = require("../models/oeuvres");
+const Joi = require("joi");
+
+
+
 const {
   getChoristesNominés,
   getChoristesÉliminés,
@@ -282,6 +286,44 @@ const getUserActivityHistory = async (req, res) => {
   }
 };
 
+// Validation du corps de la requête
+const roleUpdateSchema = Joi.object({
+  role: Joi.string()
+    .valid("choriste", "manager de choeur", "chef de pupitre", "admin")
+    .required(),
+});
+
+const updateUserRole = async (req, res) => {
+  const { role } = req.body;
+  const { id } = req.params;
+
+  // Valider le corps de la requête
+  const { error } = roleUpdateSchema.validate({ role });
+  if (error) {
+    return res.status(400).json({ error: error.details[0].message });
+  }
+
+  try {
+    const user = await User.findByIdAndUpdate(id, { role }, { new: true });
+
+    if (!user) {
+      return res.status(404).json({ error: "Utilisateur non trouvé" });
+    }
+
+    res.status(200).json({ message: "Rôle mis à jour avec succès" });
+  } catch (error) {
+    console.error(
+      "Erreur lors de la mise à jour du rôle de l'utilisateur :",
+      error.message
+    );
+    res
+      .status(500)
+      .json({ error: "Erreur serveur lors de la mise à jour du rôle" });
+  }
+};
+
+
+
 module.exports = {
   getProfileAndStatusHistory,
   getProfile,
@@ -290,4 +332,5 @@ module.exports = {
   getChoristeActivityHistory,
   generateStatistics,
   getUserActivityHistory,
+  updateUserRole,
 };

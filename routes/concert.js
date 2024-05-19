@@ -356,8 +356,7 @@ router.post(
 //   concertController.indiquerpresenceConcert
 // );
 
-router.post(
-  "/:id/indiquerconfirmation",
+router.post("/:id/indiquerconfirmation",
 
   concertController.indiquerpresenceConcert
 );

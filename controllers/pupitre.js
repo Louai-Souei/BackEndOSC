@@ -92,11 +92,56 @@ const createPupitre = async (req, res) => {
     }
   };
   
+const getAllPupitres = async (req, res) => {
+  try {
+    const pupitres = await Pupitre.find()
+      .populate("choristes")
+      .populate("chefs")
+      .populate("saison");
+
+    res.status(200).json(pupitres);
+  } catch (error) {
+    console.error(
+      "Erreur lors de la récupération des pupitres :",
+      error.message
+    );
+    res
+      .status(500)
+      .json({
+        error: `Erreur lors de la récupération des pupitres : ${error.message}`,
+      });
+  }
+};
 
   
+const getListeChoristesByPupitreId = async (req, res) => {
+  const pupitreId = req.params.id;
+
+  try {
+    const pupitre = await Pupitre.findById(pupitreId).populate("choristes");
+
+    if (!pupitre) {
+      return res.status(404).json({ error: "Pupitre non trouvé" });
+    }
+
+    res.status(200).json(pupitre.choristes);
+  } catch (error) {
+    console.error(
+      "Erreur lors de la récupération de la liste des choristes par pupitre ID :",
+      error.message
+    );
+    res
+      .status(500)
+      .json({
+        error: `Erreur lors de la récupération de la liste des choristes par pupitre ID : ${error.message}`,
+      });
+  }
+};
 
 module.exports = {
-    assignLeadersToPupitre,
-    createPupitre,
-    updatePupitreById,
+  assignLeadersToPupitre,
+  createPupitre,
+  updatePupitreById,
+  getAllPupitres,
+  getListeChoristesByPupitreId,
 };
