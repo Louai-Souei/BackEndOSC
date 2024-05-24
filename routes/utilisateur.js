@@ -1,11 +1,11 @@
-const express = require('express');
+const express = require("express");
 const router = express.Router();
-const userController = require('../controllers/utilisateur');
-const statusHistoryController = require('../controllers/statusHistory');
+const userController = require("../controllers/utilisateur");
+const statusHistoryController = require("../controllers/statusHistory");
 
-const eliminationController=require('../controllers/absenceElemination')
-const Auth = require('../middlewares/auth');
-
+const eliminationController = require("../controllers/absenceElemination");
+const Auth = require("../middlewares/auth");
+router.get("/hend", userController.getListeChoristes);
 /**
  * @swagger
  * tags:
@@ -204,13 +204,35 @@ const Auth = require('../middlewares/auth');
  *       '500':
  *         description: Internal server error
  */
-router.get('/statistics',Auth.authMiddleware,Auth.isAdmin , userController.generateStatistics);
-router.post('/ajouterStatus',Auth.authMiddleware,Auth.isAdminOrChoriste , statusHistoryController.addStatusChange);
-router.get('/:id',Auth.authMiddleware,Auth.isAdmin , statusHistoryController.getStatusHistoryForUser);
-router.get('/historiqueActiviteUser/:choristeId',Auth.authMiddleware,Auth.isAdminOrChoriste,userController.getChoristeActivityHistory);
-router.get('/:id/profile',Auth.authMiddleware,Auth.isAdminOrChoriste ,userController.getProfile );
-
-
-
+router.get(
+  "/statistics",
+  Auth.authMiddleware,
+  Auth.isAdmin,
+  userController.generateStatistics
+);
+router.post(
+  "/ajouterStatus",
+  Auth.authMiddleware,
+  Auth.isAdminOrChoriste,
+  statusHistoryController.addStatusChange
+);
+router.get(
+  "/:id",
+  Auth.authMiddleware,
+  Auth.isAdmin,
+  statusHistoryController.getStatusHistoryForUser
+);
+router.get(
+  "/historiqueActiviteUser/:choristeId",
+  Auth.authMiddleware,
+  Auth.isAdminOrChoriste,
+  userController.getChoristeActivityHistory
+);
+router.get(
+  "/:id/profile",
+  Auth.authMiddleware,
+  Auth.isAdminOrChoriste,
+  userController.getProfile
+);
 
 module.exports = router;

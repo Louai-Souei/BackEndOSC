@@ -192,7 +192,12 @@ async function genererMotDePasse(candidatId) {
 const ajouterChoriste = async (candidat, tessiture) => {
   try {
     if (candidat.estConfirme === true) {
-      const password = await genererMotDePasse(candidat._id);
+      const passwordd = await genererMotDePasse(candidat._id);
+
+      const hashedPassword = await bcrypt.hash(passwordd, 10);
+
+      // Mettre à jour le mot de passe du candidat
+      const password = hashedPassword;
 
       const nouveauChoriste = new User({
         nom: candidat.nom,
@@ -200,7 +205,6 @@ const ajouterChoriste = async (candidat, tessiture) => {
         email: candidat.email,
         password: password,
         role: "choriste",
-        taille_en_m: candidat.taille_en_m,
       });
 
       await nouveauChoriste.save();
@@ -231,10 +235,8 @@ exports.envoyerEmailConfirmation = async (req, res) => {
         throw new Error(`Aucun candidat avec l'ID ${id} trouvé.`);
       }
 
-      // Générer un mot de passe aléatoire
-      const generatedPassword = Math.random().toString(36).slice(-8);
+      const generatedPassword = await genererMotDePasse(candidat._id);
 
-      // Hasher le mot de passe
       const hashedPassword = await bcrypt.hash(generatedPassword, 10);
 
       // Mettre à jour le mot de passe du candidat
@@ -243,7 +245,7 @@ exports.envoyerEmailConfirmation = async (req, res) => {
 
       // Envoyer l'email de confirmation
       const mailOptions = {
-        from: "votre_email@gmail.com",
+        from: "hendlegleg1@gmail.com",
         to: candidat.email,
         subject: "Confirmation d'inscription",
         text: `Bonjour ${candidat.nom}, cliquez sur ce lien pour confirmer votre inscription : http://localhost:3000/${candidat.id}. Voici vos informations de connexion : 
@@ -279,6 +281,7 @@ exports.confirmerEngagement = async (req, res) => {
     const tessitureAudition = (
       await Audition.findOne({ candidat: candidat.id })
     )?.tessiture;
+    console.log(tessitureAudition);
     if (
       candidat.nom &&
       candidat.prenom &&
@@ -286,18 +289,9 @@ exports.confirmerEngagement = async (req, res) => {
       tessitureAudition
     ) {
       await ajouterChoriste(candidat, tessitureAudition);
-    } else {
-      throw new Error(
-        "Les informations nécessaires pour créer un choriste sont incomplètes."
-      );
     }
-
-    return {
-      message:
-        "Candidat marqué comme signé et ajouté en tant que choriste avec succès",
-    };
   } catch (error) {
-    console.error(
+    console.log(
       "Erreur lors du marquage comme signé et de l'ajout du choriste :",
       error
     );
@@ -403,7 +397,7 @@ exports.getCandidatsconfirme = async (req, res) => {
       },
       { $unwind: "$candidatDetails" },
       {
-        $match: { "candidatDetails.estConfirme": true }, // Filtrer les candidats confirmés
+        $match: { "candidatDetails.estConfirme": true },
       },
       {
         $group: {
