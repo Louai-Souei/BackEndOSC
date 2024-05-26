@@ -19,15 +19,9 @@ const transporter = nodemailer.createTransport({
   },
     pass: process.env.EMAIL_PASSWORD,
   },
-});
+);
 //H
-const envoyerNotificationCongeJob = new CronJob(
-  "0 10 13 * * *",
-  async () => {
-    try {
-      console.log(
-        "Tâche cron en cours d'exécution pour l'envoi de notifications de congé..."
-      );
+
 const envoyerNotificationCongeJob = new CronJob(
   "0 10 13 * * *",
   async () => {
@@ -40,14 +34,7 @@ const envoyerNotificationCongeJob = new CronJob(
         demandeConge: true,
         statusChanged: true,
       });
-      const usersWithLeaveChanged = await User.find({
-        demandeConge: true,
-        statusChanged: true,
-      });
 
-      if (usersWithLeaveChanged.length > 0) {
-        for (const user of usersWithLeaveChanged) {
-          const contenuEmail = `
       if (usersWithLeaveChanged.length > 0) {
         for (const user of usersWithLeaveChanged) {
           const contenuEmail = `
@@ -63,31 +50,7 @@ const envoyerNotificationCongeJob = new CronJob(
             subject: "Notification de modification du statut de congé",
             text: contenuEmail,
           });
-          await transporter.sendMail({
-            from: "hendlegleg1@gmail.com",
-            to: user.email,
-            subject: "Notification de modification du statut de congé",
-            text: contenuEmail,
-          });
 
-          console.log(`Notification envoyée à ${user.email}`);
-          user.statusChanged = false;
-          await user.save();
-        }
-      } else {
-        console.log("Aucun utilisateur avec un statut de congé modifié.");
-      }
-    } catch (error) {
-      console.error(
-        "Erreur lors de l'envoi des notifications de congé :",
-        error.message
-      );
-    }
-  },
-  null,
-  true,
-  "Europe/Paris"
-);
           console.log(`Notification envoyée à ${user.email}`);
           user.statusChanged = false;
           await user.save();
@@ -120,9 +83,7 @@ const declareLeave = async (req, res) => {
       });
     }
 
-    const user = await User.findById(userId).select(
-      "nom prenom conge dateDebutConge dateFinConge"
-    );
+   
     const user = await User.findById(userId).select(
       "nom prenom conge dateDebutConge dateFinConge"
     );

@@ -9,7 +9,9 @@ const Programme = require('../models/programme')
 const oeuvre = require('../models/oeuvres')
 const concert_oeuvre_dto = require("../models/dtos/concert_oeuvre_dto");
 
-const sendEmailToPupitre = async (subject, content) => {
+
+const concertController = {
+   sendEmailToPupitre : async (subject, content) => {
   try {
     // Récupérer l'adresse e-mail du chef de pupitre depuis la base de données
     const chefDePupitreEmail = await Utilisateur.getChefDePupitreEmail()
@@ -53,8 +55,7 @@ const sendEmailToPupitre = async (subject, content) => {
     console.error("Erreur lors de l'envoi de l'e-mail:", error.message);
     throw error;
   }
-};
-const concertController = {
+},
   createConcert: async (req, res) => {
     const newConcert = await Concert.create(req.body)
 
@@ -131,7 +132,7 @@ const concertController = {
       const updatedConcert = await Concert.findByIdAndUpdate(id, req.body, {
        
         new: true,
-     ,
+     
       })
       res.status(200).json({ model: updatedConcert })
     } catch (error) {
@@ -293,7 +294,7 @@ const concertController = {
         confirmation: true,
        
         raison: raison,
-     ,
+     
       })
         await concert.save()
 
@@ -500,8 +501,6 @@ createConcertAndProg: async (req, res) => {
     res.status(500).json({ message: error.message });
     }
   },
-}
 
 };
-
 module.exports = concertController;

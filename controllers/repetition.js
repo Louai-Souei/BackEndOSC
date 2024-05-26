@@ -463,11 +463,8 @@ cron.schedule("0 12 * * *", async () => {
   console.log("Tâche cron exécutée.");
 });
 
-  console.log('Tâche cron exécutée.')
-})
 const consulterEtatAbsencesRepetitions = async (req, res) => {
-  try {
-    const filter = {};
+  
   try {
     const filter = {}
 
@@ -547,22 +544,13 @@ const consulterEtatAbsencesRepetitions = async (req, res) => {
     console.error(error)
     res.status(500).json({ error: 'Internal Server Error' })
   }
-}
 
+  }
 const hasAbsentRequestForRepetition = async (participant, repetition) => {
   const absenceData = await AbsenceRequest.findOne({
     user: participant._id,
     repetition: repetition._id,
     status: 'absent',
-  })
-
-  return !!absenceData
-}
-
-  const absenceData = await AbsenceRequest.findOne({
-    user: participant._id,
-    repetition: repetition._id,
-    status: "absent",
   });
 
   return !!absenceData;
@@ -575,33 +563,33 @@ const ajouterPresenceManuelleRepetition = async (req, res) => {
     const repetition = await Repetition.findById(id);
 
     if (!repetition) {
-      return res.status(404).json({ message: 'Répétition non trouvée!' })
+      return res.status(404).json({ message: 'Répétition non trouvée!' });
     }
 
     const existingParticipant = repetition.participant.find(
-      (participant) => participant.toString() === choristeId,
-    )
+      (participant) => participant.toString() === choristeId
+    );
 
     if (existingParticipant) {
-      return res
-        .status(400)
-        .json({ message: 'Ce choriste participe déjà à cette répétition.' })
+      return res.status(400).json({ message: 'Ce choriste participe déjà à cette répétition.' });
     }
+
     repetition.participant.push({
       user: choristeId,
       participation: true,
       raison: raison,
-    })
-    await repetition.save()
+    });
+    
+    await repetition.save();
 
     res.status(200).json({
-      message:
-        "Participation ajoutée manuellement avec succès à la répétition.",
+      message: 'Participation ajoutée manuellement avec succès à la répétition.',
     });
   } catch (error) {
-    res.status(500).json({ success: false, error: error.message })
+    res.status(500).json({ success: false, error: error.message });
   }
 };
+
 
 module.exports = {
   ajouterPresenceManuelleRepetition,
@@ -617,4 +605,4 @@ module.exports = {
   consulterEtatAbsencesRepetitions,
   testnotif,
   getRRepetitionById,
-};
+}
