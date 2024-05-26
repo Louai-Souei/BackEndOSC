@@ -312,7 +312,11 @@ router.post('/:id/ajouterpresence', auth.authMiddleware, auth.isAdminOrChoriste,
  *       500:
  *         description: Internal server error
  */
-router.post('/:id/indiquerconfirmation', auth.authMiddleware, auth.isChoriste, concertController.indiquerpresenceConcert);
+// router.post('/:id/indiquerconfirmation', auth.authMiddleware, auth.isChoriste, concertController.indiquerpresenceConcert);
+router.post(
+  "/:id/indiquerconfirmation",
+  concertController.indiquerpresenceConcert
+);
 /**
  * @swagger
  * /concert/{id}/indiquerconfirmation:

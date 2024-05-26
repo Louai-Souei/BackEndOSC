@@ -4,7 +4,13 @@ require('dotenv').config();
 const nodemailer = require('nodemailer');
 const Pupitre = require('../models/pupitre');
 const mongoose= require ('mongoose');
-const { io } = require('../socket');
+const { onlineUsers, io } = require("../socket/socketServer");
+
+const {
+  sendNotification,
+  addNotification,
+} = require("./notificationController");
+
 
 
 const transporter = nodemailer.createTransport({
@@ -78,6 +84,7 @@ const declareLeave = async (req, res) => {
 
     
     const admins = await User.find({ role: 'admin' }).distinct('_id');
+    console.log('admins: ', admins);
     const notification = {
       userId: userId,
       message: 'Nouvelle demande de congé enregistrée.',
@@ -85,7 +92,36 @@ const declareLeave = async (req, res) => {
     };
 
     for (const adminId of admins) {
-      io.emit(`notif-${adminId}`, { notification });
+      
+      console.log("------------------------");
+      console.log('adminId: ', adminId);
+      const existingUser = onlineUsers.find(
+      (user) => user.userId === adminId._id.toString()
+    );
+    if (existingUser) {
+      req.notificationdetails = {
+        userSocketId: existingUser.socketId,
+        notif_body: `Le choriste ${nom} ${prenom} a conge ${new Date(
+          dateDebutConge
+        ).toLocaleDateString()} à ${new Date(
+          dateFinConge
+        ).toLocaleTimeString()}`,
+      };
+
+      await sendNotification(req, res, async () => {
+        res.status(200).json({ message: "Utilisateurs récupérés avec succès" });
+      });
+    }
+    req.body = {
+      userId: adminId.toString(),
+      newMessage: `Le choriste ${nom} ${prenom} a conge ${new Date(
+        dateDebutConge
+      ).toLocaleDateString()} à ${new Date(dateFinConge).toLocaleTimeString()}`,
+    };
+
+    await addNotification(req, res, async () => {
+      res.status(200).json({ message: "Utilisateurs récupérés avec succès" });
+    });
     }
 
 
@@ -97,7 +133,7 @@ const declareLeave = async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 };
-const sendNotification = async (req, res) => {
+const sendNotification_ = async (req, res) => {
   try {
     const { userId, message } = req.body; 
 
@@ -200,7 +236,7 @@ const notifmodifyLeaveStatus = async (req, res) => {
 module.exports={
   /*sendNotificationForLeaveRequest,*/
   notifmodifyLeaveStatus,
-  sendNotification,
+  sendNotification_,
   declareLeave,
   LeaveNotifications,
   modifyLeaveStatus
