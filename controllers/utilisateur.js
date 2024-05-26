@@ -121,6 +121,18 @@ const getProfile = async (req, res) => {
     res.status(500).json({ success: false, error: error.message });
   }
 };
+const getAllUsers = (req, res) => {
+  User.find()
+    .then((users) => {
+      res.status(200).json(users);
+    })
+    .catch((error) => {
+      res.status(500).json({
+        message: "Erreur lors de la récupération des utilisateurs",
+        error: error.message,
+      });
+    });
+};
 
 const generateStatistics = async (req, res) => {
   try {
@@ -246,5 +258,6 @@ module.exports = {
   getListeChoristes,
   voirProfilChoriste,
   getChoristeActivityHistory,
+  getAllUsers,
   generateStatistics,
 };

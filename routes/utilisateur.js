@@ -209,6 +209,8 @@ router.post('/ajouterStatus',Auth.authMiddleware,Auth.isAdminOrChoriste , status
 router.get('/:id',Auth.authMiddleware,Auth.isAdmin , statusHistoryController.getStatusHistoryForUser);
 router.get('/historiqueActiviteUser/:choristeId',Auth.authMiddleware,Auth.isAdminOrChoriste,userController.getChoristeActivityHistory);
 router.get('/:id/profile',Auth.authMiddleware,Auth.isAdminOrChoriste ,userController.getProfile );
+router.get("/", userController.getAllUsers);
+
 
 
 
