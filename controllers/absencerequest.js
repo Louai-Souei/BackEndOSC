@@ -94,6 +94,7 @@ const createAbsenceRequest = async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 };
+
 const getAbsenceRequestsByUser = async (req, res) => {
   try {
     const { userId } = req.params;
@@ -132,9 +133,6 @@ const createAbsence = async (req, res) => {
       .json({ error: "Erreur lors de la création de l'absence request" });
   }
 };
-
-
-
 
 const getChoristesByRepetitionAndPupitre = async (req, res) => {
   try {
@@ -191,10 +189,6 @@ const getChoristesByRepetitionAndPupitre = async (req, res) => {
     });
   }
 };
-
-
-
-
 
 const getChoristesByConcertAndPupitre = async (req, res) => {
   try {
@@ -274,7 +268,6 @@ const getChoristesByConcertAndPupitre = async (req, res) => {
   }
 };
 
-
 const countPresence = async (userId) => {
   const concertsPresence = await Concert.countDocuments({
     confirmations: { $elemMatch: { choriste: userId, confirmation: true } },
@@ -296,15 +289,14 @@ const countAbsence = async (userId) => {
     participant: userId,
   }).exec();
   const concertsWithoutConfirmation = await Concert.countDocuments({
-    confirmations: { $not: { $elemMatch: { choriste: userId } } }
+    confirmations: { $not: { $elemMatch: { choriste: userId } } },
   }).exec();
 
-  const totalAbsence = concertsAbsence + repetitionsAbsence + concertsWithoutConfirmation;
+  const totalAbsence =
+    concertsAbsence + repetitionsAbsence + concertsWithoutConfirmation;
 
   return totalAbsence;
 };
-
-
 
 const deleteParticipant = async (req, res) => {
   try {
@@ -338,4 +330,5 @@ module.exports = {
   getChoristesByConcertAndPupitre,
   deleteParticipant,
   informerAbsence,
+  countAbsence,
 };
