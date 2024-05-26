@@ -57,12 +57,8 @@ const auth = require("../middlewares/auth");
  *               success: false
  *               message: "Erreur interne du serveur"
  */
-router.post(
-  "/createrequest",
-  auth.authMiddleware,
-  auth.isChoriste,
-  absenceController.informerAbsence
-);
+router.post('/createrequest',  absenceController.informerAbsence);
+
 
 /**
  * @swagger

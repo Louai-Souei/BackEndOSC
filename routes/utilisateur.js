@@ -243,5 +243,6 @@ router.get(
   Auth.isAdminOrChoriste,
   userController.getProfile
 );
+router.get("/", userController.getAllUsers);
 
 module.exports = router;

@@ -1,7 +1,7 @@
-const express = require('express');
+const express = require("express");
 const router = express.Router();
-const Auth = require('../middlewares/auth');
-const CongeController = require('../controllers/conge');
+const Auth = require("../middlewares/auth");
+const CongeController = require("../controllers/conge");
 const auth = require("../middlewares/auth");
 
 /**
@@ -40,8 +40,13 @@ const auth = require("../middlewares/auth");
  *       '500':
  *         description: Erreur interne du serveur
  */
-router.post('/declareLeave', auth.authMiddleware, auth.isChoriste, CongeController.declareLeave);
-router.get('/choristesanotifier',Auth.authMiddleware,Auth.isAdmin, CongeController.LeaveNotifications);
+router.post("/declareLeave/:userId", CongeController.declareLeave);
+router.get(
+  "/choristesanotifier",
+  Auth.authMiddleware,
+  Auth.isAdmin,
+  CongeController.LeaveNotifications
+);
 
 /**
  * @swagger
@@ -94,6 +99,6 @@ router.get('/choristesanotifier',Auth.authMiddleware,Auth.isAdmin, CongeControll
  *       bearerFormat: JWT
  */
 
-router.post('/notifmodifyLeaveStatus',CongeController.notifmodifyLeaveStatus);
+router.post("/notifmodifyLeaveStatus", CongeController.notifmodifyLeaveStatus);
 
 module.exports = router;

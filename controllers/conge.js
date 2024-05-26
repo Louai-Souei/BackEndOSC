@@ -17,8 +17,17 @@ const transporter = nodemailer.createTransport({
     user: "hendlegleg1@gmail.com",
     pass: process.env.EMAIL_PASSWORD,
   },
+    pass: process.env.EMAIL_PASSWORD,
+  },
 });
 //H
+const envoyerNotificationCongeJob = new CronJob(
+  "0 10 13 * * *",
+  async () => {
+    try {
+      console.log(
+        "Tâche cron en cours d'exécution pour l'envoi de notifications de congé..."
+      );
 const envoyerNotificationCongeJob = new CronJob(
   "0 10 13 * * *",
   async () => {
@@ -31,7 +40,14 @@ const envoyerNotificationCongeJob = new CronJob(
         demandeConge: true,
         statusChanged: true,
       });
+      const usersWithLeaveChanged = await User.find({
+        demandeConge: true,
+        statusChanged: true,
+      });
 
+      if (usersWithLeaveChanged.length > 0) {
+        for (const user of usersWithLeaveChanged) {
+          const contenuEmail = `
       if (usersWithLeaveChanged.length > 0) {
         for (const user of usersWithLeaveChanged) {
           const contenuEmail = `
@@ -41,6 +57,12 @@ const envoyerNotificationCongeJob = new CronJob(
 
           Merci et à bientôt !
         `;
+          await transporter.sendMail({
+            from: "hendlegleg1@gmail.com",
+            to: user.email,
+            subject: "Notification de modification du statut de congé",
+            text: contenuEmail,
+          });
           await transporter.sendMail({
             from: "hendlegleg1@gmail.com",
             to: user.email,
@@ -66,12 +88,30 @@ const envoyerNotificationCongeJob = new CronJob(
   true,
   "Europe/Paris"
 );
+          console.log(`Notification envoyée à ${user.email}`);
+          user.statusChanged = false;
+          await user.save();
+        }
+      } else {
+        console.log("Aucun utilisateur avec un statut de congé modifié.");
+      }
+    } catch (error) {
+      console.error(
+        "Erreur lors de l'envoi des notifications de congé :",
+        error.message
+      );
+    }
+  },
+  null,
+  true,
+  "Europe/Paris"
+);
 envoyerNotificationCongeJob.start();
 
 const declareLeave = async (req, res) => {
   try {
     const { startDate, endDate } = req.body;
-    const userId = req.auth.userId;
+    const userId = req.params.userId;
 
     if (!startDate || !endDate) {
       return res.status(400).json({
@@ -83,12 +123,17 @@ const declareLeave = async (req, res) => {
     const user = await User.findById(userId).select(
       "nom prenom conge dateDebutConge dateFinConge"
     );
+    const user = await User.findById(userId).select(
+      "nom prenom conge dateDebutConge dateFinConge"
+    );
 
     if (!user) {
+      return res.status(404).json({ message: "Utilisateur non trouvé" });
       return res.status(404).json({ message: "Utilisateur non trouvé" });
     }
 
     user.demandeConge = true;
+    user.conge = "enattente";
     user.conge = "enattente";
     user.dateDebutConge = startDate;
     user.dateFinConge = endDate;
@@ -106,6 +151,8 @@ const declareLeave = async (req, res) => {
     console.log("admins: ", admins);
     const notification = {
       userId: userId,
+      message: "Nouvelle demande de congé enregistrée.",
+      user: { nom, prenom, conge, dateDebutConge, dateFinConge },
       message: "Nouvelle demande de congé enregistrée.",
       user: { nom, prenom, conge, dateDebutConge, dateFinConge },
     };
@@ -147,6 +194,8 @@ const declareLeave = async (req, res) => {
     }
 
     res.status(200).json({
+      message: "Demande de congé enregistrée avec succès pour l'utilisateur.",
+      user: { nom, prenom, conge, dateDebutConge, dateFinConge },
       message: "Demande de congé enregistrée avec succès pour l'utilisateur.",
       user: { nom, prenom, conge, dateDebutConge, dateFinConge },
     });
