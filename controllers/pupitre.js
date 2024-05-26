@@ -91,6 +91,34 @@ const createPupitre = async (req, res) => {
       res.status(500).json({ error: `Erreur lors de la mise à jour du pupitre : ${error.message}` });
     }
   };
+
+  const getPupitreIdByUserId = async (req, res) => {
+  try {
+    const userId = req.params.userId;
+
+    // Recherche de l'utilisateur par ID
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(404).json({ success: false, message: "Utilisateur non trouvé." });
+    }
+
+    // Parcours de tous les pupitres
+    const pupitres = await Pupitre.find();
+
+    for (const pupitre of pupitres) {
+      // Vérifiez si l'utilisateur est associé à ce pupitre
+      if (pupitre.choristes.includes(userId)) {
+        // Si l'utilisateur est associé à ce pupitre, retournez l'ID du pupitre
+        return res.status(200).json({  pupitre : pupitre });
+      }
+    }
+
+    // Si l'utilisateur n'est pas associé à un pupitre, retournez un message d'erreur
+    return res.status(404).json({ success: false, message: "L'utilisateur n'est pas associé à un pupitre." });
+  } catch (error) {
+    return res.status(500).json({ success: false, error: `Erreur lors de la récupération de l'ID du pupitre : ${error.message}` });
+  }
+};
   
 const getAllPupitres = async (req, res) => {
   try {
@@ -142,6 +170,7 @@ module.exports = {
   assignLeadersToPupitre,
   createPupitre,
   updatePupitreById,
+  getPupitreIdByUserId,
   getAllPupitres,
   getListeChoristesByPupitreId,
 };

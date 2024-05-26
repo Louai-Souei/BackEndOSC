@@ -37,7 +37,11 @@ const auth = require('../middlewares/auth')
  *                         type: string
  *                         description: Position proposée pour le participant (par exemple, 'Avant' ou 'Arrière')
  */
-router.get('/:id',auth.authMiddleware,auth.isAdmin, placementController.proposePlacementBySize);
+// router.get('/:id',auth.authMiddleware,auth.isAdmin, placementController.proposePlacementBySize);
+router.post(
+  "/:id",
+  placementController.proposePlacementBySize
+);
 /**
  * @swagger
  * /placement/update/{id}:

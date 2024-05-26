@@ -108,7 +108,7 @@ const notificationController = require("../controllers/notificationController");
  */
 
 router.post("/AddNotification", notificationController.addNotification);
-
+router.post("/SendNotif", notificationController.sendNotification);
 router.get(
   "/notifications/:userId",
   notificationController.getNotificationByUserId
