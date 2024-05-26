@@ -33,12 +33,9 @@ const auth = require("../middlewares/auth");
  *   name: Concerts
  *   description: API operations related to concerts
  */
-router.get(
-  "/concerts/statistics",
-  auth.authMiddleware,
-  auth.isAdmin,
-  concertController.getConcertStatistics
-);
+router.get('/statistics', concertController.getConcertStatistics);
+router.get('/calculateOeuvreStatistics', concertController.calculateOeuvreStatistics);
+
 
 /**
  * @swagger

@@ -97,150 +97,6 @@ router.get(
 
 router.post("/", absenceController.createAbsence);
 
-/**
- * @swagger
- * components:
- *   schemas:
- *     Absence:
- *       type: object
- *       properties:
- *         _id:
- *           type: string
- *           description: The auto-generated id of the absence
- *         choristeId:
- *           type: string
- *           description: The ID of the choriste associated with the absence
- *         date:
- *           type: string
- *           format: date
- *           description: The date of the absence
- *         reason:
- *           type: string
- *           description: The reason for the absence
- *       example:
- *         _id: 12345
- *         choristeId: "67890"
- *         date: "2023-01-01"
- *         reason: "Sick"
- *     AbsenceResponse:
- *       type: object
- *       properties:
- *         message:
- *           type: string
- *         data:
- *           type: array
- *           items:
- *             $ref: '#/components/schemas/Absence'
- *     AbsenceDetailsResponse:
- *       type: object
- *       properties:
- *         message:
- *           type: string
- *         data:
- *           type: object
- *           properties:
- *             Participants_par_pupitre:
- *               type: object
- *               additionalProperties:
- *                 $ref: '#/components/schemas/Absence'
- *             Taux_absence_par_pupitre:
- *               type: object
- *               additionalProperties:
- *                 type: string
- *       example:
- *         message: "Success - List of choristes with their attendance details"
- *         data:
- *           Participants_par_pupitre:
- *             soprano:
- *               - _id: 12345
- *                 choristeId: "67890"
- *                 date: "2023-01-01"
- *                 reason: "Sick"
- *             alto:
- *               - _id: 67890
- *                 choristeId: "12345"
- *                 date: "2023-01-02"
- *                 reason: "Personal reasons"
- *           Taux_absence_par_pupitre:
- *             soprano: "25%"
- *             alto: "0%"
- *   responses:
- *     AbsenceResponse:
- *       200:
- *         $ref: '#/components/schemas/AbsenceResponse'
- *       500:
- *         description: Server error while fetching absences
- *     AbsenceDetailsResponse:
- *       200:
- *         $ref: '#/components/schemas/AbsenceDetailsResponse'
- *       500:
- *         description: Server error while fetching choristes' attendance details
- *   tags:
- *     - name: Absences
- *       description: API for managing choristes' absences
- */
-/**
- * @swagger
- * /absence/getparticipants/{repetitionId}/{tessiture}:
- *   get:
- *     summary: Get absences by repetition and pupitre
- *     tags: [Absences]
- *     security:
- *       - bearerAuth: []
- *     parameters:
- *       - in: path
- *         name: repetitionId
- *         schema:
- *           type: string
- *         required: true
- *         description: The ID of the repetition
- *       - in: path
- *         name: tessiture
- *         schema:
- *           type: string
- *         required: true
- *         description: The tessiture for which to retrieve absences
- *     responses:
- *       200:
- *         description: Success - List of choristes with their attendance details
- *         content:
- *           application/json:
- *             schema:
- *               type: array
- *               items:
- *                 type: object
- *                 properties:
- *                   tessiture:
- *                     type: string
- *                   Participants:
- *                     type: array
- *                     items:
- *                       type: object
- *                       properties:
- *                         _id:
- *                           type: string
- *                         nom:
- *                           type: string
- *                         prenom:
- *                           type: string
- *                         email:
- *                           type: string
- *               example:
- *                 - tessiture: soprano
- *                   Participants:
- *                     - _id: 12345
- *                       nom: "Nom1"
- *                       prenom: "Prenom1"
- *                       email: "email1@example.com"
- *                 - tessiture: alto
- *                   Participants:
- *                     - _id: 67890
- *                       nom: "Nom2"
- *                       prenom: "Prenom2"
- *                       email: "email2@example.com"
- *       500:
- *         description: Server error while fetching choristes' attendance details
- */
 
 // router.get(
 //   "/getparticipants/:repetitionId/:tessiture",
@@ -433,11 +289,18 @@ router.get(
  *       500:
  *         description: Internal server error
  */
-router.get(
-  "/nomines",
-  auth.authMiddleware,
-  auth.isAdmin,
-  absenceElemination.getChoristesNominés
-);
+router.get('/nomines', auth.authMiddleware, auth.isAdmin, absenceElemination.getChoristesNominés)
+
+
+
+///DHIA
+router.get('/countByUser', absenceController.getAbsenceCountByUser);
+router.get('/getAbsenceCountByUserconcert', absenceController.getAbsenceCountByUserconcert);
+router.get('/getAbsenceCountByUserrep', absenceController.getAbsenceCountByUserrep);
+router.get('/getAbsencePresenceCountByEvent', absenceController.getAbsencePresenceCountByEvent);
+router.get('/getAbsenceCountByTessiture', absenceController.getAbsenceCountByTessiture);
+router.get('/getTotalAbsenceCount', absenceController.getTotalAbsenceCount);
+router.get('/getTotalAbsenceCountConcert', absenceController.getTotalAbsenceCountConcert);
+router.get('/getAbsencePresenceByConcert', absenceController.getAbsencePresenceByConcert);
 
 module.exports = router;
