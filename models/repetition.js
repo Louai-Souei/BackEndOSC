@@ -2,6 +2,12 @@ const mongoose = require("mongoose");
 const Schema = mongoose.Schema;
 
 const RepetitionSchema = new Schema({
+  presence: [
+    {
+      choriste: { type: Schema.Types.ObjectId, ref: "User" },
+      raison: { type: String },
+    },
+  ],
   nom: { type: String, required: true },
   date: [{ type: Date, required: true }],
   heureDebut: { type: String, required: true },

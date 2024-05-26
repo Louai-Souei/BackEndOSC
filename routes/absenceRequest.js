@@ -181,10 +181,10 @@ router.get(
   absenceController.getChoristesByConcertAndPupitre
 );
 
-router.delete(
-  "/getparticipants/:participantId",
-  absenceController.deleteParticipant
-);
+// router.delete(
+//   "/getparticipants/:participantId",
+//   absenceController.deleteParticipant
+// );
 
 /**
  * @swagger

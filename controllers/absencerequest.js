@@ -3,21 +3,11 @@ const Pupitre = require("../models/pupitre");
 const Repetition = require("../models/repetition");
 const Concert = require("../models/concert");
 const User = require("../models/utilisateurs");
-const AbsenceRequest = require("../models/absence");
-const Pupitre = require("../models/pupitre");
-const Repetition = require("../models/repetition");
-const Concert = require("../models/concert");
-const User = require("../models/utilisateurs");
 
 const informerAbsence = (req, res) => {
   const { eventType, eventDate, reason } = req.body;
   const userId = req.auth.userId;
   if (!eventType || !eventDate || !reason) {
-    return res.status(400).json({
-      success: false,
-      message:
-        "Les données requises sont manquantes dans le corps de la requête",
-    });
     return res.status(400).json({
       success: false,
       message:
@@ -32,7 +22,6 @@ const informerAbsence = (req, res) => {
     .then((user) => {
       if (!user) {
         throw new Error("Utilisateur non trouvé");
-        throw new Error("Utilisateur non trouvé");
       }
 
       userObj = user;
@@ -40,13 +29,10 @@ const informerAbsence = (req, res) => {
       let eventModel;
 
       if (eventType === "repetition") {
-      if (eventType === "repetition") {
         eventModel = Repetition;
-      } else if (eventType === "concert") {
       } else if (eventType === "concert") {
         eventModel = Concert;
       } else {
-        throw new Error("Type d'événement invalide");
         throw new Error("Type d'événement invalide");
       }
 
@@ -63,11 +49,7 @@ const informerAbsence = (req, res) => {
         user: userObj._id,
         nom: userObj.nom,
         status: "absent",
-        nom: userObj.nom,
-        status: "absent",
         reason: reason,
-        repetition: eventType === "repetition" ? event._id : null,
-        concert: eventType === "concert" ? event._id : null,
         repetition: eventType === "repetition" ? event._id : null,
         concert: eventType === "concert" ? event._id : null,
         approved: false,
@@ -76,11 +58,6 @@ const informerAbsence = (req, res) => {
       return absenceRequest.save();
     })
     .then((savedRequest) => {
-      return res.status(201).json({
-        success: true,
-        message: "Demande d'absence créée avec succès",
-        savedRequest,
-      });
       return res.status(201).json({
         success: true,
         message: "Demande d'absence créée avec succès",
@@ -96,19 +73,11 @@ const createAbsenceRequest = async (req, res) => {
   try {
     const { userId, reason, dates, type } = req.body;
 
-
     const user = await User.findById(userId);
     if (!user) {
       return res.status(404).json({ message: "Utilisateur non trouvé" });
-      return res.status(404).json({ message: "Utilisateur non trouvé" });
     }
 
-    const absenceRequest = new AbsenceRequest({
-      user: userId,
-      reason,
-      dates,
-      type,
-    });
     const absenceRequest = new AbsenceRequest({
       user: userId,
       reason,
@@ -121,9 +90,6 @@ const createAbsenceRequest = async (req, res) => {
     res
       .status(201)
       .json({ message: "Demande d'absence créée avec succès", absenceRequest });
-    res
-      .status(201)
-      .json({ message: "Demande d'absence créée avec succès", absenceRequest });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
@@ -132,9 +98,6 @@ const getAbsenceRequestsByUser = async (req, res) => {
   try {
     const { userId } = req.params;
 
-    const absenceRequests = await AbsenceRequest.find({
-      User: userId,
-    }).populate("user");
     const absenceRequests = await AbsenceRequest.find({
       User: userId,
     }).populate("user");
@@ -169,18 +132,8 @@ const createAbsence = async (req, res) => {
     res
       .status(500)
       .json({ error: "Erreur lors de la création de l'absence request" });
-    console.error(
-      "Erreur lors de la création de l'absence request :",
-      error.message
-    );
-    res
-      .status(500)
-      .json({ error: "Erreur lors de la création de l'absence request" });
   }
 };
-
-
-
 
 const getChoristesByRepetitionAndPupitre = async (req, res) => {
   try {
@@ -189,8 +142,6 @@ const getChoristesByRepetitionAndPupitre = async (req, res) => {
 
     const choristes = await AbsenceRequest.find({
       repetition: repetitionId,
-      status: "present",
-    }).populate("user", "_id nom prenom email");
       status: "present",
     }).populate("user", "_id nom prenom email");
 
@@ -207,17 +158,12 @@ const getChoristesByRepetitionAndPupitre = async (req, res) => {
               prenom: absence.user.prenom,
               email: absence.user.email,
             },
-            },
           };
         }
-        return null;
         return null;
       })
     );
 
-    const choristesAvecTessiture = filteredChoristes.filter(
-      (choriste) => choriste !== null
-    );
     const choristesAvecTessiture = filteredChoristes.filter(
       (choriste) => choriste !== null
     );
@@ -235,13 +181,6 @@ const getChoristesByRepetitionAndPupitre = async (req, res) => {
 
     res.status(200).json(result);
   } catch (error) {
-    console.error(
-      "Erreur lors de la récupération des choristes par répétition :",
-      error.message
-    );
-    res.status(500).json({
-      error: "Erreur lors de la récupération des choristes par répétition",
-    });
     console.error(
       "Erreur lors de la récupération des choristes par répétition :",
       error.message
@@ -321,8 +260,8 @@ const getChoristesByConcertAndPupitre = async (req, res) => {
       groupedUsersByPupitre[pupitreTessiture] = utilisateursArray;
     });
 
-    return res.status(200).json({
-      "Participants par pupitre": choristesParPupitre,
+    res.status(200).json({
+      "Participants par pupitre": groupedUsersByPupitre,
       "Taux d'absence par pupitre": tauxAbsenceParPupitre,
     });
   } catch (error) {

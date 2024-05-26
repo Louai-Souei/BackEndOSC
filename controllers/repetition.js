@@ -31,7 +31,7 @@ const testnotif = async (req, res, next) => {
         },
       };
 
-            console.log(req.notificationdetails);
+      console.log(req.notificationdetails);
 
       await sendNotification(req, null, async () => {
         res.status(200).json({ message: "Utilisateurs récupérés avec succès" });
@@ -564,25 +564,25 @@ const ajouterPresenceManuelleRepetition = async (req, res) => {
       return res.status(404).json({ message: "Répétition non trouvée!" });
     }
 
-    const existingParticipant = repetition.participant.find(
-      (participant) => participant.toString() === choristeId
+    const existingParticipant = repetition.presence.find(
+      (participant) => participant.choriste.toString() === choristeId
     );
 
     if (existingParticipant) {
-      return res
-        .status(400)
-        .json({ message: "Ce choriste participe déjà à cette répétition." });
+      return res.status(400).json({
+        status: "error",
+        message: "Ce choriste est déjà present  cette répétition.",
+      });
     }
-    repetition.participant.push({
-      user: choristeId,
-      participation: true,
+    repetition.presence.push({
+      choriste: choristeId,
       raison: raison,
     });
     await repetition.save();
 
     res.status(200).json({
-      message:
-        "Participation ajoutée manuellement avec succès à la répétition.",
+      status: "success",
+      message: "Presence ajoutée manuellement avec succès à la répétition.",
     });
   } catch (error) {
     res.status(500).json({ success: false, error: error.message });
