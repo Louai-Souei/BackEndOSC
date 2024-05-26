@@ -29,4 +29,3 @@ formulaireSchema.pre("save", async function (next) {
 });
 
 module.exports = mongoose.model("Formulaire", formulaireSchema);
-

@@ -218,5 +218,32 @@ router.get("/:id/profile", userController.getProfile);
 router.get("/", userController.getListeChoristes);
 
 router.patch("/:id/role", userController.updateUserRole);
+router.get(
+  "/liste_choristes_non_elim",
+  userController.getListeChoristesNonElim
+);
+
+router.get(
+  "/statistics",
+  Auth.authMiddleware,
+  Auth.isAdmin,
+  userController.generateStatistics
+);
+router.post(
+  "/ajouterStatus",
+  Auth.authMiddleware,
+  Auth.isAdminOrChoriste,
+  statusHistoryController.addStatusChange
+);
+//router.get('/:id', Auth.authMiddleware,Auth.isAdmin , statusHistoryController.getStatusHistoryForUser);
+router.get("/:id", statusHistoryController.getStatusHistoryForUser);
+router.get(
+  "/:id/profile",
+  Auth.authMiddleware,
+  Auth.isAdminOrChoriste,
+  userController.getProfile
+);
+
+
 
 module.exports = router;

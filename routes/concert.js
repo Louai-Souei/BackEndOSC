@@ -264,6 +264,11 @@ router.post(
   auth.isChoriste,
   concertController.confirmerpresenceConcert
 );
+router.get(
+  "/:id",
+
+  concertController.getConcertById
+);
 
 // router.get(
 //   "/:id/confirmedChoristes",

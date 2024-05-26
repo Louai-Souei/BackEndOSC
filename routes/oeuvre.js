@@ -1,18 +1,17 @@
-const express = require('express');
+const express = require("express");
 const router = express.Router();
-const oeuvreController = require('../controllers/oeuvre');
-const auth = require('../middlewares/auth');
+const oeuvreController = require("../controllers/oeuvre");
+const auth = require("../middlewares/auth");
 const multer = require("multer");
 const fs = require("fs");
 const path = require("path");
 
-
-
-
-
-router.get('/statistics',auth.authMiddleware,auth.isAdmin , oeuvreController.OeuvreStatistics);
-
-
+router.get(
+  "/statistics",
+  auth.authMiddleware,
+  auth.isAdmin,
+  oeuvreController.OeuvreStatistics
+);
 
 /**
  * @swagger
@@ -144,7 +143,11 @@ router.get('/statistics',auth.authMiddleware,auth.isAdmin , oeuvreController.Oeu
  *       '500':
  *         description: Server error
  */
-router.get('/', oeuvreController.getAllOeuvres);
+router.get(
+  "/",
+
+  oeuvreController.getAllOeuvres
+);
 
 /**
  * @swagger
@@ -170,7 +173,7 @@ router.get('/', oeuvreController.getAllOeuvres);
  *       '500':
  *         description: Server error
  */
-router.post('/', auth.authMiddleware, auth.isAdmin, oeuvreController.createOeuvre);
+router.post("/", oeuvreController.createOeuvre);
 
 /**
  * @swagger
@@ -197,7 +200,11 @@ router.post('/', auth.authMiddleware, auth.isAdmin, oeuvreController.createOeuvr
  *       '500':
  *         description: Server error
  */
-router.get('/:id', auth.authMiddleware, auth.isAdmin, oeuvreController.getOeuvreById);
+router.get(
+  "/:id",
+
+  oeuvreController.getOeuvreById
+);
 
 /**
  * @swagger
@@ -232,7 +239,11 @@ router.get('/:id', auth.authMiddleware, auth.isAdmin, oeuvreController.getOeuvre
  *       '500':
  *         description: Server error
  */
-router.put('/:id', auth.authMiddleware, auth.isAdmin, oeuvreController.updateOeuvre);
+router.put(
+  "/:id",
+
+  oeuvreController.updateOeuvre
+);
 
 /**
  * @swagger
@@ -261,7 +272,11 @@ router.put('/:id', auth.authMiddleware, auth.isAdmin, oeuvreController.updateOeu
  *       '500':
  *         description: Server error
  */
-router.delete('/:id', auth.authMiddleware, auth.isAdmin, oeuvreController.deleteOeuvre);
+router.delete(
+  "/:id",
+
+  oeuvreController.deleteOeuvre
+);
 
 /**
  * @swagger
@@ -290,48 +305,40 @@ router.delete('/:id', auth.authMiddleware, auth.isAdmin, oeuvreController.delete
  *         description: Internal server error
  */
 
-
 const storage = multer.diskStorage({
-    destination: function (req, file, cb) {
-      if (!fs.existsSync("public")) {
-        fs.mkdirSync("public");
-      }
-  
-      if (!fs.existsSync("public/csv")) {
-        fs.mkdirSync("public/csv");
-      }
-  
-      cb(null, "public/csv");
-    },
-    filename: function (req, file, cb) {
-      cb(null, Date.now() + file.originalname);
-    },
-  });
-  
-  const upload = multer({
-    storage: storage,
-    fileFilter: function (req, file, cb) {
-      var ext = path.extname(file.originalname);
-  
-      if (ext !== ".csv") {
-        return cb(new Error("Only csvs are allowed!"));
-      }
-  
-      cb(null, true);
-    },
-  });
+  destination: function (req, file, cb) {
+    if (!fs.existsSync("public")) {
+      fs.mkdirSync("public");
+    }
 
+    if (!fs.existsSync("public/csv")) {
+      fs.mkdirSync("public/csv");
+    }
 
+    cb(null, "public/csv");
+  },
+  filename: function (req, file, cb) {
+    cb(null, Date.now() + file.originalname);
+  },
+});
 
-  
+const upload = multer({
+  storage: storage,
+  fileFilter: function (req, file, cb) {
+    var ext = path.extname(file.originalname);
 
+    if (ext !== ".csv") {
+      return cb(new Error("Only csvs are allowed!"));
+    }
 
-router.post('/importOeuvreAndConcertFromExcel', upload.single('csvFile'), oeuvreController.createOeuvreFromExcel);
+    cb(null, true);
+  },
+});
 
-
-
-
-
-
+router.post(
+  "/importOeuvreAndConcertFromExcel",
+  upload.single("csvFile"),
+  oeuvreController.createOeuvreFromExcel
+);
 
 module.exports = router;

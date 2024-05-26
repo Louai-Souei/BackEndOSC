@@ -35,7 +35,8 @@ const absenceElemination =require('../controllers/absenceElemination')
  *       500:
  *         description: Internal server error
  */
-router.post('/discipline',auth.authMiddleware,auth.isAdmin,absenceElemination.eliminationDiscipline)
+//router.post('/discipline',auth.authMiddleware,auth.isAdmin,absenceElemination.eliminationDiscipline)
+router.post('/discipline',absenceElemination.eliminationDiscipline)
 /**
  * @swagger
  * /elimination/absences_excessive:
@@ -72,8 +73,9 @@ router.post('/discipline',auth.authMiddleware,auth.isAdmin,absenceElemination.el
  *       500:
  *         description: Internal server error
  */
-router.post('/absences_excessive',auth.authMiddleware,auth.isAdmin,absenceElemination.eliminationExcessiveAbsences)
+//router.post('/absences_excessive',auth.authMiddleware,auth.isAdmin,absenceElemination.eliminationExcessiveAbsences)
 
+router.post('/absences_excessive',absenceElemination.eliminationExcessiveAbsences)
 
 
 module.exports = router;

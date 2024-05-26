@@ -14,6 +14,24 @@ const {
   getChoristesÉliminés,
 } = require("../controllers/absenceElemination");
 
+//get liste de tous les choristes
+
+const getListeChoristes = async (req, res) => {
+  try {
+    const choristes = await User.find({ role: "choriste" });
+    console.log("Liste des choristes récupérée avec succès:", choristes);
+    res.json(choristes); // Envoie la réponse au client
+  } catch (error) {
+    console.error(
+      "Erreur lors de la récupération de la liste des choristes:",
+      error
+    );
+    res.status(500).json({
+      message: "Erreur serveur lors de la récupération des choristes",
+    });
+  }
+};
+
 const getProfileAndStatusHistory = async (req, res) => {
   try {
     const userId = req.params.id;
@@ -66,18 +84,39 @@ const getProfileAndStatusHistory = async (req, res) => {
   }
 };
 
-const getListeChoristes = async () => {
-  try {
-    const choristes = await User.find({ role: "choriste" });
+//retourner la liste de tous les choristes sauf les eliminés :
 
-    return choristes;
-  } catch (error) {
-    console.error(error);
-    throw new Error(
-      "Erreur lors de la récupération de la liste des choristes."
+const { countAbsence } = require("./absencerequest");
+
+const getListeChoristesNonElim = async (req, res) => {
+  try {
+    // Rechercher les choristes qui ne sont pas éliminés
+    const choristes = await User.find({
+      role: "choriste",
+      elimination: { $ne: "elimine" },
+    });
+    //console.log("Liste des choristes récupérée avec succès:", choristes);
+
+    // Remplir le champ absencecount de chaque choriste
+    const choristesAvecAbsence = await Promise.all(
+      choristes.map(async (choriste) => {
+        const totalAbsence = await countAbsence(choriste._id);
+        return { ...choriste.toObject(), absencecount: totalAbsence };
+      })
     );
+
+    res.json(choristesAvecAbsence); // Envoyer la réponse au client
+  } catch (error) {
+    console.error(
+      "Erreur lors de la récupération de la liste des choristes:",
+      error
+    );
+    res.status(500).json({
+      message: "Erreur serveur lors de la récupération des choristes",
+    });
   }
 };
+
 const voirProfilChoriste = async (idUser) => {
   try {
     const choriste = await User.findById(idUser);
@@ -327,10 +366,11 @@ const updateUserRole = async (req, res) => {
 module.exports = {
   getProfileAndStatusHistory,
   getProfile,
-  getListeChoristes,
+  getListeChoristesNonElim,
   voirProfilChoriste,
   getChoristeActivityHistory,
   generateStatistics,
   getUserActivityHistory,
   updateUserRole,
+  getListeChoristes,
 };

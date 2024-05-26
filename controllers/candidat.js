@@ -60,13 +60,17 @@ const create = async (req, res) => {
     console.log("req.body: ", req.body);
     const candidat = new Candidat(req.body);
 
-        const savedCandidat = await candidat.save();
-        res.status(201).json(savedCandidat);
-    } catch (error) {
-        console.log('error: ', error.message);
-        res.status(400).json({ message: "un utilisateur déjà inscrit avec cette adresse e-mail" });
-    }
-}
+    const savedCandidat = await candidat.save();
+    res.status(201).json(savedCandidat);
+  } catch (error) {
+    console.log("error: ", error.message);
+    res
+      .status(400)
+      .json({
+        message: "un utilisateur déjà inscrit avec cette adresse e-mail",
+      });
+  }
+};
 
 const sendEmail = async (email, subject, text, attachments = []) => {
   try {

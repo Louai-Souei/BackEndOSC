@@ -1,4 +1,4 @@
-const mongoose = require('mongoose');
+const mongoose = require("mongoose");
 const Schema = mongoose.Schema;
 const Saison = require("./saison");
 
@@ -31,17 +31,15 @@ placementSchema.pre("save", async function (next) {
   }
 });
 
-const Placement = mongoose.model('Placement', placementSchema);
+const Placement = mongoose.model("Placement", placementSchema);
 module.exports = Placement;
-
-
 
 const changePasswordMiddleware = (req, res, next) => {
   const { oldPassword, newPassword } = req.body;
 
   // Vérifiez les informations actuelles du mot de passe (à adapter selon votre implémentation)
   if (oldPassword !== user.password) {
-    return res.status(401).send('Mot de passe actuel incorrect');
+    return res.status(401).send("Mot de passe actuel incorrect");
   }
 
   // Mettez à jour le mot de passe dans votre système (à adapter selon votre implémentation)

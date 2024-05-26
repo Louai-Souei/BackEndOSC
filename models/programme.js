@@ -1,4 +1,4 @@
-const mongoose = require('mongoose');
+const mongoose = require("mongoose");
 const Saison = require("./saison");
 const Schema = mongoose.Schema;
 
@@ -27,6 +27,6 @@ programmeSchema.pre("save", async function (next) {
   }
 });
 
-const Programme = mongoose.model('Programme', programmeSchema);
+const Programme = mongoose.model("Programme", programmeSchema);
 
-module.exports = Programme ;
+module.exports = Programme;
