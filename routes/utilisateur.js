@@ -1,5 +1,8 @@
 const express = require("express");
+const express = require("express");
 const router = express.Router();
+const userController = require("../controllers/utilisateur");
+const statusHistoryController = require("../controllers/statusHistory");
 const userController = require("../controllers/utilisateur");
 const statusHistoryController = require("../controllers/statusHistory");
 
