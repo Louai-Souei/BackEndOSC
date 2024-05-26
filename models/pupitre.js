@@ -11,7 +11,13 @@ const pupitreSchema = new Schema({
   },
   besoin: { type: Number, required: true },
   choristes: [{ type: Schema.Types.ObjectId, ref: "User" }],
-  chefs: [{ type: Schema.Types.ObjectId, ref: "User" }],
+  chefs: [
+    {
+      type: Schema.Types.ObjectId,
+      ref: "User",
+      where: { role: "chef de pupitre" },
+    },
+  ],
   saison: { type: mongoose.Schema.Types.ObjectId, ref: "Saison" },
 });
 

@@ -161,10 +161,10 @@ const concertController = {
 
   indiquerpresenceConcert: async (req, res) => {
     try {
-      const { id } = req.params;
+      const { concertId } = req.params;
       const { userId } = req.body;
 
-      const concert = await Concert.findById(id);
+      const concert = await Concert.findById(concertId);
 
       if (!concert) {
         return res.status(404).json({ message: "Concert non trouvé!" });
