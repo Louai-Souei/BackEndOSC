@@ -1,10 +1,7 @@
 const express = require("express");
-const express = require("express");
 const router = express.Router();
-const userController = require("../controllers/utilisateur");
 const statusHistoryController = require("../controllers/statusHistory");
 const userController = require("../controllers/utilisateur");
-const statusHistoryController = require("../controllers/statusHistory");
 
 const eliminationController = require("../controllers/absenceElemination");
 const Auth = require("../middlewares/auth");
@@ -246,7 +243,5 @@ router.get(
   Auth.isAdminOrChoriste,
   userController.getProfile
 );
-
-
 
 module.exports = router;

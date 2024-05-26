@@ -1,16 +1,10 @@
-const User = require('../models/utilisateurs');
-const { CronJob } = require('cron');
-require('dotenv').config();
-const nodemailer = require('nodemailer');
-const Pupitre = require('../models/pupitre');
-const mongoose= require ('mongoose');
+const User = require("../models/utilisateurs");
+const { CronJob } = require("cron");
+require("dotenv").config();
+const nodemailer = require("nodemailer");
+const Pupitre = require("../models/pupitre");
+const mongoose = require("mongoose");
 const { onlineUsers, io } = require("../socket/socketServer");
-
-const {
-  sendNotification,
-  addNotification,
-} = require("./notificationController");
-
 
 const {
   sendNotification,
