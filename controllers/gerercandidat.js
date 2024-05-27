@@ -106,7 +106,7 @@ exports.envoyerEmailAcceptation = async (req, res) => {
           const confirmationLink = `http://localhost:3000/accept/${candidat.id}/${token}`;
 
           const mailOptions = {
-            from: "votreemail@gmail.com",
+            from: "hendlegleg1@gmail.com",
             to: candidat.email,
             subject: "Votre acceptation dans le chœur",
             text: `Cher ${candidat.nom}, Félicitations! Vous avez été retenu pour rejoindre le chœur. Veuillez confirmer votre présence en cliquant sur ce lien : ${confirmationLink}. Cordialement.`,
@@ -205,6 +205,7 @@ const ajouterChoriste = async (candidat, tessiture) => {
         email: candidat.email,
         password: password,
         role: "choriste",
+        tessiture : candidat.tessiture
       });
 
       await nouveauChoriste.save();
