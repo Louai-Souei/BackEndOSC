@@ -16,7 +16,7 @@ const { onlineUsers, io } = require('../socket/socketServer')
 const {
   sendNotification,
   addNotification,
-} = require('./notificationController')
+} = require("./notificationController");
 
 const testnotif = async (req, res, next) => {
   try {
@@ -31,7 +31,7 @@ const testnotif = async (req, res, next) => {
         },
       };
 
-            console.log(req.notificationdetails);
+      console.log(req.notificationdetails);
 
       await sendNotification(req, null, async () => {
         res.status(200).json({ message: "Utilisateurs récupérés avec succès" });
@@ -51,7 +51,7 @@ const testnotif = async (req, res, next) => {
     if (res && res.status && res.json) {
       res
         .status(500)
-        .json({ message: 'Internal server error sending notification' })
+        .json({ message: "Internal server error sending notification" });
     }
   }
 };
@@ -61,8 +61,8 @@ const fetchRepetitions = (req, res) => {
     .then((repetitions) => {
       res.status(200).json({
         repetitions: repetitions,
-        message: 'Succès - Répétitions récupérées',
-      })
+        message: "Succès - Répétitions récupérées",
+      });
     })
     .catch((error) => {
       res.status(400).json({
@@ -120,7 +120,17 @@ const addRepetitionn = async (req, res) => {
 
     newRepetition.pupitreInstances = pupitreInstances;
 
-    await newRepetition.save()
+    await newRepetition.save();
+    await QRCode.toFile(
+      `./imageQR/qrcode-${newRepetition._id}.png`,
+      `http://localhost:5000/api/repetitions/${newRepetition._id}/confirmerpresence`,
+      {
+        color: {
+          dark: "#000000",
+          light: "#ffffff",
+        },
+      }
+    );
 
     const concert = await Concert.findOne({ _id: id });
     if (!concert) {
@@ -146,7 +156,7 @@ const addRepetitionn = async (req, res) => {
     return res.status(400).json({
       error: error.message,
       message: "Échec d'ajout de la répétition",
-    })
+    });
   }
 };
 
@@ -154,8 +164,19 @@ const addRepetition = async (req, res) => {
   try {
     const newRepetition = new Repetition(req.body);
     await newRepetition.save();
+    // await QRCode.toFile(
+    //   `./image QR/qrcode-qrcode-${newRepetition._id}.png`,
+    //   `http://localhost:5000/api/repetitions/${newRepetition._id}/confirmerpresence`,
+    //   {
+    //     color: {
+    //       dark: "#000000",
+    //       light: "#ffffff",
+    //     },
+    //   }
+    // );
+
     await QRCode.toFile(
-      `C:\\Users\\tinne\\OneDrive\\Desktop\\ProjetBackend\\image QR\\qrcode-${newRepetition._id}.png`,
+      `./imageQR/qrcode-${newRepetition._id}.png`,
       `http://localhost:5000/api/repetitions/${newRepetition._id}/confirmerpresence`,
       {
         color: {
@@ -167,13 +188,13 @@ const addRepetition = async (req, res) => {
 
     res.status(200).json({
       repetition: newRepetition,
-      message: 'Répétition ajoutée avec succès',
-    })
+      message: "Répétition ajoutée avec succès",
+    });
   } catch (error) {
     res.status(400).json({
       error: error.message,
       message: "Échec d'ajout de la répétition",
-    })
+    });
   }
 };
 
@@ -183,6 +204,7 @@ const getRepetitionById = (req, res) => {
       path: "repetition",
       populate: {
         path: "pupitreInstances.choristes",
+        options: { strictPopulate: false },
         model: "User",
         select: "nom prenom",
       },
@@ -206,6 +228,7 @@ const getRepetitionById = (req, res) => {
       });
     });
 };
+
 const getRRepetitionById = async (req, res) => {
   try {
     const id = req.params.id;
@@ -312,14 +335,14 @@ const deleteRepetition = async (req, res) => {
 };
 
 const generatePupitreList = async (req, res) => {
-  const { pourcentagePersonnes } = req.body
+  const { pourcentagePersonnes } = req.body;
 
   try {
-    const repetitions = await Repetition.find()
-    const pupitreInstances = []
+    const repetitions = await Repetition.find();
+    const pupitreInstances = [];
 
     for (const repetition of repetitions) {
-      const pourcentage = pourcentagePersonnes || 100
+      const pourcentage = pourcentagePersonnes || 100;
 
       for (const pupitre of repetition.pourcentagesPupitres) {
         const pupitreId = pupitre.pupitre
@@ -343,34 +366,34 @@ const generatePupitreList = async (req, res) => {
           heureDebut: repetition.heureDebut,
           heureFin: repetition.heureFin,
           repetitionPercentage: pourcentage,
-        }
+        };
 
         const newPupitreInstance = {
           repetitionInfo,
           pupitreId,
           selectedChoristes,
-        }
+        };
 
-        pupitreInstances.push(newPupitreInstance)
+        pupitreInstances.push(newPupitreInstance);
       }
     }
 
-    res.status(200).json(pupitreInstances)
+    res.status(200).json(pupitreInstances);
   } catch (err) {
-    console.error('Erreur lors de la génération des pupitres :', err)
-    res.status(500).json({ message: err.message })
+    console.error("Erreur lors de la génération des pupitres :", err);
+    res.status(500).json({ message: err.message });
   }
 };
 
 const confirmerpresenceRepetition = async (req, res) => {
   try {
-    const { id } = req.params
-    const repetition = await Repetition.findById(id)
+    const { id } = req.params;
+    const repetition = await Repetition.findById(id);
 
     if (!repetition) {
-      return res.status(404).json({ message: 'Répétition non trouvée!' })
+      return res.status(404).json({ message: "Répétition non trouvée!" });
     } else {
-      const { userid } = req.body
+      const { userid } = req.body;
       const absence = await Absence.create({
         user: userid,
         status: "present",
@@ -378,13 +401,13 @@ const confirmerpresenceRepetition = async (req, res) => {
       });
 
       if (!absence) {
-        return res.status(404).json({ message: 'Présence échouée' })
+        return res.status(404).json({ message: "Présence échouée" });
       } else {
-        return res.status(200).json({ message: 'Présence enregistrée' })
+        return res.status(200).json({ message: "Présence enregistrée" });
       }
     }
   } catch (error) {
-    res.status(500).json({ success: false, error: error.message })
+    res.status(500).json({ success: false, error: error.message });
   }
 };
 
@@ -393,7 +416,7 @@ const envoyerNotificationChoristes = async () => {
     const choristes = await User.find({
       role: "choriste",
       estEnConge: false,
-    })
+    });
 
     if (choristes.length > 0) {
       const maintenant = new Date();
@@ -433,16 +456,16 @@ const envoyerNotificationChoristes = async () => {
                       Lieu : ${repetitionsDans24h[0].lieu}
 
                       Merci et à bientôt !
-                  `
+                  `;
 
           await transporter.sendMail({
             from: "wechcrialotfi@gmail.com",
             to: choriste.email,
             subject: "Notification importante - Répétition à venir",
             text: contenuEmail,
-          })
+          });
 
-          console.log(`Notification envoyée à ${choriste.email}`)
+          console.log(`Notification envoyée à ${choriste.email}`);
         }
       } else {
         console.log("Aucune répétition dans les 24 heures suivantes.");
@@ -571,19 +594,21 @@ const ajouterPresenceManuelleRepetition = async (req, res) => {
     );
 
     if (existingParticipant) {
-      return res.status(400).json({ message: 'Ce choriste participe déjà à cette répétition.' });
+      return res.status(400).json({
+        status: "error",
+        message: "Ce choriste est déjà present  cette répétition.",
+      });
     }
-
-    repetition.participant.push({
-      user: choristeId,
-      participation: true,
+    repetition.presence.push({
+      choriste: choristeId,
       raison: raison,
     });
     
     await repetition.save();
 
     res.status(200).json({
-      message: 'Participation ajoutée manuellement avec succès à la répétition.',
+      status: "success",
+      message: "Presence ajoutée manuellement avec succès à la répétition.",
     });
   } catch (error) {
     res.status(500).json({ success: false, error: error.message });
@@ -605,4 +630,4 @@ module.exports = {
   consulterEtatAbsencesRepetitions,
   testnotif,
   getRRepetitionById,
-}
+};

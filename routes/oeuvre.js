@@ -142,11 +142,7 @@ router.get(
  *       '500':
  *         description: Server error
  */
-router.get(
-  "/",
-
-  oeuvreController.getAllOeuvres
-);
+router.get("/", oeuvreController.getAllOeuvres);
 
 /**
  * @swagger
@@ -201,7 +197,8 @@ router.post("/", oeuvreController.createOeuvre);
  */
 router.get(
   "/:id",
-
+  auth.authMiddleware,
+  auth.isAdmin,
   oeuvreController.getOeuvreById
 );
 
@@ -240,7 +237,8 @@ router.get(
  */
 router.put(
   "/:id",
-
+  auth.authMiddleware,
+  auth.isAdmin,
   oeuvreController.updateOeuvre
 );
 
@@ -273,7 +271,8 @@ router.put(
  */
 router.delete(
   "/:id",
-
+  auth.authMiddleware,
+  auth.isAdmin,
   oeuvreController.deleteOeuvre
 );
 

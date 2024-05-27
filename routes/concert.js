@@ -2,6 +2,7 @@ const express = require("express");
 const router = express.Router();
 const concertController = require("../controllers/concert");
 const auth = require("../middlewares/auth");
+
 /**
  * @swagger
  * /concert/concerts/statistics:
@@ -239,12 +240,11 @@ router.get('/calculateOeuvreStatistics', concertController.calculateOeuvreStatis
  *         - nom_concert
  */
 
-// Routes pour gérer les concerts
 router.post("/addConcertAndProgramme", concertController.createConcertAndProg);
+
 router.post(
   "/",
-  auth.authMiddleware,
-  auth.isAdmin,
+
   concertController.createConcert
 );
 router.get("/listConcerts", concertController.getAllConcerts);
@@ -261,38 +261,11 @@ router.post(
   auth.isChoriste,
   concertController.confirmerpresenceConcert
 );
-router.get(
-  "/:id",
-
-  concertController.getConcertById
-);
-
-// router.get(
-//   "/:id/confirmedChoristes",
-//   auth.authMiddleware,
-//   auth.isAdmin,
-//   concertController.getConfirmedChoristesForConcert
-// );
 
 router.get(
   "/:id/confirmedChoristes",
   concertController.getConfirmedChoristesForConcert
 );
-
-router.put("/:concertId/invite", async (req, res) => {
-  const { concertId } = req.params;
-  const { choristeId } = req.body;
-  try {
-    const updatedConcert = await concertController.updateConcertInvite(
-      choristeId,
-      concertId
-    );
-    res.status(200).json({ model: updatedConcert });
-  } catch (error) {
-    res.status(500).json({ success: false, error: error.message });
-  }
-});
-
 /**
  * @swagger
  * /concert/{id}/confirmedChoristes:
@@ -323,12 +296,8 @@ router.put("/:concertId/invite", async (req, res) => {
  *       500:
  *         description: Internal server error
  */
-router.post(
-  "/:id/ajouterpresence",
-  auth.authMiddleware,
-  auth.isAdminOrChoriste,
-  concertController.ajouterPresenceManuelle
-);
+// router.post('/:id/ajouterpresence', auth.authMiddleware, auth.isAdminOrChoriste,concertController.ajouterPresenceManuelle);
+router.post("/:id/ajouterpresence", concertController.ajouterPresenceManuelle);
 /**
  * @swagger
  * /concert/{id}/ajouterpresence:
@@ -378,7 +347,6 @@ router.post(
 
   concertController.indiquerpresenceConcert
 );
-
 /**
  * @swagger
  * /concert/{id}/indiquerconfirmation:

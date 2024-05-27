@@ -313,6 +313,13 @@ router.post(
 
   repetitionController.addRepetitionn
 );
+
+router.post(
+  "/:id/ajouterPresenceManuelle",
+
+  repetitionController.ajouterPresenceManuelleRepetition
+);
+
 router.get(
   "/get/:id/:repetitionId",
 

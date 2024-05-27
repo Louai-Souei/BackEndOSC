@@ -93,7 +93,6 @@ router.get(
 
 router.post("/", absenceController.createAbsence);
 
-
 // router.get(
 //   "/getparticipants/:repetitionId/:tessiture",
 //   auth.authMiddleware,
@@ -176,10 +175,10 @@ router.get(
   absenceController.getChoristesByConcertAndPupitre
 );
 
-router.delete(
-  "/getparticipants/:participantId",
-  absenceController.deleteParticipant
-);
+// router.delete(
+//   "/getparticipants/:participantId",
+//   absenceController.deleteParticipant
+// );
 
 /**
  * @swagger

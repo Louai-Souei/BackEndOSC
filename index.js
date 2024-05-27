@@ -2,6 +2,8 @@ const express = require("express");
 const cron = require("node-cron");
 const swaggerJsdoc = require("swagger-jsdoc");
 const swaggerUi = require("swagger-ui-express");
+
+const path = require("path");
 //const cors = require("cors");
 // const socketIO = require("socket.io");
 require("dotenv").config();
@@ -10,7 +12,7 @@ const userRoutes = require("./routes/utilisateur");
 const auditionRoutes = require("./routes/audition");
 const repetitionRoutes = require("./routes/repetition");
 const gererRoutes = require("./routes/gerercandidat");
-const listeFinaleRoutes = require("./routes/listeFinale.js");
+
 const oeuvreRoutes = require("./routes/oeuvre");
 const candidatRoutes = require("./routes/candidat");
 const formulaireRoutes = require("./routes/formulaire");
@@ -18,6 +20,7 @@ const congeRoutes = require("./routes/conge");
 const saisonRoutes = require("./routes/saison.js");
 const concertsRoutes = require("./routes/concert.js");
 const qrcodeRoutes = require("./routes/qrcode");
+const listeFinaleRoutes = require("./routes/listeFinale.js");
 const filtragecandidatRoutes = require("./routes/filtragecandidats.js");
 const authRoutes = require("./routes/auth");
 const AbsenceRoutes = require("./routes/absenceRequest.js");
@@ -226,6 +229,11 @@ app.use(
   swaggerUi.serve,
   swaggerUi.setup(specs, { explorer: true })
 );
+const qrImagesPath = path.join(__dirname, "imageQR");
+console.log("Serving images from:", qrImagesPath);
+
+// Utiliser le middleware express.static pour servir les fichiers statiques
+app.use("/qr-images", express.static(qrImagesPath));
 
 app.use("/api/concerts", concertsRoutes);
 app.use("/api/filtragecandidats", filtragecandidatRoutes);

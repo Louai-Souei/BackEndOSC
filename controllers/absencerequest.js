@@ -776,11 +776,14 @@ const getAbsencePresenceCountByEvent = async (req, res) => {
 };
 
 module.exports = {
+  getAbsencePresenceByConcert,
+  getAbsencePresenceCountByEvent,
   createAbsenceRequest,
   getAbsenceRequestsByUser,
   createAbsence,
   getChoristesByRepetitionAndPupitre,
   getChoristesByConcertAndPupitre,
+  informerAbsence,
   getAbsenceCountByUser,
   getAbsenceCountByTessiture,
   getTotalAbsenceCount,

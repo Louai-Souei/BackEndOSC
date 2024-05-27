@@ -14,7 +14,7 @@ const concertController = {
    sendEmailToPupitre : async (subject, content) => {
   try {
     // Récupérer l'adresse e-mail du chef de pupitre depuis la base de données
-    const chefDePupitreEmail = await Utilisateur.getChefDePupitreEmail()
+    const chefDePupitreEmail = await Utilisateur.getChefDePupitreEmail();
 
     if (!chefDePupitreEmail) {
       console.error(
@@ -39,10 +39,11 @@ const concertController = {
       tls: {
         rejectUnauthorized: false,
       },
-    })
+    });
 
     const mailOptions = {
       from: choristeEmail,
+      to: chefDePupitreEmail,
       to: chefDePupitreEmail,
       to: chefDePupitreEmail,
       subject: subject,
@@ -57,30 +58,9 @@ const concertController = {
   }
 },
   createConcert: async (req, res) => {
-    const newConcert = await Concert.create(req.body)
-
-    await QRCode.toFile(
-      `C:\\Users\\tinne\\OneDrive\\Desktop\\ProjetBackend\\image QR\\qrcode-${newConcert._id}.png`,
-      `http://localhost:5000/api/concerts/${newConcert._id}/confirmerpresence`,
-      {
-        color: {
-          dark: "#000000",
-          light: "#ffffff",
-        },
-      }
-    );
-
     try {
-      const {
-        presence,
-        date,
-        lieu,
-        heure,
-        programme,
-        planning,
-        nom_concert ,
-      } =
-        req.body
+      const { presence, date, lieu, heure, programme, planning, nom_concert } =
+        req.body;
 
       const existingConcert = await Concert.findOne({ date: date });
 
@@ -89,23 +69,34 @@ const concertController = {
           .status(400)
           .json({ message: "Un concert existe déjà à cette date." });
       }
-      if (!nom_concert) {
-        return res
-          .status(400)
-          .json({ success: false, error: "Certains champs sont manquants." });
-      }
+      // if (!nom_concert) {
+      //   return res
+      //     .status(400)
+      //     .json({ success: false, error: "Certains champs sont manquants." });
+      // }
 
       const newConcert = await Concert.create(req.body);
+      await QRCode.toFile(
+        `./image QR/qrcode-${newConcert._id}.png`,
+        `http://localhost:5000/api/concerts/${newConcert._id}/confirmerpresence`,
+        {
+          color: {
+            dark: "#000000",
+            light: "#ffffff",
+          },
+        }
+      );
+
       res.status(201).json({ model: newConcert });
     } catch (error) {
-      res.status(500).json({ success: false, error: error.message })
+      res.status(500).json({ success: false, error: error.message });
     }
   },
 
 
   getAllConcerts: async (req, res) => {
     try {
-      const concerts = await Concert.find().populate("programme")
+      const concerts = await Concert.find().populate("programme");
       res.status(200).json(concerts);
     } catch (error) {
       res.status(500).json({ success: false, error: error.message });
@@ -128,51 +119,49 @@ const concertController = {
 
   updateConcert: async (req, res) => {
     try {
-      const { id } = req.params
+      const { id } = req.params;
       const updatedConcert = await Concert.findByIdAndUpdate(id, req.body, {
-       
         new: true,
-     
-      })
-      res.status(200).json({ model: updatedConcert })
+      });
+      res.status(200).json({ model: updatedConcert });
     } catch (error) {
-      res.status(500).json({ success: false, error: error.message })
+      res.status(500).json({ success: false, error: error.message });
     }
   },
 
   deleteConcert: async (req, res) => {
     try {
-      const { id } = req.params
-      await Concert.findByIdAndDelete(id)
-      res.status(200).json({ model: {} })
+      const { id } = req.params;
+      await Concert.findByIdAndDelete(id);
+      res.status(200).json({ model: {} });
     } catch (error) {
-      res.status(500).json({ success: false, error: error.message })
+      res.status(500).json({ success: false, error: error.message });
     }
   },
 
   confirmerpresenceConcert: async (req, res) => {
     try {
-      const { id } = req.params
-      const concert = await Concert.findById(id)
+      const { id } = req.params;
+      const concert = await Concert.findById(id);
 
       if (!concert) {
-        return res.status(404).json({ message: 'concert non trouve!' })
+        return res.status(404).json({ message: "concert non trouve!" });
       } else {
-        const { userid } = req.body
+        const { userid } = req.body;
         const absence = await Absence.create({
           user: userid,
-          status: 'present',
+          status: "present",
           concert: id,
-        })
+        });
 
         if (!absence) {
-          return res.status(404).json({ message: 'Présence échouée' })
+          return res.status(404).json({ message: "Présence échouée" });
         } else {
-          return res.status(200).json({ message: 'Présence enregistrée' })
+          return res.status(200).json({ message: "Présence enregistrée" });
         }
       }
     } catch (error) {
-      res.status(500).json({ success: false, error: error.message })
+      res.status(500).json({ success: false, error: error.message });
     }
   },
 
@@ -363,10 +352,10 @@ const concertController = {
       // Obtenez la liste des répétitions liées à tous les concerts
       const repetitions = await Repetition.find({
         concert: { $in: concerts.map((c) => c._id) },
-      })
+      });
 
       // Calculer les statistiques pour chaque concert
-      const concertStatistics = []
+      const concertStatistics = [];
       for (const concert of concerts) {
         const concertStats = {
           concert: {
@@ -383,14 +372,14 @@ const concertController = {
           nbrepetitions: [],
           nbpresenceRepetitions: 0,
           nbabsenceRepetitions: 0,
-        }
+        };
 
         // Calculer les statistiques de présence/absence pour chaque choriste
         for (const confirmation of concert.confirmations) {
           if (confirmation.confirmation) {
-            concertStats.presenceConcert++
+            concertStats.presenceConcert++;
           } else {
-            concertStats.absenceConcert++
+            concertStats.absenceConcert++;
           }
         }
 
@@ -403,37 +392,37 @@ const concertController = {
             },
             absence: 0,
             presence: 0,
-          }
+          };
 
           for (const participantId of repetition.participant) {
             const confirmation = concert.confirmations.find((conf) =>
-              conf.choriste.equals(participantId),
-            )
+              conf.choriste.equals(participantId)
+            );
 
             if (confirmation) {
               if (confirmation.confirmation) {
-                repetitionStats.presence++
+                repetitionStats.presence++;
               } else {
-                repetitionStats.absence++
+                repetitionStats.absence++;
               }
             }
           }
 
-          concertStats.repetitions.push(repetitionStats)
-          concertStats.presenceRepetitions += repetitionStats.presence
-          concertStats.absenceRepetitions += repetitionStats.absence
+          concertStats.repetitions.push(repetitionStats);
+          concertStats.presenceRepetitions += repetitionStats.presence;
+          concertStats.absenceRepetitions += repetitionStats.absence;
         }
 
-        concertStatistics.push(concertStats)
+        concertStatistics.push(concertStats);
       }
 
-        // Envoyer les statistiques en réponse
-        res.status(200).json({
-          statistiquesConcerts: concertStatistics,
-        })
-      } catch (error) {
-        console.error(error)
-        res.status(500).json({ success: false, error: error.message })
+      // Envoyer les statistiques en réponse
+      res.status(200).json({
+        statistiquesConcerts: concertStatistics,
+      });
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({ success: false, error: error.message });
     }
   },
 

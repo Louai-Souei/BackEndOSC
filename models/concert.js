@@ -3,9 +3,12 @@ const Saison = require("./saison");
 const Schema = mongoose.Schema;
 
 const concertSchema = new Schema({
-  presence: {
-    type: Boolean,
-  },
+  presence: [
+    {
+      choriste: [{ type: Schema.Types.ObjectId, ref: "User" }],
+      raison: { type: String, required: true },
+    },
+  ],
   date: { type: Date, required: true },
   lieu: { type: String, required: true },
   heure: { type: Date, required: true },

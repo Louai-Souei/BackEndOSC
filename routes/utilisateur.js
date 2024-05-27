@@ -6,6 +6,8 @@ const userController = require("../controllers/utilisateur");
 const eliminationController = require("../controllers/absenceElemination");
 const Auth = require("../middlewares/auth");
 
+router.get("/liste_choristes", userController.getListeChoristes);
+
 /**
  * @swagger
  * tags:
