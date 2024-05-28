@@ -3,6 +3,8 @@ const mongoose = require("mongoose");
 const saisonSchema = new mongoose.Schema({
   name: { type: String, required: false },
   numero: { type: String, required: false, unique: true },
+
+  annee: { type: String, required: false, unique: false },
   Datedebut: {
     type: Date,
     default: Date.now,
