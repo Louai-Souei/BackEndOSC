@@ -210,7 +210,7 @@ router.get("/liste_choristes", userController.getListeChoristes);
 router.get("/:userId/activity", userController.getUserActivityHistory);
 router.get("/statistics", userController.generateStatistics);
 router.post("/ajouterStatus", statusHistoryController.addStatusChange);
-router.get("/:id", statusHistoryController.getStatusHistoryForUser);
+router.get("/Status/:id", statusHistoryController.getStatusHistoryForUser);
 router.get(
   "/historiqueActiviteUser/:choristeId",
   userController.getChoristeActivityHistory
