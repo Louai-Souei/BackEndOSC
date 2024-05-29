@@ -1,17 +1,17 @@
-const cron = require("node-cron")
-const { format } = require('date-fns')
-const { CronJob } = require("cron")
-const nodemailer = require("nodemailer")
-const Repetition = require('../models/repetition')
-const Pupitre = require("../models/pupitre")
-const Absence = require("../models/absence")
-const QRCode = require("qrcode")
+const cron = require("node-cron");
+const { format } = require("date-fns");
+const { CronJob } = require("cron");
+const nodemailer = require("nodemailer");
+const Repetition = require("../models/repetition");
+const Pupitre = require("../models/pupitre");
+const Absence = require("../models/absence");
+const QRCode = require("qrcode");
 const User = require("../models/utilisateurs");
-const Concert = require("../models/concert")
-const AbsenceRequest = require("../models/absence")
+const Concert = require("../models/concert");
+const AbsenceRequest = require("../models/absence");
 const socket = require("../socket");
-const mongoose = require("mongoose")
-const { onlineUsers, io } = require('../socket/socketServer')
+const mongoose = require("mongoose");
+const { onlineUsers, io } = require("../socket/socketServer");
 
 const {
   sendNotification,
@@ -67,16 +67,16 @@ const fetchRepetitions = (req, res) => {
     .catch((error) => {
       res.status(400).json({
         error: error.message,
-        message: 'Échec de récupération des répétitions',
-      })
-    })
+        message: "Échec de récupération des répétitions",
+      });
+    });
 };
 
 const addRepetitionn = async (req, res) => {
   const id = req.params.id;
 
   try {
-    const newRepetition = new Repetition(req.body)
+    const newRepetition = new Repetition(req.body);
     const pupitreInstances = [];
 
     const {
@@ -345,7 +345,7 @@ const generatePupitreList = async (req, res) => {
       const pourcentage = pourcentagePersonnes || 100;
 
       for (const pupitre of repetition.pourcentagesPupitres) {
-        const pupitreId = pupitre.pupitre
+        const pupitreId = pupitre.pupitre;
 
         const choristes = await User.find({ role: "choriste" });
         const nombreChoristes = Math.ceil(
@@ -385,27 +385,76 @@ const generatePupitreList = async (req, res) => {
   }
 };
 
+// const confirmerpresenceRepetition = async (req, res) => {
+//   try {
+//     const { id } = req.params;
+//     const repetition = await Repetition.findById(id);
+
+//     if (!repetition) {
+//       return res
+//         .status(404)
+//         .json({ status: "erreur", message: "Répétition non trouvée!" });
+//     } else {
+//       const { userid } = req.body;
+//       const existingabsence = await Absence.find({
+//         user: userid,
+//         repetition: id,
+//       });
+//       if (existingabsence.length > 0) {
+//         return res
+//           .status(404)
+//           .json({ status: "erreur", message: "Presence deja enregistrée" });
+//       }
+//       const absence = await Absence.create({
+//         user: userid,
+//         status: "present",
+//         repetition: id,
+//       });
+
+//       if (!absence) {
+//         return res
+//           .status(404)
+//           .json({ status: "erreur", message: "Présence échouée" });
+//       } else {
+//         return res
+//           .status(200)
+//           .json({ status: "success", message: "Présence enregistrée" });
+//       }
+//     }
+//   } catch (error) {
+//     res.status(500).json({ success: false, error: error.message });
+//   }
+// };
 const confirmerpresenceRepetition = async (req, res) => {
   try {
     const { id } = req.params;
     const repetition = await Repetition.findById(id);
 
     if (!repetition) {
-      return res.status(404).json({ message: "Répétition non trouvée!" });
-    } else {
-      const { userid } = req.body;
-      const absence = await Absence.create({
-        user: userid,
-        status: "present",
-        repetition: id,
-      });
-
-      if (!absence) {
-        return res.status(404).json({ message: "Présence échouée" });
-      } else {
-        return res.status(200).json({ message: "Présence enregistrée" });
-      }
+      return res
+        .status(404)
+        .json({ status: "erreur", message: "Répétition non trouvée!" });
     }
+
+    const { userid, raison } = req.body;
+
+    const existingPresence = repetition.presence.find(
+      (p) => p.choriste.toString() === userid
+    );
+
+    if (existingPresence) {
+      return res
+        .status(400)
+        .json({ status: "erreur", message: "Présence déjà enregistrée" });
+    }
+
+    repetition.presence.push({ choriste: userid, raison });
+
+    await repetition.save();
+
+    return res
+      .status(200)
+      .json({ status: "success", message: "Présence enregistrée" });
   } catch (error) {
     res.status(500).json({ success: false, error: error.message });
   }
@@ -427,7 +476,7 @@ const envoyerNotificationChoristes = async () => {
 
       const repetitionsDans24h = await Repetition.find({
         date: { $gte: maintenant, $lt: dateDans24h },
-      })
+      });
 
       console.log(
         "Répétitions dans les 24 heures suivantes:",
@@ -487,32 +536,31 @@ cron.schedule("0 12 * * *", async () => {
 });
 
 const consulterEtatAbsencesRepetitions = async (req, res) => {
-  
   try {
-    const filter = {}
+    const filter = {};
 
     if (req.query.dateprécise) {
       filter.date = new Date(req.query.dateprécise);
     }
     if (req.query.dateprécise) {
-      filter.date = new Date(req.query.dateprécise)
+      filter.date = new Date(req.query.dateprécise);
     }
 
     if (req.query.dateDebut) {
       filter.date = { $gte: new Date(req.query.dateDebut) };
     }
     if (req.query.dateDebut) {
-      filter.date = { $gte: new Date(req.query.dateDebut) }
+      filter.date = { $gte: new Date(req.query.dateDebut) };
     }
 
     if (req.query.dateFin) {
       filter.date = { $lte: new Date(req.query.dateFin) };
     }
     if (req.query.dateFin) {
-      filter.date = { $lte: new Date(req.query.dateFin) }
+      filter.date = { $lte: new Date(req.query.dateFin) };
     }
 
-    const repetitions = await Repetition.find(filter).populate('participant')
+    const repetitions = await Repetition.find(filter).populate("participant");
 
     const result = await Promise.all(
       repetitions.map(async (repetition) => {
@@ -520,23 +568,23 @@ const consulterEtatAbsencesRepetitions = async (req, res) => {
           repetition.participant.map(async (participant) => {
             const isAbsent = await hasAbsentRequestForRepetition(
               participant,
-              repetition,
-            )
+              repetition
+            );
             return isAbsent
               ? {
                   _id: participant._id.toString(),
                   nom: participant.nom,
                   prenom: participant.prenom,
                 }
-              : null
-          }),
-        )
+              : null;
+          })
+        );
 
         // Compter le nombre de présents et d'absents
         const presentCount =
           repetition.participant.length -
-          absentMembers.filter((member) => member === null).length
-        const absenceCount = absentMembers.length - presentCount
+          absentMembers.filter((member) => member === null).length;
+        const absenceCount = absentMembers.length - presentCount;
 
         if (presentCount > 0 || absenceCount > 0) {
           return {
@@ -550,30 +598,29 @@ const consulterEtatAbsencesRepetitions = async (req, res) => {
               absenceCount,
             },
             absentMembers: absentMembers.filter(
-              (absentMember) => absentMember !== null,
+              (absentMember) => absentMember !== null
             ),
-          }
+          };
         } else {
-          return null
+          return null;
         }
-      }),
-    )
+      })
+    );
 
     // Filtrer les répétitions ayant un nombre de présences ou d'absences > 0
-    const filteredResult = result.filter((item) => item !== null)
+    const filteredResult = result.filter((item) => item !== null);
 
-    res.status(200).json(filteredResult)
+    res.status(200).json(filteredResult);
   } catch (error) {
-    console.error(error)
-    res.status(500).json({ error: 'Internal Server Error' })
+    console.error(error);
+    res.status(500).json({ error: "Internal Server Error" });
   }
-
-  }
+};
 const hasAbsentRequestForRepetition = async (participant, repetition) => {
   const absenceData = await AbsenceRequest.findOne({
     user: participant._id,
     repetition: repetition._id,
-    status: 'absent',
+    status: "absent",
   });
 
   return !!absenceData;
@@ -586,11 +633,11 @@ const ajouterPresenceManuelleRepetition = async (req, res) => {
     const repetition = await Repetition.findById(id);
 
     if (!repetition) {
-      return res.status(404).json({ message: 'Répétition non trouvée!' });
+      return res.status(404).json({ message: "Répétition non trouvée!" });
     }
 
-    const existingParticipant = repetition.participant.find(
-      (participant) => participant.toString() === choristeId
+    const existingParticipant = repetition.presence.find(
+      (participant) => participant.choriste.toString() === choristeId
     );
 
     if (existingParticipant) {
@@ -603,7 +650,6 @@ const ajouterPresenceManuelleRepetition = async (req, res) => {
       choriste: choristeId,
       raison: raison,
     });
-    
     await repetition.save();
 
     res.status(200).json({
@@ -614,7 +660,6 @@ const ajouterPresenceManuelleRepetition = async (req, res) => {
     res.status(500).json({ success: false, error: error.message });
   }
 };
-
 
 module.exports = {
   ajouterPresenceManuelleRepetition,

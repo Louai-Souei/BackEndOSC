@@ -1,62 +1,61 @@
-const Concert = require('../models/concert');
-const QRCode = require('qrcode');
-const Absence = require('../models/absence');
-const Excel = require('exceljs');
-const Utilisateur = require('../models/utilisateurs'); 
-const nodemailer = require('nodemailer');
-const Repetition=require('../models/repetition')
-const Programme = require('../models/programme')
-const oeuvre = require('../models/oeuvres')
+const Concert = require("../models/concert");
+const QRCode = require("qrcode");
+const Absence = require("../models/absence");
+const Excel = require("exceljs");
+const Utilisateur = require("../models/utilisateurs");
+const nodemailer = require("nodemailer");
+const Repetition = require("../models/repetition");
+const Programme = require("../models/programme");
+const oeuvre = require("../models/oeuvres");
 const concert_oeuvre_dto = require("../models/dtos/concert_oeuvre_dto");
 
-
 const concertController = {
-   sendEmailToPupitre : async (subject, content) => {
-  try {
-    // Récupérer l'adresse e-mail du chef de pupitre depuis la base de données
-    const chefDePupitreEmail = await Utilisateur.getChefDePupitreEmail();
+  sendEmailToPupitre: async (subject, content) => {
+    try {
+      // Récupérer l'adresse e-mail du chef de pupitre depuis la base de données
+      const chefDePupitreEmail = await Utilisateur.getChefDePupitreEmail();
 
-    if (!chefDePupitreEmail) {
-      console.error(
-        "Impossible de récupérer l'adresse e-mail du chef de pupitre."
-      );
-      return;
+      if (!chefDePupitreEmail) {
+        console.error(
+          "Impossible de récupérer l'adresse e-mail du chef de pupitre."
+        );
+        return;
+      }
+      // Récupérer l'adresse e-mail du choriste depuis la base de données
+      const choristeEmail = await Utilisateur.getChoristeEmail();
+
+      if (!choristeEmail) {
+        console.error("Impossible de récupérer l'adresse e-mail du choriste.");
+        return;
+      }
+
+      const transporter = nodemailer.createTransport({
+        service: "gmail",
+        auth: {
+          user: "namouchicyrine@gmail.com",
+          pass: "tqdmvzynhcwsjsvy",
+        },
+        tls: {
+          rejectUnauthorized: false,
+        },
+      });
+
+      const mailOptions = {
+        from: choristeEmail,
+        to: chefDePupitreEmail,
+        to: chefDePupitreEmail,
+        to: chefDePupitreEmail,
+        subject: subject,
+        text: content,
+      };
+
+      await transporter.sendMail(mailOptions);
+      console.log("E-mail envoyé avec succès.");
+    } catch (error) {
+      console.error("Erreur lors de l'envoi de l'e-mail:", error.message);
+      throw error;
     }
-    // Récupérer l'adresse e-mail du choriste depuis la base de données
-    const choristeEmail = await Utilisateur.getChoristeEmail();
-
-    if (!choristeEmail) {
-      console.error("Impossible de récupérer l'adresse e-mail du choriste.");
-      return;
-    }
-
-    const transporter = nodemailer.createTransport({
-      service: "gmail",
-      auth: {
-        user: "namouchicyrine@gmail.com",
-        pass: "tqdmvzynhcwsjsvy",
-      },
-      tls: {
-        rejectUnauthorized: false,
-      },
-    });
-
-    const mailOptions = {
-      from: choristeEmail,
-      to: chefDePupitreEmail,
-      to: chefDePupitreEmail,
-      to: chefDePupitreEmail,
-      subject: subject,
-      text: content,
-    }
-
-    await transporter.sendMail(mailOptions);
-    console.log("E-mail envoyé avec succès.");
-  } catch (error) {
-    console.error("Erreur lors de l'envoi de l'e-mail:", error.message);
-    throw error;
-  }
-},
+  },
   createConcert: async (req, res) => {
     try {
       const { presence, date, lieu, heure, programme, planning, nom_concert } =
@@ -93,7 +92,6 @@ const concertController = {
     }
   },
 
-
   getAllConcerts: async (req, res) => {
     try {
       const concerts = await Concert.find().populate("programme");
@@ -102,7 +100,6 @@ const concertController = {
       res.status(500).json({ success: false, error: error.message });
     }
   },
-  
 
   getConcertById: async (req, res) => {
     try {
@@ -111,9 +108,9 @@ const concertController = {
       if (!concert) {
         return res.status(404).json({ message: "Concert non trouvé!" });
       }
-      res.status(200).json({ model: concert })
+      res.status(200).json({ model: concert });
     } catch (error) {
-      res.status(500).json({ success: false, error: error.message })
+      res.status(500).json({ success: false, error: error.message });
     }
   },
 
@@ -139,6 +136,32 @@ const concertController = {
     }
   },
 
+  // confirmerpresenceConcert: async (req, res) => {
+  //   try {
+  //     const { id } = req.params;
+  //     const concert = await Concert.findById(id);
+
+  //     if (!concert) {
+  //       return res.status(404).json({ message: "concert non trouve!" });
+  //     } else {
+  //       const { userid } = req.body;
+  //       const absence = await Absence.create({
+  //         user: userid,
+  //         status: "present",
+  //         concert: id,
+  //       });
+
+  //       if (!absence) {
+  //         return res.status(404).json({ message: "Présence échouée" });
+  //       } else {
+  //         return res.status(200).json({ message: "Présence enregistrée" });
+  //       }
+  //     }
+  //   } catch (error) {
+  //     res.status(500).json({ success: false, error: error.message });
+  //   }
+  // },
+
   confirmerpresenceConcert: async (req, res) => {
     try {
       const { id } = req.params;
@@ -148,6 +171,18 @@ const concertController = {
         return res.status(404).json({ message: "concert non trouve!" });
       } else {
         const { userid } = req.body;
+
+        // Vérifier si la présence est déjà enregistrée
+        const existingAbsence = await Absence.findOne({
+          user: userid,
+          status: "present",
+          concert: id,
+        });
+
+        if (existingAbsence) {
+          return res.status(400).json({ message: "Présence déjà enregistrée" });
+        }
+
         const absence = await Absence.create({
           user: userid,
           status: "present",
@@ -155,7 +190,7 @@ const concertController = {
         });
 
         if (!absence) {
-          return res.status(404).json({ message: "Présence échouée" });
+          return res.status(500).json({ message: "Présence échouée" });
         } else {
           return res.status(200).json({ message: "Présence enregistrée" });
         }
@@ -255,67 +290,97 @@ const concertController = {
     }
   },
 
+  // ajouterPresenceManuelle: async (req, res) => {
+  //   try {
+  //     const { id } = req.params;
+  //     const { choristeId, raison } = req.body;
+  //     const concert = await Concert.findById(id);
+  //     if (!concert) {
+  //       return res.status(404).json({ message: "Concert non trouvé!" });
+  //     }
+  //     const existingConfirmation = concert.confirmations.find(
+  //       (conf) => conf.choriste.toString() === choristeId
+  //     );
+  //     if (existingConfirmation) {
+  //       return res.status(400).json({
+  //         message: "Ce choriste a déjà confirmé sa présence à ce concert.",
+  //       });
+  //     }
+  //     concert.confirmations.push({
+  //       choriste: choristeId,
+  //       confirmation: true,
+  //       raison: raison,
+  //     });
+  //     await concert.save();
+  //     res
+  //       .status(200)
+
+  //       .json({ message: "Présence ajoutée manuellement avec succès." });
+  //   } catch (error) {
+  //     res.status(500).json({ success: false, error: error.message });
+  //   }
+  // },
   ajouterPresenceManuelle: async (req, res) => {
     try {
       const { id } = req.params;
-      const { choristeId, raison } = req.body;
-      const concert = await Concert.findById(id);
+      const { userid, reason } = req.body;
 
+      const concert = await Concert.findById(id);
       if (!concert) {
         return res.status(404).json({ message: "Concert non trouvé!" });
       }
-      // Vérifiez si le choriste existe dans les confirmations
-      const existingConfirmation = concert.confirmations.find(
-        (conf) => conf.choriste.toString() === choristeId
-      );
 
-      if (existingConfirmation) {
+      // Vérifier si la présence est déjà enregistrée pour ce choriste et ce concert
+      const existingAbsence = await Absence.findOne({
+        user: userid,
+        status: "present",
+        concert: id,
+      });
+
+      if (existingAbsence) {
         return res.status(400).json({
           message: "Ce choriste a déjà confirmé sa présence à ce concert.",
         });
       }
 
-        // Ajoutez manuellement la confirmation de présence du choriste avec la raison fournie
-        concert.confirmations.push({
-       
-        choriste: choristeId,
-       
-        confirmation: true,
-       
-        raison: raison,
-     
-      })
-        await concert.save()
+      // Enregistrer la présence
+      const absence = await Absence.create({
+        user: userid,
+        status: "present",
+        concert: id,
+        reason: reason, // Ajouter la raison si elle est fournie
+      });
 
-        res
-        
-        .status(200)
-        
-        .json({ message: 'Présence ajoutée manuellement avec succès.' })
+      if (!absence) {
+        return res.status(500).json({ message: "Présence échouée" });
+      } else {
+        return res
+          .status(200)
+          .json({ message: "Présence ajoutée manuellement avec succès." });
+      }
     } catch (error) {
-      res.status(500).json({ success: false, error: error.message })
+      res.status(500).json({ success: false, error: error.message });
     }
   },
-
   calculateOeuvreStatistics: async (req, res) => {
     try {
       // Récupérer tous les concerts
-      const concerts = await Concert.find().populate('programme')
-      console.log(concerts)
-      res.status(200).json(concerts)
+      const concerts = await Concert.find().populate("programme");
+      console.log(concerts);
+      res.status(200).json(concerts);
 
       // Initialiser un objet pour stocker les statistiques des oeuvres
-      const oeuvreStatistics = {}
+      const oeuvreStatistics = {};
 
       // Parcourir tous les concerts
       for (const concert of concerts) {
         // Récupérer le programme du concert
-        const programme = await Programme.findById(concert.programme)
+        const programme = await Programme.findById(concert.programme);
         if (!programme) {
           console.error(
-            `Programme not found for concert with ID ${concert._id}`,
-          )
-          continue
+            `Programme not found for concert with ID ${concert._id}`
+          );
+          continue;
         }
 
         // Parcourir toutes les oeuvres du programme
@@ -326,28 +391,28 @@ const concertController = {
             oeuvreStatistics[oeuvreId] = {
               idOeuvre: oeuvreId,
               totalConcerts: 1,
-            }
+            };
           } else {
             // Si l'oeuvre existe, incrémenter le total de concerts
-            oeuvreStatistics[oeuvreId].totalConcerts++
+            oeuvreStatistics[oeuvreId].totalConcerts++;
           }
         }
       }
 
       // Convertir l'objet des statistiques en un tableau
-      const oeuvreStatisticsArray = Object.values(oeuvreStatistics)
+      const oeuvreStatisticsArray = Object.values(oeuvreStatistics);
 
       // Retourner les statistiques des oeuvres par concert dans la réponse
-      res.status(200).json(oeuvreStatisticsArray)
-      } catch (error) {
-      console.error('Error calculating oeuvre statistics:', error)
-        res.status(500).json({ error: 'Internal Server Error' })
-      }
-    },
-    getConcertStatistics: async (req, res) => {
-      try {
-        // Obtenez tous les concerts
-        const concerts = await Concert.find()
+      res.status(200).json(oeuvreStatisticsArray);
+    } catch (error) {
+      console.error("Error calculating oeuvre statistics:", error);
+      res.status(500).json({ error: "Internal Server Error" });
+    }
+  },
+  getConcertStatistics: async (req, res) => {
+    try {
+      // Obtenez tous les concerts
+      const concerts = await Concert.find();
 
       // Obtenez la liste des répétitions liées à tous les concerts
       const repetitions = await Repetition.find({
@@ -426,70 +491,102 @@ const concertController = {
     }
   },
 
-
-
   async updateConcertInvite(choristeId, concertId) {
     try {
-        // Recherche du concert dans la base de données en utilisant l'ID fourni dans la route
-        const concert = await Concert.findById(concertId);
+      // Recherche du concert dans la base de données en utilisant l'ID fourni dans la route
+      const concert = await Concert.findById(concertId);
 
-        // Vérifie si le concert existe
-        if (!concert) {
-            throw new Error("Concert not found");
-        }
-        
-        // Recherche de la confirmation du choriste dans les confirmations du concert
-        const confirmationIndex = concert.confirmations.findIndex(
-            (confirmation) => confirmation.choriste.toString() === choristeId
-        );
+      // Vérifie si le concert existe
+      if (!concert) {
+        throw new Error("Concert not found");
+      }
 
-        // Vérifie si la confirmation du choriste existe
-        if (confirmationIndex === -1) {
-            throw new Error("Choriste not found in concert confirmations");
-        }
-        
-        // Met à jour le champ invite à true dans la confirmation du choriste
-        concert.confirmations[confirmationIndex].invite = true;
+      // Recherche de la confirmation du choriste dans les confirmations du concert
+      const confirmationIndex = concert.confirmations.findIndex(
+        (confirmation) => confirmation.choriste.toString() === choristeId
+      );
 
-        // Enregistre les modifications apportées au concert dans la base de données
-        const updatedConcert = await concert.save();
-        
-        return updatedConcert;
+      // Vérifie si la confirmation du choriste existe
+      if (confirmationIndex === -1) {
+        throw new Error("Choriste not found in concert confirmations");
+      }
+
+      // Met à jour le champ invite à true dans la confirmation du choriste
+      concert.confirmations[confirmationIndex].invite = true;
+
+      // Enregistre les modifications apportées au concert dans la base de données
+      const updatedConcert = await concert.save();
+
+      return updatedConcert;
     } catch (error) {
-        throw new Error("Error updating concert invite: " + error.message);
-    }
-},
-
-    // Envoyer les statistiques en réponse
-   
-
-createConcertAndProg: async (req, res) => {
-    
-  try {
-    console.log(req.body);
-    const dto = new concert_oeuvre_dto(req.body);
-    let listIds = [];
-    await Promise.all(dto.programme.map(async (element) => {
-     // const nouvelleOeuvre = new Oeuvre(element);
-     // const savedOeuvre = await nouvelleOeuvre.save().then(savedDoc => {
-       // listIds.push(savedDoc.id);
-     // });
-      listIds.push(element._id);
-
-    }));
-
-    if (listIds.length > 0) {
-      dto.concert.programme = listIds;
-      const concert = new Concert(dto.concert);
-      const savedConcert = await concert.save();
-      res.status(201).json(savedConcert);
-    } else {
-      return res.status(404).json({ message: 'Programme est obligatoire' });
-    }
-  } catch (error) {
-    res.status(500).json({ message: error.message });
+      throw new Error("Error updating concert invite: " + error.message);
     }
   },
 
+  createConcertAndProg: async (req, res) => {
+    try {
+      console.log(req.body);
+      const dto = new concert_oeuvre_dto(req.body);
+      let listIds = [];
+      await Promise.all(
+        dto.programme.map(async (element) => {
+          // const nouvelleOeuvre = new Oeuvre(element);
+          // const savedOeuvre = await nouvelleOeuvre.save().then(savedDoc => {
+          // listIds.push(savedDoc.id);
+          // });
+          listIds.push(element._id);
+        })
+      );
+
+      if (listIds.length > 0) {
+        dto.concert.programme = listIds;
+        const concert = new Concert(dto.concert);
+        const savedConcert = await concert.save();
+        await QRCode.toFile(
+          `./imageQR/Cqrcode-${savedConcert._id}.png`,
+          `http://localhost:5000/api/concerts/${savedConcert._id}/confirmerpresence`,
+          {
+            color: {
+              dark: "#000000",
+              light: "#ffffff",
+            },
+          }
+        );
+        res.status(201).json(savedConcert);
+      } else {
+        return res.status(404).json({ message: "Programme est obligatoire" });
+      }
+    } catch (error) {
+      res.status(500).json({ message: error.message });
+    }
+  },
+
+  getChoristesByConcertAndPupitre: async (req, res) => {
+    const concertId = req.params.concertId;
+
+    try {
+      const concert = await Concert.findById(concertId).populate(
+        "confirmations.choriste"
+      );
+
+      if (!concert) {
+        return res.status(404).json({ message: "Concert not found" });
+      }
+
+      const choristes = concert.confirmations.map((confirmation) => ({
+        _id: confirmation.choriste._id,
+        nom: confirmation.choriste.nom,
+        prenom: confirmation.choriste.prenom,
+        confirmation: confirmation.confirmation,
+        raison: confirmation.raison,
+        invite: confirmation.invite,
+      }));
+
+      res.json(choristes);
+    } catch (error) {
+      console.error("Error fetching choristes:", error);
+      res.status(500).json({ message: "Internal server error" });
+    }
+  },
 };
 module.exports = concertController;

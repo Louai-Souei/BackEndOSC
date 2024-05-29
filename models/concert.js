@@ -12,6 +12,7 @@ const concertSchema = new Schema({
     {
       choriste: { type: Schema.Types.ObjectId, ref: "User" },
       confirmation: { type: Boolean, default: false },
+      raison: { type: String },
       invite: { type: Boolean, default: false },
     },
   ],
