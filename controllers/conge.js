@@ -198,19 +198,76 @@ const LeaveNotifications = async (req, res) => {
       demandeConge: true,
     });
 
-    const leaveNotifications = [];
+   
 
-    for (const user of usersToNotify) {
-      const notification = new Notification({
-        userId: user._id,
-        message: "Vous êtes en congé.",
+    res.status(200).json(usersToNotify );
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+
+const updateLeaveStatus = async (req, res) => {
+  const { idUser } = req.params;
+  
+  try {
+    const userToUpdate = await User.findOneAndUpdate(
+      {
+        _id: idUser,
+        conge: "enattente",
+        demandeConge: true,
+      },
+      {
+        $set: { conge: "validé" },
+      },
+      { new: true }  // Return the updated document
+    );
+
+    const pupitres = await Pupitre.find();
+
+    const chefspupitre = pupitres
+    .filter((pupitre) => pupitre.choristes.includes(idUser))
+    .map((pupitre) => {
+      return pupitre.chefs;
+    })
+    .flat();
+
+
+    chefspupitre.map(async (chef)   =>  {
+      if (chef) {
+        req.notificationdetails = {
+          userSocketId: chef.socketId,
+          notif_body: `Le choriste ${chef.nom} ${chef.prenom} a demandé un congé`,
+        };
+
+        await sendNotification(req, res, async () => {
+          res
+            .status(200)
+            .json({ message: "Utilisateurs récupérés avec succès" });
+        });
+      }
+      req.body = {
+        userId: chef._id.toString(),
+        newMessage: `Le choriste ${chef.nom} ${chef.prenom} a demandé un congé`,
+      };
+
+      await addNotification(req, res, async () => {
+        res.status(200).json({ message: "Utilisateurs récupérés avec succès" });
       });
+     
+    });
 
-      await notification.save();
-      leaveNotifications.push(notification);
+    
+ 
+
+    if (!userToUpdate) {
+      return res.status(404).json({ message: "User not found or conditions not met" });
     }
 
-    res.status(200).json({ message: "Liste des congés", leaveNotifications });
+    res.status(200).json({
+      message: "Leave status updated successfully",
+      user: userToUpdate
+    });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
@@ -277,6 +334,7 @@ const notifmodifyLeaveStatus = async (req, res) => {
 
 module.exports = {
   /*sendNotificationForLeaveRequest,*/
+  updateLeaveStatus,
   notifmodifyLeaveStatus,
   sendNotification_,
   declareLeave,

@@ -204,8 +204,8 @@ router.get(
  */
 router.get(
   "/getChoristedepasseseuil/:seuil",
-  auth.authMiddleware,
-  auth.isAdmin,
+ // auth.authMiddleware,
+ // auth.isAdmin,
   absenceElemination.getChoristedepasseseuil
 );
 router.get(
@@ -236,8 +236,8 @@ router.get(
  */
 router.get(
   "/elimine",
-  auth.authMiddleware,
-  auth.isAdmin,
+ // auth.authMiddleware,
+ // auth.isAdmin,
   absenceElemination.getChoristesÉliminés
 );
 /**
@@ -284,7 +284,10 @@ router.get(
  *       500:
  *         description: Internal server error
  */
-router.get('/nomines', auth.authMiddleware, auth.isAdmin, absenceElemination.getChoristesNominés)
+router.get('/nomines', 
+//auth.authMiddleware, 
+//auth.isAdmin, 
+absenceElemination.getChoristesNominés)
 
 
 
