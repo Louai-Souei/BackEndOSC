@@ -1,26 +1,20 @@
-const express = require("express");
-const router = express.Router();
-const auditionController = require("../controllers/audition");
-const EvenementAudition = require("../models/evenementaudition");
-const auth = require("../middlewares/auth");
+const express = require('express')
+const router = express.Router()
+const auditionController = require('../controllers/audition')
+const EvenementAudition = require('../models/evenementaudition')
+const auth = require('../middlewares/auth')
 
-router.post("/", auditionController.createAudition);
-router.get("/", auditionController.getAudition);
-router.get("/:id", auditionController.getAuditionById);
+router.post('/', auditionController.createAudition)
+router.get('/', auditionController.getAudition)
+router.get('/:id', auditionController.getAuditionById)
 
-router.patch("/:id", auditionController.updateAudition);
-router.delete("/:id", auditionController.deleteAudition);
-router.get("/auditions/enattente", auditionController.getAuditionEnAttente);
-router.get("/auditions/enattente", auditionController.getAuditionEnAttente);
+router.patch('/:id', auditionController.updateAudition)
+router.get('/auditions/enattente/:saisonId', auditionController.getAuditionEnAttente)
 router.post(
-  "/genererplanabsence",
-  auditionController.genererPlanificationabsence
-);
+  '/genererplanabsence',
+  auditionController.genererPlanificationabsence,
+)
 // Route pour générer le planning d'auditions
-router.post(
-  "/generer-planning/:evenementAuditionId",
-  auditionController.genererPlanification
-);
 
 /**
  * @swagger
@@ -121,31 +115,31 @@ router.post(
 //router.post('/lancerEvenementAudition', auth.authMiddleware, auth.isAdmin, auditionController.lancerEvenementAudition);
 
 router.post(
-  "/lancerEvenementAudition",
-  auditionController.lancerEvenementAudition
-);
+  '/lancerEvenementAudition',
+  auditionController.lancerEvenementAudition,
+)
 
 router.get(
-  "/Check/EvenementAudition",
-  auditionController.CheckEvenementAudition
-);
+  '/Check/EvenementAudition',
+  auditionController.CheckEvenementAudition,
+)
 router.get(
-  "/:saisonId/Check/NextEvenementAudition",
-  auditionController.checkNextEvent
-);
+  '/:saisonId/Check/NextEvenementAudition',
+  auditionController.checkNextEvent,
+)
 
 router.patch(
-  "/update/EvenementAudition/:eventId",
-  auditionController.updateEvenementAudition
-);
+  '/update/EvenementAudition/:eventId',
+  auditionController.updateEvenementAudition,
+)
 
-router.get("/get/EvenementAudition", auditionController.getEvenementAudition);
+router.get('/get/EvenementAudition', auditionController.getEvenementAudition)
 
 router.post(
-  "/generer-planning/:evenementAuditionId/:saison",
+  '/generer-planning/:evenementAuditionId/:saison',
 
-  auditionController.genererPlanification
-);
+  auditionController.genererPlanification,
+)
 
 /**
  * @swagger
@@ -182,9 +176,9 @@ router.post(
  */
 
 router.post(
-  "/genererplanabsence",
-  auditionController.genererPlanificationabsence
-);
+  '/genererplanabsence',
+  auditionController.genererPlanificationabsence,
+)
 
 /**
  * @swagger
@@ -211,4 +205,4 @@ router.post(
  *         description: Internal server error
  */
 
-module.exports = router;
+module.exports = router
