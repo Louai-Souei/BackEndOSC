@@ -252,6 +252,15 @@ router.post(
 
   repetitionController.addRepetition
 );
+
+router.post(
+  "/launch-cron",
+
+  repetitionController.cronLaunch
+);
+
+
+
 /**
  * @swagger
  * /repetitions/add:
@@ -324,6 +333,12 @@ router.get(
   "/get/:id/:repetitionId",
 
   repetitionController.getRRepetitionById
+);
+
+router.get(
+  "/all-repetitions/:saisonId",
+
+  repetitionController.getAllRepetions
 );
 /**
  * @swagger

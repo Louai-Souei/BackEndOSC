@@ -15,9 +15,17 @@ exports.createSaison = async (req, res) => {
 
       // Créer une nouvelle saison en incrémentant le numéro de la saison active
       const newNumero = parseInt(numero) + 1;
+
+      // Date actuelle pour Datedebut et extraction de l'année
+      const currentDate = new Date();
+      const currentYear = currentDate.getFullYear().toString();
+
+      // Créer une nouvelle saison avec le nom, le numéro et l'année
       const nouvelleSaison = new Saison({
         name: req.body.nom,
         numero: newNumero.toString(),
+        annee: currentYear,
+        Datedebut: currentDate,
       });
 
       // Sauvegarder la nouvelle saison
