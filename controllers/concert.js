@@ -342,7 +342,7 @@ const concertController = {
           message: "Ce choriste a déjà confirmé sa présence à ce concert.",
         });
       }
-
+      console.log("qqqq");
       // Enregistrer la présence
       const absence = await Absence.create({
         user: userid,

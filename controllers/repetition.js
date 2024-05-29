@@ -1,19 +1,12 @@
-const cron = require("node-cron");
-const { format } = require("date-fns");
-const { CronJob } = require("cron");
 const nodemailer = require("nodemailer");
 const Repetition = require("../models/repetition");
-const Pupitre = require("../models/pupitre");
-const Absence = require("../models/absence");
+
 const QRCode = require("qrcode");
 const cron = require("node-cron");
 const { format } = require("date-fns");
 const { CronJob } = require("cron");
-const nodemailer = require("nodemailer");
-const Repetition = require("../models/repetition");
 const Pupitre = require("../models/pupitre");
 const Absence = require("../models/absence");
-const QRCode = require("qrcode");
 const User = require("../models/utilisateurs");
 const Concert = require("../models/concert");
 const AbsenceRequest = require("../models/absence");

@@ -4,7 +4,7 @@ const swaggerJsdoc = require("swagger-jsdoc");
 const swaggerUi = require("swagger-ui-express");
 
 const path = require("path");
-//const cors = require("cors");
+const cors = require("cors");
 // const socketIO = require("socket.io");
 require("dotenv").config();
 const mongoose = require("mongoose");
@@ -148,16 +148,10 @@ app.get("/hello", (req, res) => {
 });
 app.use((req, res, next) => {
   res.setHeader("Access-Control-Allow-Origin", "*");
-  res.setHeader(
-    "Access-Control-Allow-Headers",
-    "Origin, X-Requested-With, Content-Type, Accept, Authorization"
-  );
-  res.setHeader(
-    "Access-Control-Allow-Methods",
-    "GET, POST, PUT, DELETE, PATCH, OPTIONS"
-  );
+
   next();
 });
+app.use(cors());
 
 const options = {
   definition: {
