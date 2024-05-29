@@ -6,10 +6,7 @@ const AuditionSchema = new Schema({
   date_audition: { type: Date },
   heure_debut: { type: Date },
   heure_fin: { type: Date },
-  evenementAudition: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: "evenementAudition",
-  },
+
   candidat: { type: mongoose.Schema.Types.ObjectId, ref: "Candidat" },
   extraitChante: { type: String },
   tessiture: {
