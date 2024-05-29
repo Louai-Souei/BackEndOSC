@@ -8,7 +8,7 @@ const path = require("path");
 
 router.get(
   "/statistics",
- 
+
   oeuvreController.OeuvreStatistics
 );
 
@@ -197,8 +197,8 @@ router.post("/", oeuvreController.createOeuvre);
  */
 router.get(
   "/:id",
-  auth.authMiddleware,
-  auth.isAdmin,
+  // auth.authMiddleware,
+  // auth.isAdmin,
   oeuvreController.getOeuvreById
 );
 
@@ -237,8 +237,8 @@ router.get(
  */
 router.put(
   "/:id",
-  auth.authMiddleware,
-  auth.isAdmin,
+  // auth.authMiddleware,
+  // auth.isAdmin,
   oeuvreController.updateOeuvre
 );
 
@@ -271,8 +271,8 @@ router.put(
  */
 router.delete(
   "/:id",
-  auth.authMiddleware,
-  auth.isAdmin,
+  // auth.authMiddleware,
+  // auth.isAdmin,
   oeuvreController.deleteOeuvre
 );
 
