@@ -107,6 +107,7 @@ exports.envoyerEmailAcceptation = async (req, res) => {
 
           const mailOptions = {
             from: "hendlegleg1@gmail.com",
+            from: "hendlegleg1@gmail.com",
             to: candidat.email,
             subject: "Votre acceptation dans le chœur",
             text: `Cher ${candidat.nom}, Félicitations! Vous avez été retenu pour rejoindre le chœur. Veuillez confirmer votre présence en cliquant sur ce lien : ${confirmationLink}. Cordialement.`,
