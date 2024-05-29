@@ -334,6 +334,12 @@ router.get(
 
   repetitionController.getRRepetitionById
 );
+
+router.get(
+  "/all-repetitions/:saisonId",
+
+  repetitionController.getAllRepetions
+);
 /**
  * @swagger
  * /repetitions/{id}:

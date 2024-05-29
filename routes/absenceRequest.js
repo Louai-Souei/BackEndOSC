@@ -57,8 +57,7 @@ const auth = require("../middlewares/auth");
  *               success: false
  *               message: "Erreur interne du serveur"
  */
-router.post('/createrequest',  absenceController.informerAbsence);
-
+router.post("/createrequest/:userId", absenceController.informerAbsence);
 
 /**
  * @swagger
@@ -236,8 +235,8 @@ router.get(
  */
 router.get(
   "/elimine",
-  auth.authMiddleware,
-  auth.isAdmin,
+  // auth.authMiddleware,
+  // auth.isAdmin,
   absenceElemination.getChoristesÉliminés
 );
 /**
@@ -284,18 +283,38 @@ router.get(
  *       500:
  *         description: Internal server error
  */
-router.get('/nomines', auth.authMiddleware, auth.isAdmin, absenceElemination.getChoristesNominés)
+router.get('/nomines',
+  // auth.authMiddleware, auth.isAdmin,
+  absenceElemination.getChoristesNominés)
 
 
 
 ///DHIA
-router.get('/countByUser', absenceController.getAbsenceCountByUser);
-router.get('/getAbsenceCountByUserconcert', absenceController.getAbsenceCountByUserconcert);
-router.get('/getAbsenceCountByUserrep', absenceController.getAbsenceCountByUserrep);
-router.get('/getAbsencePresenceCountByEvent', absenceController.getAbsencePresenceCountByEvent);
-router.get('/getAbsenceCountByTessiture', absenceController.getAbsenceCountByTessiture);
-router.get('/getTotalAbsenceCount', absenceController.getTotalAbsenceCount);
-router.get('/getTotalAbsenceCountConcert', absenceController.getTotalAbsenceCountConcert);
-router.get('/getAbsencePresenceByConcert', absenceController.getAbsencePresenceByConcert);
+router.get("/countByUser", absenceController.getAbsenceCountByUser);
+router.get(
+  "/getAbsenceCountByUserconcert",
+  absenceController.getAbsenceCountByUserconcert
+);
+router.get(
+  "/getAbsenceCountByUserrep",
+  absenceController.getAbsenceCountByUserrep
+);
+router.get(
+  "/getAbsencePresenceCountByEvent",
+  absenceController.getAbsencePresenceCountByEvent
+);
+router.get(
+  "/getAbsenceCountByTessiture",
+  absenceController.getAbsenceCountByTessiture
+);
+router.get("/getTotalAbsenceCount", absenceController.getTotalAbsenceCount);
+router.get(
+  "/getTotalAbsenceCountConcert",
+  absenceController.getTotalAbsenceCountConcert
+);
+router.get(
+  "/getAbsencePresenceByConcert",
+  absenceController.getAbsencePresenceByConcert
+);
 
 module.exports = router;

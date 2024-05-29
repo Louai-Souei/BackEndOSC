@@ -10,10 +10,9 @@ const programmeSchema = new Schema({
 
 programmeSchema.pre("save", async function (next) {
   try {
-    // Recherche de la saison active
     const saisonActive = await Saison.findOne({ isActive: true });
     if (saisonActive) {
-      this.saison = saisonActive._id; // Définit l'ID de la saison active sur l'instance d'œuvre
+      this.saison = saisonActive._id;
     } else {
       throw new Error("Aucune saison active trouvée.");
     }

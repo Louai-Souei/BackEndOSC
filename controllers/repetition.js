@@ -760,6 +760,18 @@ const cronLaunch = async (req, res) => {
       .json({ message: "Erreur lors de la mise à jour du cron job." });
   }
 };
+const getAllRepetions = async (req, res) => {
+  try {
+    const { saisonId } = req.params;
+
+    const repetitions = await Repetition.find({
+      saison: saisonId,
+    });
+    res.status(200).json(repetitions);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
 
 module.exports = {
   ajouterPresenceManuelleRepetition,
@@ -776,4 +788,5 @@ module.exports = {
   testnotif,
   getRRepetitionById,
   cronLaunch,
+  getAllRepetions
 };
