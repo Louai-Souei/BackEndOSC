@@ -43,8 +43,8 @@ const auth = require("../middlewares/auth");
 router.post("/declareLeave/:userId", CongeController.declareLeave);
 router.get(
   "/choristesanotifier",
-  Auth.authMiddleware,
-  Auth.isAdmin,
+ // Auth.authMiddleware,
+ // Auth.isAdmin,
   CongeController.LeaveNotifications
 );
 
@@ -100,5 +100,6 @@ router.get(
  */
 
 router.post("/notifmodifyLeaveStatus", CongeController.notifmodifyLeaveStatus);
+router.post('/valider/:idUser', CongeController.updateLeaveStatus);
 
 module.exports = router;
