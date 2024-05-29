@@ -6,6 +6,8 @@ const User = require("../models/utilisateurs");
 const bcrypt = require("bcrypt");
 const uuid = require("uuid");
 const Pupitre = require("../models/pupitre");
+const Saison = require("../models/saison");
+
 const variablesController = require("./variablesController");
 function generateUniqueToken() {
   return uuid.v4();
@@ -205,7 +207,7 @@ const ajouterChoriste = async (candidat, tessiture) => {
         email: candidat.email,
         password: password,
         role: "choriste",
-        tessiture : candidat.tessiture
+        tessiture: candidat.tessiture,
       });
 
       await nouveauChoriste.save();
@@ -306,27 +308,28 @@ let listeCandidatsParSaison = {};
 
 exports.getListeCandidats = async (req, res) => {
   try {
-    const saison = req.body.saison;
+    const annee = req.body.annee;
 
-    if (!saison) {
+    if (!annee) {
       return res.status(400).json({
-        message: "Numéro de saison manquant dans le corps de la requête",
+        message: "Année de saison manquante dans le corps de la requête",
       });
     }
 
-    if (!listeCandidatsParSaison[saison]) {
-      listeCandidatsParSaison[saison] = await Candidat.find(
-        { saison },
-        "nom prenom"
-      );
-      console.log(listeCandidatsParSaison);
+    // Recherche de la saison correspondant à l'année donnée
+    const saison = await Saison.findOne({ annee });
+
+    if (!saison) {
+      return res.status(404).json({
+        message: `Aucune saison trouvée pour l'année ${annee}`,
+      });
     }
 
-    res.status(200).json(listeCandidatsParSaison[saison]);
-    console.log(
-      `Liste des candidats pour la saison ${saison}:`,
-      listeCandidatsParSaison[saison]
-    );
+    // Récupération de la liste des candidats pour la saison trouvée
+    const candidats = await Candidat.find({ saison: saison._id }, "nom prenom email");
+
+    res.status(200).json(candidats);
+    console.log(`Liste des candidats pour la saison ${annee}:`, candidats);
   } catch (error) {
     console.error(
       "Erreur lors de la récupération de la liste des candidats :",

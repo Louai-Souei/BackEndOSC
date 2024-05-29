@@ -90,8 +90,7 @@ router.post(
  */
 router.post(
   "/liste",
-  Auth.authMiddleware,
-  Auth.isAdminOrManager,
+  
   gerercontroller.getListeCandidats
 );
 
