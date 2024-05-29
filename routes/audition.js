@@ -10,11 +10,21 @@ router.get('/:id', auditionController.getAuditionById)
 
 router.patch('/:id', auditionController.updateAudition)
 router.get('/auditions/enattente/:saisonId', auditionController.getAuditionEnAttente)
+router.delete(
+  "/:id",
+  auditionController.deleteAudition
+);
 router.post(
   '/genererplanabsence',
   auditionController.genererPlanificationabsence,
 )
 // Route pour générer le planning d'auditions
+
+router.post(
+  "/genererplanabsence",
+  auditionController.genererPlanificationabsence
+);
+
 
 /**
  * @swagger
