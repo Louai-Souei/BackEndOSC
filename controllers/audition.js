@@ -318,20 +318,14 @@ async function genererPlanification(req, res) {
       _id: evenementAuditionId,
     })
 
-    const candidats = await Candidat.find({ saison: saison })
-    console.log('candidats: ', candidats)
-    const nombreSeancesParJour = auditionPlanning.nombre_séance
-    const dureeAuditionMinutes = auditionPlanning.dureeAudition
-
-    const nombreTotalSeances = Math.ceil(
-      candidatsNonPresentes.length / nombreSeancesParJour,
-    )
+    const candidats = await Candidat.find({ saison: saison });
+    console.log("candidats: ", candidats);
+    const nombreSeancesParJour = auditionPlanning.nombre_séance;
+    const dureeAuditionMinutes = parseInt(auditionPlanning.dureeAudition);
 
     const planning = []
 
-    let dateDebutAudition = moment(
-      auditionPlanning.Date_debut_Audition,
-    ).startOf('day')
+    let dateDebutAudition = moment(auditionPlanning.Date_debut_Audition);
 
     for (let jour = 0; jour < auditionPlanning.nombre_séance; jour++) {
       let heureDebutSeance = moment(auditionPlanning.Date_debut_Audition)
@@ -347,18 +341,15 @@ async function genererPlanification(req, res) {
         if (candidatIndex < candidats.length) {
           const candidat = candidats[candidatIndex]
 
-          const dateDebutSeance = dateDebutAudition
-            .clone()
-            .add(seance * dureeAuditionMinutes, 'minutes')
+          const dateDebutSeance = heureDebutSeance.clone();
           const dateFinSeance = dateDebutSeance
             .clone()
             .add(dureeAuditionMinutes, 'minutes')
 
           if (dateFinSeance.isAfter(auditionPlanning.Date_fin_Audition)) {
             console.warn(
-              "La date de fin de l'audition dépasse la date spécifiée.",
-            )
-
+              "La date de fin de l'audition dépasse la date spécifiée."
+            );
             return res.status(400).json({
               success: false,
               error: "La date de fin de l'audition dépasse la date spécifiée.",
@@ -375,6 +366,7 @@ async function genererPlanification(req, res) {
 
           await nouvellePlanification.save()
           planning.push(nouvellePlanification)
+          heureDebutSeance = dateFinSeance;
 
           // Call sendAuditionEmails function here
           await sendAuditionEmails(candidat, {
@@ -383,8 +375,6 @@ async function genererPlanification(req, res) {
           })
         }
       }
-
-      dateDebutAudition.add(1, 'day')
     }
 
     console.log(
@@ -454,12 +444,12 @@ async function genererPlanificationabsence(req, res) {
 
     // Vérifier si le nombre récupéré est valide
     if (isNaN(dureeAuditionMinutes)) {
-      console.error("La durée de l'audition n'est pas valide.")
+      console.error("La durée de l'audition n'est pas valide.");
       res.status(400).json({
         success: false,
         error: "La durée de l'audition n'est pas valide.",
-      })
-      return
+      });
+      return;
     }
 
     let dateDebutAudition = moment(auditionPlanning.Date_debut_Audition)
@@ -507,10 +497,11 @@ async function genererPlanificationabsence(req, res) {
       dateDebutAudition.add(dureeAuditionMinutes, 'minutes')
     }
 
+    console.log("Planification des auditions générée avec succès");
     res.status(200).json({
       success: true,
-      message: 'Planification des auditions générée avec succès',
-    })
+      message: "Planification des auditions générée avec succès",
+    });
   } catch (error) {
     console.error(
       'Erreur lors de la génération de la planification des auditions :',
