@@ -83,18 +83,32 @@ const declareLeave = async (req, res) => {
       });
     }
 
-   
+    // Vérifier si les dates sont valides
+    const start = new Date(startDate);
+    const end = new Date(endDate);
+
+    if (isNaN(start.getTime()) || isNaN(end.getTime())) {
+      return res.status(400).json({
+        message: "Les dates de début et de fin du congé ne sont pas valides.",
+      });
+    }
+
+    if (start >= end) {
+      return res.status(400).json({
+        message:
+          "La date de début du congé doit être antérieure à la date de fin.",
+      });
+    }
+
     const user = await User.findById(userId).select(
       "nom prenom conge dateDebutConge dateFinConge"
     );
 
     if (!user) {
       return res.status(404).json({ message: "Utilisateur non trouvé" });
-      return res.status(404).json({ message: "Utilisateur non trouvé" });
     }
 
     user.demandeConge = true;
-    user.conge = "enattente";
     user.conge = "enattente";
     user.dateDebutConge = startDate;
     user.dateFinConge = endDate;
@@ -104,59 +118,16 @@ const declareLeave = async (req, res) => {
     const { nom, prenom, conge, dateDebutConge, dateFinConge } = user;
 
     // Calculate the number of days for the leave
-    const start = new Date(startDate);
-    const end = new Date(endDate);
     const leaveDuration = Math.ceil((end - start) / (1000 * 60 * 60 * 24)) + 1; // Adding 1 to include the start date
 
     const admins = await User.find({ role: "admin" }).distinct("_id");
-    console.log("admins: ", admins);
-    const notification = {
-      userId: userId,
-      message: "Nouvelle demande de congé enregistrée.",
-      user: { nom, prenom, conge, dateDebutConge, dateFinConge },
-      message: "Nouvelle demande de congé enregistrée.",
-      user: { nom, prenom, conge, dateDebutConge, dateFinConge },
-    };
 
     for (const adminId of admins) {
-      console.log("------------------------");
-      console.log("adminId: ", adminId);
-      const existingUser = onlineUsers.find(
-        (user) => user.userId === adminId._id.toString()
-      );
-      if (existingUser) {
-        req.notificationdetails = {
-          userSocketId: existingUser.socketId,
-          notif_body: `Le choriste ${nom} ${prenom} a demandé un congé de ${leaveDuration} jours à partir du ${new Date(
-            dateDebutConge
-          ).toLocaleDateString()} jusqu'au ${new Date(
-            dateFinConge
-          ).toLocaleDateString()}`,
-        };
-
-        await sendNotification(req, res, async () => {
-          res
-            .status(200)
-            .json({ message: "Utilisateurs récupérés avec succès" });
-        });
-      }
-      req.body = {
-        userId: adminId.toString(),
-        newMessage: `Le choriste ${nom} ${prenom} a demandé un congé de ${leaveDuration} jours du ${new Date(
-          dateDebutConge
-        ).toLocaleDateString()} au ${new Date(
-          dateFinConge
-        ).toLocaleDateString()}`,
-      };
-
-      await addNotification(req, res, async () => {
-        res.status(200).json({ message: "Utilisateurs récupérés avec succès" });
-      });
+      // Envoyer des notifications aux administrateurs
+      // ...
     }
 
     res.status(200).json({
-      message: "Demande de congé enregistrée avec succès pour l'utilisateur.",
-      user: { nom, prenom, conge, dateDebutConge, dateFinConge },
       message: "Demande de congé enregistrée avec succès pour l'utilisateur.",
       user: { nom, prenom, conge, dateDebutConge, dateFinConge },
     });
@@ -164,6 +135,7 @@ const declareLeave = async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 };
+
 
 const sendNotification_ = async (req, res) => {
   try {
@@ -198,19 +170,76 @@ const LeaveNotifications = async (req, res) => {
       demandeConge: true,
     });
 
-    const leaveNotifications = [];
+   
 
-    for (const user of usersToNotify) {
-      const notification = new Notification({
-        userId: user._id,
-        message: "Vous êtes en congé.",
+    res.status(200).json(usersToNotify );
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+
+const updateLeaveStatus = async (req, res) => {
+  const { idUser } = req.params;
+  
+  try {
+    const userToUpdate = await User.findOneAndUpdate(
+      {
+        _id: idUser,
+        conge: "enattente",
+        demandeConge: true,
+      },
+      {
+        $set: { conge: "validé" },
+      },
+      { new: true }  // Return the updated document
+    );
+
+    const pupitres = await Pupitre.find();
+
+    const chefspupitre = pupitres
+    .filter((pupitre) => pupitre.choristes.includes(idUser))
+    .map((pupitre) => {
+      return pupitre.chefs;
+    })
+    .flat();
+
+
+    chefspupitre.map(async (chef)   =>  {
+      if (chef) {
+        req.notificationdetails = {
+          userSocketId: chef.socketId,
+          notif_body: `Le choriste ${chef.nom} ${chef.prenom} a demandé un congé`,
+        };
+
+        await sendNotification(req, res, async () => {
+          res
+            .status(200)
+            .json({ message: "Utilisateurs récupérés avec succès" });
+        });
+      }
+      req.body = {
+        userId: chef._id.toString(),
+        newMessage: `Le choriste ${chef.nom} ${chef.prenom} a demandé un congé`,
+      };
+
+      await addNotification(req, res, async () => {
+        res.status(200).json({ message: "Utilisateurs récupérés avec succès" });
       });
+     
+    });
 
-      await notification.save();
-      leaveNotifications.push(notification);
+    
+ 
+
+    if (!userToUpdate) {
+      return res.status(404).json({ message: "User not found or conditions not met" });
     }
 
-    res.status(200).json({ message: "Liste des congés", leaveNotifications });
+    res.status(200).json({
+      message: "Leave status updated successfully",
+      user: userToUpdate
+    });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
@@ -277,6 +306,7 @@ const notifmodifyLeaveStatus = async (req, res) => {
 
 module.exports = {
   /*sendNotificationForLeaveRequest,*/
+  updateLeaveStatus,
   notifmodifyLeaveStatus,
   sendNotification_,
   declareLeave,

@@ -158,7 +158,7 @@ const getChoristesNominés = async (req, res, next) => {
         .json({ success: false, message: "Aucun choriste nominé trouvé." });
     }
 
-    res.status(200).json({ success: true, count, data: choristesNominés });
+    res.status(200).json( choristesNominés );
   } catch (error) {
     console.error(error);
     res
@@ -185,7 +185,7 @@ const getChoristesÉliminés = async (req, res, next) => {
         .json({ success: false, message: "Aucun choriste éliminé trouvé." });
     }
 
-    res.status(200).json({ success: true, count, data: choristesÉliminés });
+    res.status(200).json( choristesÉliminés );
   } catch (error) {
     console.error(error);
     res

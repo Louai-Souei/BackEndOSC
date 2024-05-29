@@ -252,6 +252,15 @@ router.post(
 
   repetitionController.addRepetition
 );
+
+router.post(
+  "/launch-cron",
+
+  repetitionController.cronLaunch
+);
+
+
+
 /**
  * @swagger
  * /repetitions/add:

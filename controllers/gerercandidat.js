@@ -6,6 +6,8 @@ const User = require("../models/utilisateurs");
 const bcrypt = require("bcrypt");
 const uuid = require("uuid");
 const Pupitre = require("../models/pupitre");
+const Saison = require("../models/saison");
+
 const variablesController = require("./variablesController");
 function generateUniqueToken() {
   return uuid.v4();
@@ -107,6 +109,7 @@ exports.envoyerEmailAcceptation = async (req, res) => {
 
           const mailOptions = {
             from: "hendlegleg1@gmail.com",
+            from: "hendlegleg1@gmail.com",
             to: candidat.email,
             subject: "Votre acceptation dans le chœur",
             text: `Cher ${candidat.nom}, Félicitations! Vous avez été retenu pour rejoindre le chœur. Veuillez confirmer votre présence en cliquant sur ce lien : ${confirmationLink}. Cordialement.`,
@@ -191,30 +194,28 @@ async function genererMotDePasse(candidatId) {
 
 const ajouterChoriste = async (candidat, tessiture) => {
   try {
-    if (candidat.estConfirme === true) {
-      const passwordd = await genererMotDePasse(candidat._id);
-
-      const hashedPassword = await bcrypt.hash(passwordd, 10);
-
-      // Mettre à jour le mot de passe du candidat
-      const password = hashedPassword;
-
-      const nouveauChoriste = new User({
-        nom: candidat.nom,
-        prenom: candidat.prenom,
-        email: candidat.email,
-        password: password,
-        role: "choriste",
-        tessiture :tessiture
-      });
-
-      await nouveauChoriste.save();
-      console.log("Nouveau choriste ajouté avec succès.");
-    } else {
+    if (!candidat.estConfirme) {
       console.log(
         "Le candidat n'est pas confirmé. Le choriste ne sera pas ajouté."
       );
+      return "Le candidat n'est pas confirmé. Le choriste ne sera pas ajouté";
     }
+
+    const rawPassword = await genererMotDePasse(candidat._id);
+    const hashedPassword = await bcrypt.hash(rawPassword, 10);
+
+    const nouveauChoriste = new User({
+      nom: candidat.nom,
+      prenom: candidat.prenom,
+      email: candidat.email,
+      password: hashedPassword,
+      role: "choriste",
+      tessiture: tessiture,
+    });
+
+    await nouveauChoriste.save();
+    console.log("Nouveau choriste ajouté avec succès.");
+    return "Nouveau choriste ajouté avec succès";
   } catch (error) {
     console.error("Erreur lors de l'ajout du choriste :", error);
     throw new Error("Erreur lors de l'ajout du choriste");
@@ -242,9 +243,9 @@ exports.envoyerEmailConfirmation = async (req, res) => {
 
       // Mettre à jour le mot de passe du candidat
       candidat.motDePasse = hashedPassword;
+      candidat.estConfirme = false;
       await candidat.save();
 
-      // Envoyer l'email de confirmation
       const mailOptions = {
         from: "hendlegleg1@gmail.com",
         to: candidat.email,
@@ -273,32 +274,35 @@ exports.envoyerEmailConfirmation = async (req, res) => {
 exports.confirmerEngagement = async (req, res) => {
   try {
     const candidat = await Candidat.findById(req.params.id);
-    console.log(candidat);
     if (!candidat) {
       throw new Error("Candidat introuvable");
     }
+
     candidat.signature = false;
     await candidat.save();
-    const tessitureAudition = (
-      await Audition.findOne({ candidat: candidat.id })
-    )?.tessiture;
-    console.log(tessitureAudition);
-    if (
-      candidat.nom &&
-      candidat.prenom &&
-      candidat.email &&
-      tessitureAudition
-    ) {
-      await ajouterChoriste(candidat, tessitureAudition);
+
+    const audition = await Audition.findOne({ candidat: candidat._id });
+    const tessitureAudition = audition ? audition.tessiture : null;
+
+    if (!tessitureAudition) {
+      throw new Error("Tessiture introuvable pour le candidat");
     }
+
+    if (candidat.nom && candidat.prenom && candidat.email) {
+      await ajouterChoriste(candidat, tessitureAudition);
+    } else {
+      throw new Error("Les informations du candidat sont incomplètes");
+    }
+
+    res.status(200).send("Engagement confirmé et choriste ajouté avec succès");
   } catch (error) {
-    console.log(
+    console.error(
       "Erreur lors du marquage comme signé et de l'ajout du choriste :",
       error
     );
-    throw new Error(
-      "Erreur lors du marquage comme signé et de l'ajout du choriste"
-    );
+    res
+      .status(500)
+      .send("Erreur lors du marquage comme signé et de l'ajout du choriste");
   }
 };
 
@@ -306,27 +310,28 @@ let listeCandidatsParSaison = {};
 
 exports.getListeCandidats = async (req, res) => {
   try {
-    const saison = req.body.saison;
+    const annee = req.body.annee;
 
-    if (!saison) {
+    if (!annee) {
       return res.status(400).json({
-        message: "Numéro de saison manquant dans le corps de la requête",
+        message: "Année de saison manquante dans le corps de la requête",
       });
     }
 
-    if (!listeCandidatsParSaison[saison]) {
-      listeCandidatsParSaison[saison] = await Candidat.find(
-        { saison },
-        "nom prenom"
-      );
-      console.log(listeCandidatsParSaison);
+    // Recherche de la saison correspondant à l'année donnée
+    const saison = await Saison.findOne({ annee });
+
+    if (!saison) {
+      return res.status(404).json({
+        message: `Aucune saison trouvée pour l'année ${annee}`,
+      });
     }
 
-    res.status(200).json(listeCandidatsParSaison[saison]);
-    console.log(
-      `Liste des candidats pour la saison ${saison}:`,
-      listeCandidatsParSaison[saison]
-    );
+    // Récupération de la liste des candidats pour la saison trouvée
+    const candidats = await Candidat.find({ saison: saison._id }, "nom prenom email");
+
+    res.status(200).json(candidats);
+    console.log(`Liste des candidats pour la saison ${annee}:`, candidats);
   } catch (error) {
     console.error(
       "Erreur lors de la récupération de la liste des candidats :",
@@ -365,7 +370,6 @@ exports.getCandidatsRetenusParPupitre = async (req, res) => {
         },
       },
     ]);
-    // Vérification des IDs inclus dans les données renvoyées
     candidatsRetenus.forEach((pupitre) => {
       console.log(`Tessiture: ${pupitre._id}`);
       pupitre.candidats.forEach((candidat) => {

@@ -5,8 +5,8 @@ const Concert = require('../models/concert')
 const User = require('../models/utilisateurs')
 
 const informerAbsence = (req, res) => {
-  const { eventType, eventDate, reason } = req.body
-  const userId = req.auth.userId
+  const { eventType, eventDate, reason } = req.body;
+  const userId = req.params.userId;
   if (!eventType || !eventDate || !reason) {
     return res.status(400).json({
       success: false,
