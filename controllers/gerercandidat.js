@@ -205,7 +205,7 @@ const ajouterChoriste = async (candidat, tessiture) => {
         email: candidat.email,
         password: password,
         role: "choriste",
-        tessiture : candidat.tessiture
+        tessiture :tessiture
       });
 
       await nouveauChoriste.save();
